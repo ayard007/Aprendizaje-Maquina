@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía Interactiva — Formulario de Inventario en Excel VBA</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f14;
+  --bg2: #161820;
+  --bg3: #1e2028;
+  --bg4: #252830;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaf0;
+  --text2: #9499ab;
+  --text3: #5d6170;
+  --accent: #6c63ff;
+  --accent2: #8b85ff;
+  --accent-glow: rgba(108,99,255,0.15);
+  --green: #3ecf8e;
+  --green-bg: rgba(62,207,142,0.08);
+  --green-border: rgba(62,207,142,0.25);
+  --amber: #f5a623;
+  --amber-bg: rgba(245,166,35,0.08);
+  --blue: #4ea8de;
+  --blue-bg: rgba(78,168,222,0.08);
+  --red: #ff6b6b;
+  --pink: #ff8fab;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.65;min-height:100vh;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,15,20,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.nav-brand{font-family:var(--display);font-size:14px;font-weight:700;color:var(--accent2);letter-spacing:0.02em;}
+.nav-progress-wrap{display:flex;align-items:center;gap:12px;}
+.nav-prog-label{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.nav-dots{display:flex;gap:5px;}
+.ndot{width:8px;height:8px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);cursor:pointer;transition:all .2s;}
+.ndot.done{background:var(--green);border-color:var(--green);}
+.ndot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px var(--accent);}
+.nav-timer{font-family:var(--mono);font-size:12px;color:var(--amber);background:var(--amber-bg);padding:3px 10px;border-radius:99px;border:1px solid rgba(245,166,35,0.2);}
+
+/* ── HERO ── */
+.hero{padding:120px 2rem 60px;max-width:860px;margin:0 auto;text-align:center;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent-glow);border:1px solid rgba(108,99,255,0.3);color:var(--accent2);font-size:11px;font-family:var(--mono);padding:5px 14px;border-radius:99px;margin-bottom:28px;letter-spacing:0.05em;}
+.hero h1{font-family:var(--display);font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#e8eaf0 30%,#9499ab);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{font-size:16px;color:var(--text2);max-width:580px;margin:0 auto 36px;line-height:1.7;}
+.hero-meta{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+.hm-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text3);}
+.hm-dot{width:5px;height:5px;border-radius:50%;}
+
+/* ── PHASE NAV ── */
+.phase-nav{max-width:860px;margin:0 auto 48px;padding:0 2rem;display:flex;gap:8px;flex-wrap:wrap;}
+.pnav-btn{flex:1;min-width:100px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-size:12px;cursor:pointer;transition:all .2s;text-align:center;}
+.pnav-btn:hover{border-color:var(--border2);color:var(--text);}
+.pnav-btn.active{border-color:var(--accent);background:var(--accent-glow);color:var(--accent2);}
+.pnav-btn .pnum{display:block;font-family:var(--display);font-size:20px;font-weight:700;margin-bottom:2px;}
+
+/* ── MAIN LAYOUT ── */
+.main{max-width:860px;margin:0 auto;padding:0 2rem 100px;}
+
+/* ── PHASE BLOCK ── */
+.phase-block{display:none;}
+.phase-block.active{display:block;}
+
+/* PHASE HEADER */
+.phase-header{margin-bottom:32px;}
+.phase-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ph-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:16px;flex-shrink:0;}
+.ph-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;padding:3px 10px;border-radius:99px;}
+.ph-time{font-family:var(--mono);font-size:10px;color:var(--amber);background:var(--amber-bg);padding:3px 10px;border-radius:99px;border:1px solid rgba(245,166,35,0.2);}
+.phase-header h2{font-family:var(--display);font-size:26px;font-weight:700;margin-bottom:8px;line-height:1.2;}
+.phase-header .objetivo{font-size:14px;color:var(--text2);line-height:1.6;background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 var(--radius) var(--radius) 0;}
+
+/* ── STEP ── */
+.step{margin-bottom:28px;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s;}
+.step.completed{border-color:var(--green-border);}
+.step-head{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;cursor:pointer;}
+.step-head:hover{background:rgba(255,255,255,0.02);}
+.snum{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);transition:all .2s;margin-top:1px;}
+.step.completed .snum{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.step-title-wrap{flex:1;}
+.step-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.step-subtitle{font-size:12px;color:var(--text3);}
+.step-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.stag{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:4px;border:1px solid;}
+.stag-excel{color:#3ecf8e;background:rgba(62,207,142,0.08);border-color:rgba(62,207,142,0.2);}
+.stag-vba{color:#8b85ff;background:rgba(139,133,255,0.08);border-color:rgba(139,133,255,0.2);}
+.stag-diseño{color:#4ea8de;background:rgba(78,168,222,0.08);border-color:rgba(78,168,222,0.2);}
+.stag-prueba{color:#f5a623;background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.2);}
+.step-check{font-size:16px;color:var(--text3);transition:all .2s;}
+.step.completed .step-check{color:var(--green);}
+
+/* STEP BODY */
+.step-body{display:none;padding:0 18px 18px;}
+.step.open .step-body{display:block;}
+
+/* EXPLANATION BOX */
+.explain-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;}
+.explain-box .ebox-label{font-size:10px;font-family:var(--mono);letter-spacing:0.07em;color:var(--text3);margin-bottom:7px;text-transform:uppercase;}
+.explain-box p{font-size:13px;color:var(--text2);line-height:1.65;}
+.explain-box p+p{margin-top:8px;}
+.explain-box strong{color:var(--text);font-weight:500;}
+
+/* WHERE BOX */
+.where-box{display:flex;align-items:flex-start;gap:10px;background:var(--blue-bg);border:1px solid rgba(78,168,222,0.2);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;}
+.where-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.where-text{font-size:12px;color:var(--blue);line-height:1.5;}
+.where-text strong{color:var(--blue);font-weight:600;}
+
+/* CODE BLOCK */
+.code-wrap{margin:10px 0 14px;}
+.code-label{display:flex;align-items:center;justify-content:space-between;background:var(--bg4);border:1px solid var(--border2);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;padding:7px 14px;}
+.code-label-text{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.05em;}
+.copy-btn{font-size:10px;font-family:var(--mono);color:var(--accent2);background:transparent;border:1px solid rgba(108,99,255,0.3);border-radius:4px;padding:2px 8px;cursor:pointer;transition:all .2s;}
+.copy-btn:hover{background:var(--accent-glow);}
+.copy-btn.copied{color:var(--green);border-color:var(--green-border);}
+pre{background:var(--bg3);border:1px solid var(--border2);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.7;color:#abb2bf;}
+.kw{color:#c678dd;}
+.fn{color:#61afef;}
+.str{color:#98c379;}
+.cmt{color:#5c6370;font-style:italic;}
+.num{color:#d19a66;}
+.op{color:#56b6c2;}
+.var2{color:#e06c75;}
+.prop{color:#e5c07b;}
+
+/* TIP BOX */
+.tip-box{display:flex;gap:10px;background:var(--amber-bg);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius);padding:10px 14px;margin:10px 0;}
+.tip-icon{font-size:14px;flex-shrink:0;}
+.tip-text{font-size:12px;color:var(--amber);line-height:1.5;}
+
+/* DONE BTN */
+.done-btn{display:flex;align-items:center;gap:7px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 18px;border-radius:var(--radius);cursor:pointer;margin-top:14px;transition:all .2s;}
+.done-btn:hover{background:rgba(62,207,142,0.15);}
+.done-btn.marked{background:rgba(62,207,142,0.18);font-weight:600;}
+
+/* ENTREGABLE */
+.entregable{border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:18px 20px;margin-top:32px;background:var(--green-bg);}
+.entregable-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.entregable-head span{font-family:var(--display);font-weight:700;font-size:14px;color:var(--green);}
+.entregable p{font-size:13px;color:rgba(62,207,142,0.8);line-height:1.6;}
+
+/* PREV / NEXT */
+.nav-actions{display:flex;justify-content:space-between;margin-top:40px;gap:12px;}
+.nav-btn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent2);}
+.nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+.nav-btn.primary:hover{background:var(--accent2);}
+.nav-btn:disabled{opacity:0.3;cursor:default;pointer-events:none;}
+
+/* PROGRESS BAR */
+.phase-progress{display:flex;gap:4px;margin-bottom:24px;}
+.pp{height:3px;flex:1;border-radius:99px;background:var(--bg4);}
+.pp.done{background:var(--green);}
+.pp.active{background:var(--accent);}
+
+/* FORMULA PREVIEW */
+.preview-frame{border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;margin:14px 0;}
+.pf-bar{background:var(--bg4);padding:7px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.pf-dot{width:8px;height:8px;border-radius:50%;}
+.pf-title{font-size:11px;font-family:var(--mono);color:var(--text3);}
+.pf-body{padding:16px;background:var(--bg3);}
+
+/* FORM MOCKUP */
+.form-mockup{background:#f0f0f0;border-radius:6px;padding:14px;font-family:'Segoe UI',sans-serif;font-size:11px;color:#222;}
+.fm-title{background:#4472c4;color:#fff;padding:5px 10px;margin:-14px -14px 12px;border-radius:4px 4px 0 0;font-weight:600;font-size:12px;}
+.fm-frame{border:1px solid #aaa;border-radius:3px;padding:8px 10px;margin-bottom:10px;}
+.fm-frame-title{font-size:9px;color:#555;margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+.fm-row{display:flex;align-items:center;margin-bottom:5px;gap:6px;}
+.fm-lbl{width:90px;font-size:10px;color:#333;flex-shrink:0;}
+.fm-inp{flex:1;height:18px;background:#fff;border:1px solid #999;border-radius:2px;font-size:10px;padding:0 4px;display:flex;align-items:center;color:#333;}
+.fm-inp.combo::after{content:"▾";margin-left:auto;font-size:8px;color:#666;}
+.fm-btns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.fm-btn{padding:4px 12px;border-radius:2px;font-size:10px;font-family:'Segoe UI',sans-serif;cursor:pointer;border:1px solid;font-weight:600;}
+.fm-btn-add{background:#4472c4;color:#fff;border-color:#2f5496;}
+.fm-btn-search{background:#70ad47;color:#fff;border-color:#507e32;}
+.fm-btn-clear{background:#ed7d31;color:#fff;border-color:#c66011;}
+.fm-btn-close{background:#ff0000;color:#fff;border-color:#c00;}
+.fm-status{font-size:9px;color:#555;text-align:center;margin-top:6px;}
+
+/* SCROLL HINT */
+.scroll-hint{text-align:center;padding:14px;color:var(--text3);font-size:12px;font-family:var(--mono);}
+
+/* CHECKER */
+.check-list{list-style:none;margin-top:12px;}
+.check-list li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
+.check-list li:last-child{border-bottom:none;}
+.chk{width:16px;height:16px;border-radius:4px;border:1px solid var(--border2);cursor:pointer;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s;}
+.chk.checked{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Computación II &nbsp;·&nbsp; ING. INDUSTRIAL</div>
+  <div class="nav-progress-wrap">
+    <span class="nav-prog-label" id="nav-prog-text">FASE 1 / 5</span>
+    <div class="nav-dots" id="nav-dots">
+      <div class="ndot active" onclick="goPhase(0)" title="Fase 1"></div>
+      <div class="ndot" onclick="goPhase(1)" title="Fase 2"></div>
+      <div class="ndot" onclick="goPhase(2)" title="Fase 3"></div>
+      <div class="ndot" onclick="goPhase(3)" title="Fase 4"></div>
+      <div class="ndot" onclick="goPhase(4)" title="Fase 5"></div>
+    </div>
+    <div class="nav-timer" id="timer">30:00</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">&#9670; ACTIVIDAD GUIADA PASO A PASO</div>
+  <h1>Formulario de Gestión de Inventario en Excel VBA</h1>
+  <p>Sigue cada paso, lee la explicación de qué hace el código, completa la tarea y avanza a la siguiente fase. Al terminar tendrás un formulario 100% funcional.</p>
+  <div class="hero-meta">
+    <div class="hm-item"><div class="hm-dot" style="background:#6c63ff"></div>5 fases · 30 min c/u</div>
+    <div class="hm-item"><div class="hm-dot" style="background:#3ecf8e"></div>Producto final: UserForm funcional</div>
+    <div class="hm-item"><div class="hm-dot" style="background:#f5a623"></div>Excel + Visual Basic</div>
+  </div>
+</div>
+
+<!-- PHASE NAV -->
+<div class="phase-nav" id="phase-nav">
+  <button class="pnav-btn active" onclick="goPhase(0)"><span class="pnum">1</span>Entorno y estructura</button>
+  <button class="pnav-btn" onclick="goPhase(1)"><span class="pnum">2</span>Diseño del formulario</button>
+  <button class="pnav-btn" onclick="goPhase(2)"><span class="pnum">3</span>Código: Agregar</button>
+  <button class="pnav-btn" onclick="goPhase(3)"><span class="pnum">4</span>Código: Buscar y Limpiar</button>
+  <button class="pnav-btn" onclick="goPhase(4)"><span class="pnum">5</span>Pruebas y entrega</button>
+</div>
+
+<div class="main">
+
+<!-- ════════════════════════════════ FASE 1 ════════════════════════════════ -->
+<div class="phase-block active" id="phase-0">
+  <div class="phase-progress">
+    <div class="pp active"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div>
+  </div>
+  <div class="phase-header">
+    <div class="phase-eyebrow">
+      <div class="ph-num" style="background:rgba(108,99,255,0.12);color:#8b85ff;">1</div>
+      <div class="ph-tag" style="background:rgba(108,99,255,0.08);color:#8b85ff;border:1px solid rgba(108,99,255,0.2);font-family:monospace;font-size:10px;padding:3px 10px;border-radius:99px;">PREPARACIÓN</div>
+      <div class="ph-time">⏱ 30 minutos</div>
+    </div>
+    <h2>Preparación del entorno y estructura del libro</h2>
+    <div class="objetivo"><strong>Objetivo:</strong> Configurar Excel para trabajar con macros y construir la hoja de base de datos que almacenará todos los productos del inventario.</div>
+  </div>
+
+  <!-- STEP 1.1 -->
+  <div class="step" id="s1-1">
+    <div class="step-head" onclick="toggleStep('s1-1')">
+      <div class="snum">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Crear y guardar el libro habilitado para macros</div>
+        <div class="step-subtitle">El formato .xlsm permite guardar y ejecutar código VBA</div>
+        <div class="step-tags"><span class="stag stag-excel">Excel</span></div>
+      </div>
+      <div class="step-check" id="chk-s1-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué es importante este paso?</div>
+        <p>Excel tiene dos formatos principales: <strong>.xlsx</strong> (sin macros) y <strong>.xlsm</strong> (con macros habilitadas). Si guardas en .xlsx, todo tu código VBA se perderá. El formato .xlsm es el contenedor que almacena tanto los datos como el código que escribiremos.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Dónde hacerlo:</strong> Archivo → Guardar como → elige "Libro de Excel habilitado para macros (*.xlsm)" → nómbralo <strong>Inventario_TuNombre.xlsm</strong></div>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-1')">✓ Listo, guardé el archivo .xlsm</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.2 -->
+  <div class="step" id="s1-2">
+    <div class="step-head" onclick="toggleStep('s1-2')">
+      <div class="snum">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Crear la hoja de base de datos con encabezados</div>
+        <div class="step-subtitle">Esta hoja será donde el formulario escriba cada registro</div>
+        <div class="step-tags"><span class="stag stag-excel">Excel</span></div>
+      </div>
+      <div class="step-check" id="chk-s1-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué función tiene esta hoja?</div>
+        <p>La hoja <strong>BD_Inventario</strong> actúa como una tabla de base de datos. Cada columna es un campo y cada fila será un producto registrado. El código VBA que escribiremos más adelante buscará esta hoja por su nombre exacto para leer y escribir datos.</p>
+        <p><strong>Importante:</strong> Los encabezados deben estar exactamente en la fila 1 porque el código empezará a escribir registros desde la fila 2 en adelante.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Dónde hacerlo:</strong> Clic derecho en la pestaña "Hoja1" → Cambiar nombre → escribe <strong>BD_Inventario</strong>. Luego escribe estos encabezados en las celdas A1 a H1:</div>
+      </div>
+      <div class="preview-frame">
+        <div class="pf-bar"><div class="pf-dot" style="background:#ff6b6b"></div><div class="pf-dot" style="background:#f5a623"></div><div class="pf-dot" style="background:#3ecf8e"></div><span class="pf-title">BD_Inventario — Vista previa de encabezados</span></div>
+        <div class="pf-body" style="overflow-x:auto;">
+          <table style="font-family:var(--mono);font-size:11px;border-collapse:collapse;min-width:600px;">
+            <tr>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">A1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">B1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">C1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">D1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">E1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">F1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">G1</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#1e2028;color:#6c63ff;font-weight:700;">H1</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">ID</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Producto</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Categoría</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Cantidad</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Precio Unit.</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Proveedor</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Fecha Entrada</td>
+              <td style="padding:5px 10px;border:1px solid #333;background:#252830;color:#abb2bf;">Estado</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-2')">✓ Encabezados escritos en la hoja</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.3 -->
+  <div class="step" id="s1-3">
+    <div class="step-head" onclick="toggleStep('s1-3')">
+      <div class="snum">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Activar la pestaña Desarrollador y abrir el Editor VBA</div>
+        <div class="step-subtitle">Sin esta pestaña no se puede acceder al entorno de programación</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s1-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué es el Editor VBA?</div>
+        <p>Visual Basic for Applications (VBA) es el lenguaje de programación integrado en Excel. El Editor VBA (también llamado IDE) es el entorno donde escribirás todo el código. Es como un pequeño programa de desarrollo dentro de Excel. Una vez que lo abras con <strong>Alt + F11</strong>, verás tres áreas: el Explorador de proyectos (izquierda), el área de código (centro) y la ventana de propiedades (abajo).</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Paso 1:</strong> Archivo → Opciones → Personalizar cinta de opciones → activa la casilla <strong>"Desarrollador"</strong> → Aceptar<br><strong>Paso 2:</strong> Presiona <strong>Alt + F11</strong> para abrir el Editor VBA</div>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">⚡</span>
+        <div class="tip-text"><strong>Atajo rápido:</strong> Alt + F11 abre y cierra el editor. Puedes ir y venir entre Excel y el editor con este atajo sin cerrar nada.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-3')">✓ El Editor VBA está abierto</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.4 -->
+  <div class="step" id="s1-4">
+    <div class="step-head" onclick="toggleStep('s1-4')">
+      <div class="snum">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Insertar un Módulo estándar y escribir el encabezado</div>
+        <div class="step-subtitle">El módulo es donde vivirá el código que abre el formulario</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s1-4">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué necesitamos un Módulo?</div>
+        <p>En VBA hay dos lugares para escribir código: dentro de un <strong>UserForm</strong> (que usaremos para los botones del formulario) y dentro de un <strong>Módulo estándar</strong> (para procedimientos generales). El módulo es el lugar donde pondremos el procedimiento que abre el formulario cuando el usuario haga clic en un botón en la hoja de Excel.</p>
+        <p>Los comentarios en VBA comienzan con apóstrofo (<strong>'</strong>). Son texto que el programa ignora, pero que sirve para documentar qué hace cada parte del código.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Dónde hacerlo:</strong> En el Editor VBA → menú <strong>Insertar → Módulo</strong>. Se abrirá una hoja en blanco. Escribe el siguiente código:</div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">MODULE1.BAS — Encabezado de autor</span>
+          <button class="copy-btn" onclick="copyCode(this, 'c1-4')">Copiar</button>
+        </div>
+        <pre id="c1-4"><span class="cmt">' ============================================================
+' Módulo: Gestión de Inventario
+' Alumno: Tu Nombre Aquí
+' Matrícula: Tu Matrícula
+' Materia: Computación II
+' Fecha: </span><span class="prop">Date()</span><span class="cmt">
+' Descripción: Formulario VBA para registro de inventario
+' ============================================================</span>
+
+<span class="kw">Sub</span> <span class="fn">AbrirFormulario</span>()
+    <span class="cmt">' Este procedimiento abre el formulario principal
+    ' Se ejecuta cuando el usuario pulsa el botón en la hoja</span>
+    frmInventario.<span class="fn">Show</span>
+<span class="kw">End Sub</span></pre>
+      </div>
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué hace Sub AbrirFormulario()?</div>
+        <p><strong>Sub</strong> declara un procedimiento (bloque de código con nombre). <strong>AbrirFormulario</strong> es el nombre que le damos. <strong>frmInventario.Show</strong> le dice a VBA que muestre el UserForm que llamaremos frmInventario. Todavía no existe, lo crearemos en la Fase 2.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-4')">✓ Módulo creado con el código</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.5 -->
+  <div class="step" id="s1-5">
+    <div class="step-head" onclick="toggleStep('s1-5')">
+      <div class="snum">5</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Capturar 3 registros de prueba manualmente en la hoja</div>
+        <div class="step-subtitle">Tener datos desde el inicio ayuda a probar la búsqueda</div>
+        <div class="step-tags"><span class="stag stag-excel">Excel</span></div>
+      </div>
+      <div class="step-check" id="chk-s1-5">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué capturar datos ahora?</div>
+        <p>Cuando programemos la función de <strong>búsqueda</strong> en la Fase 4, necesitaremos datos en la hoja para poder verificar que el código funciona. Si la hoja está vacía, no podremos probar si la búsqueda encuentra o no un producto. Captura datos reales o inventados de productos de almacén.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Dónde hacerlo:</strong> En la hoja <strong>BD_Inventario</strong>, a partir de la fila 2, captura manualmente 3 productos. Ejemplo: Taladro eléctrico, Casco de seguridad, Cable eléctrico. Llena todas las columnas.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-5')">✓ 3 registros capturados</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="entregable-head"><span>✅ Entregable de Fase 1</span></div>
+    <p>Archivo .xlsm guardado · Hoja BD_Inventario con 8 columnas · Editor VBA abierto · Módulo con Sub AbrirFormulario() · 3 registros de prueba en la hoja</p>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" disabled>← Anterior</button>
+    <button class="nav-btn primary" onclick="goPhase(1)">Fase 2: Diseñar el formulario →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ FASE 2 ════════════════════════════════ -->
+<div class="phase-block" id="phase-1">
+  <div class="phase-progress">
+    <div class="pp done"></div><div class="pp active"></div><div class="pp"></div><div class="pp"></div><div class="pp"></div>
+  </div>
+  <div class="phase-header">
+    <div class="phase-eyebrow">
+      <div class="ph-num" style="background:rgba(78,168,222,0.12);color:#4ea8de;">2</div>
+      <div class="ph-tag" style="background:rgba(78,168,222,0.08);color:#4ea8de;border:1px solid rgba(78,168,222,0.2);font-family:monospace;font-size:10px;padding:3px 10px;border-radius:99px;">DISEÑO VISUAL</div>
+      <div class="ph-time">⏱ 30 minutos</div>
+    </div>
+    <h2>Diseño visual del UserForm</h2>
+    <div class="objetivo"><strong>Objetivo:</strong> Insertar el formulario en el Editor VBA y colocar todos los controles (campos de texto, listas desplegables y botones) que el usuario verá al abrir el inventario.</div>
+  </div>
+
+  <div class="preview-frame" style="margin-bottom:28px;">
+    <div class="pf-bar"><div class="pf-dot" style="background:#ff6b6b"></div><div class="pf-dot" style="background:#f5a623"></div><div class="pf-dot" style="background:#3ecf8e"></div><span class="pf-title">Vista previa — Resultado final de esta fase</span></div>
+    <div class="pf-body">
+      <div class="form-mockup">
+        <div class="fm-title">Gestión de Inventario — frmInventario</div>
+        <div class="fm-frame">
+          <div class="fm-frame-title">Datos del producto</div>
+          <div class="fm-row"><span class="fm-lbl">Producto *</span><div class="fm-inp">txtProducto</div></div>
+          <div class="fm-row"><span class="fm-lbl">Categoría *</span><div class="fm-inp combo">cmbCategoria ▾</div></div>
+          <div class="fm-row"><span class="fm-lbl">Cantidad *</span><div class="fm-inp">txtCantidad</div></div>
+          <div class="fm-row"><span class="fm-lbl">Precio Unit. *</span><div class="fm-inp">txtPrecio</div></div>
+          <div class="fm-row"><span class="fm-lbl">Proveedor</span><div class="fm-inp">txtProveedor</div></div>
+          <div class="fm-row"><span class="fm-lbl">Fecha entrada</span><div class="fm-inp">txtFecha</div></div>
+          <div class="fm-row"><span class="fm-lbl">Estado</span><div class="fm-inp combo">cmbEstado ▾</div></div>
+        </div>
+        <div class="fm-btns">
+          <button class="fm-btn fm-btn-add">Agregar</button>
+          <button class="fm-btn fm-btn-search">Buscar</button>
+          <button class="fm-btn fm-btn-clear">Limpiar</button>
+          <button class="fm-btn fm-btn-close">Cerrar</button>
+        </div>
+        <div class="fm-status">Total de registros: 3</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step" id="s2-1">
+    <div class="step-head" onclick="toggleStep('s2-1')">
+      <div class="snum">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Insertar el UserForm y configurar sus propiedades básicas</div>
+        <div class="step-subtitle">El UserForm es la ventana visual que verá el usuario</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span><span class="stag stag-diseño">Diseño</span></div>
+      </div>
+      <div class="step-check" id="chk-s2-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué es un UserForm?</div>
+        <p>Un <strong>UserForm</strong> es una ventana personalizada que puedes diseñar visualmente en VBA. Funciona igual que cualquier ventana de Windows: tiene un título, controles y botones. VBA genera automáticamente el código que dibuja la ventana; tú solo arrastras los elementos. Cada control que coloques tendrá un <strong>Name</strong> (el identificador interno que usará el código) y un <strong>Caption</strong> (el texto que ve el usuario).</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Cómo insertar:</strong> En el Editor VBA → menú <strong>Insertar → UserForm</strong><br><strong>Propiedades a cambiar</strong> (ventana Properties, tecla F4):<br>• <strong>Name</strong> → <code>frmInventario</code><br>• <strong>Caption</strong> → <code>Gestión de Inventario</code><br>• <strong>Width</strong> → <code>380</code> &nbsp; <strong>Height</strong> → <code>340</code></div>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <div class="tip-text">El <strong>Name</strong> es el más importante: es el nombre que usarás en el código para referirte al formulario. Debe coincidir exactamente con lo que escribimos en <code>frmInventario.Show</code> del Módulo 1.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-1')">✓ UserForm insertado y configurado</button>
+    </div>
+  </div>
+
+  <div class="step" id="s2-2">
+    <div class="step-head" onclick="toggleStep('s2-2')">
+      <div class="snum">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Agregar un Frame y los cuatro TextBox principales</div>
+        <div class="step-subtitle">Frame agrupa controles; TextBox recibe texto del usuario</div>
+        <div class="step-tags"><span class="stag stag-diseño">Diseño</span></div>
+      </div>
+      <div class="step-check" id="chk-s2-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Para qué sirve cada control?</div>
+        <p>Un <strong>Frame</strong> es un contenedor que agrupa controles relacionados visualmente (como un rectángulo con título). Los <strong>TextBox</strong> son los campos de texto donde el usuario escribe información. Cada TextBox tiene un Name único que el código usa para leer (<code>.Value</code>) lo que el usuario escribió.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Del Cuadro de herramientas</strong> arrastra al formulario:<br>1. <strong>Frame</strong> → Caption: <code>Datos del producto</code><br>2. Dentro del Frame, 4 pares de <strong>Label + TextBox</strong>:<br>
+        &nbsp;&nbsp;Label: <code>Producto *</code> → TextBox Name: <code>txtProducto</code><br>
+        &nbsp;&nbsp;Label: <code>Cantidad *</code> → TextBox Name: <code>txtCantidad</code><br>
+        &nbsp;&nbsp;Label: <code>Precio Unitario *</code> → TextBox Name: <code>txtPrecio</code><br>
+        &nbsp;&nbsp;Label: <code>Proveedor</code> → TextBox Name: <code>txtProveedor</code></div>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-2')">✓ Frame y TextBox agregados</button>
+    </div>
+  </div>
+
+  <div class="step" id="s2-3">
+    <div class="step-head" onclick="toggleStep('s2-3')">
+      <div class="snum">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Agregar los ComboBox y el campo de Fecha</div>
+        <div class="step-subtitle">ComboBox = lista desplegable con opciones predefinidas</div>
+        <div class="step-tags"><span class="stag stag-diseño">Diseño</span></div>
+      </div>
+      <div class="step-check" id="chk-s2-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué usar ComboBox en lugar de TextBox?</div>
+        <p>Los <strong>ComboBox</strong> muestran una lista de opciones al hacer clic. Usamos ComboBox para Categoría y Estado porque los valores son fijos (no queremos que el usuario escriba "Electronica" en lugar de "Electrónica"). Esto evita errores de captura y asegura consistencia en los datos. El código llenará estas listas automáticamente al abrir el formulario.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text">Agrega dentro del Frame:<br>• Label: <code>Categoría *</code> → ComboBox Name: <code>cmbCategoria</code><br>• Label: <code>Estado</code> → ComboBox Name: <code>cmbEstado</code><br>• Label: <code>Fecha entrada</code> → TextBox Name: <code>txtFecha</code></div>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-3')">✓ ComboBox y campo fecha agregados</button>
+    </div>
+  </div>
+
+  <div class="step" id="s2-4">
+    <div class="step-head" onclick="toggleStep('s2-4')">
+      <div class="snum">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Agregar los 4 CommandButton y la etiqueta de conteo</div>
+        <div class="step-subtitle">Botones de acción y Label para mostrar el total de registros</div>
+        <div class="step-tags"><span class="stag stag-diseño">Diseño</span></div>
+      </div>
+      <div class="step-check" id="chk-s2-4">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué función tendrá cada botón?</div>
+        <p><strong>btnAgregar</strong>: leerá todos los campos y escribirá una fila nueva en BD_Inventario.<br><strong>btnBuscar</strong>: buscará en la columna Producto y cargará los datos en los campos.<br><strong>btnLimpiar</strong>: vaciará todos los campos para capturar un nuevo registro.<br><strong>btnCerrar</strong>: cerrará la ventana del formulario.<br><strong>lblTotal</strong>: mostrará cuántos productos hay registrados (actualizándose automáticamente).</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text">Fuera del Frame, en la parte inferior del formulario:<br>• CommandButton Name: <code>btnAgregar</code> Caption: <code>Agregar</code><br>• CommandButton Name: <code>btnBuscar</code> Caption: <code>Buscar</code><br>• CommandButton Name: <code>btnLimpiar</code> Caption: <code>Limpiar</code><br>• CommandButton Name: <code>btnCerrar</code> Caption: <code>Cerrar</code><br>• Label Name: <code>lblTotal</code> Caption: <code>Total: 0 registros</code></div>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-4')">✓ Botones y etiqueta agregados</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="entregable-head"><span>✅ Entregable de Fase 2</span></div>
+    <p>UserForm frmInventario con: 1 Frame · 4 TextBox (txtProducto, txtCantidad, txtPrecio, txtProveedor) · 2 ComboBox (cmbCategoria, cmbEstado) · 1 TextBox (txtFecha) · 4 botones · 1 Label lblTotal. Todos con sus nombres correctos.</p>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(0)">← Fase 1</button>
+    <button class="nav-btn primary" onclick="goPhase(2)">Fase 3: Programar Agregar →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ FASE 3 ════════════════════════════════ -->
+<div class="phase-block" id="phase-2">
+  <div class="phase-progress">
+    <div class="pp done"></div><div class="pp done"></div><div class="pp active"></div><div class="pp"></div><div class="pp"></div>
+  </div>
+  <div class="phase-header">
+    <div class="phase-eyebrow">
+      <div class="ph-num" style="background:rgba(245,166,35,0.12);color:#f5a623;">3</div>
+      <div class="ph-tag" style="background:rgba(245,166,35,0.08);color:#f5a623;border:1px solid rgba(245,166,35,0.2);font-family:monospace;font-size:10px;padding:3px 10px;border-radius:99px;">CÓDIGO VBA</div>
+      <div class="ph-time">⏱ 30 minutos</div>
+    </div>
+    <h2>Programación: Initialize y botón Agregar</h2>
+    <div class="objetivo"><strong>Objetivo:</strong> Escribir el código VBA que inicializa el formulario (carga las listas) y el que captura los datos del usuario para escribirlos en la hoja de Excel.</div>
+  </div>
+
+  <div class="step" id="s3-1">
+    <div class="step-head" onclick="toggleStep('s3-1')">
+      <div class="snum">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Abrir el código del UserForm</div>
+        <div class="step-subtitle">El código del formulario va dentro de su propio módulo</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s3-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Dónde va el código del formulario?</div>
+        <p>Cada UserForm tiene su propio módulo de código. Para abrirlo: haz doble clic en cualquier parte del formulario (en el área de diseño, no en un control). Se abrirá el editor con la cabecera <code>Private Sub UserForm_Click()</code>. <strong>Borra esa línea</strong> y estarás en el módulo correcto del formulario.</p>
+        <p>Desde los dos menús desplegables en la parte superior del editor puedes seleccionar el control (izquierda) y el evento (derecha) para generar automáticamente la estructura de cada Sub.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Cómo abrir:</strong> En el Editor VBA, doble clic sobre el formulario frmInventario en el área de diseño (no en un botón). Se abre el módulo del formulario.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-1')">✓ Módulo del formulario abierto</button>
+    </div>
+  </div>
+
+  <div class="step" id="s3-2">
+    <div class="step-head" onclick="toggleStep('s3-2')">
+      <div class="snum">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Escribir el evento UserForm_Initialize</div>
+        <div class="step-subtitle">Este código se ejecuta automáticamente al abrir el formulario</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s3-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué es el evento Initialize y por qué es importante?</div>
+        <p>VBA tiene <strong>eventos</strong>: bloques de código que se ejecutan automáticamente cuando ocurre algo. <strong>UserForm_Initialize</strong> se dispara justo antes de que la ventana aparezca en pantalla. Es el lugar ideal para preparar el formulario: llenar los ComboBox con sus opciones, poner la fecha de hoy, limpiar campos residuales, y actualizar el contador de registros. Sin este evento, los ComboBox aparecerían vacíos.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Cómo generar la estructura:</strong> En el menú desplegable izquierdo selecciona <code>UserForm</code>, en el derecho selecciona <code>Initialize</code>. Se creará <code>Private Sub UserForm_Initialize()</code>. Escribe el código entre Sub y End Sub:</div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">frmInventario — UserForm_Initialize</span>
+          <button class="copy-btn" onclick="copyCode(this,'c3-2')">Copiar</button>
+        </div>
+        <pre id="c3-2"><span class="kw">Private Sub</span> <span class="fn">UserForm_Initialize</span>()
+
+    <span class="cmt">' ── 1. Llenar categorías en el ComboBox
+    ' .AddItem agrega cada opción a la lista desplegable</span>
+    <span class="kw">With</span> cmbCategoria
+        .AddItem <span class="str">"Electrónica"</span>
+        .AddItem <span class="str">"Herramientas"</span>
+        .AddItem <span class="str">"Materia Prima"</span>
+        .AddItem <span class="str">"Consumibles"</span>
+        .AddItem <span class="str">"Equipos de Seguridad"</span>
+    <span class="kw">End With</span>
+
+    <span class="cmt">' ── 2. Llenar estados posibles del producto</span>
+    <span class="kw">With</span> cmbEstado
+        .AddItem <span class="str">"Disponible"</span>
+        .AddItem <span class="str">"Bajo Stock"</span>
+        .AddItem <span class="str">"Agotado"</span>
+        .AddItem <span class="str">"En Pedido"</span>
+    <span class="kw">End With</span>
+
+    <span class="cmt">' ── 3. Poner la fecha de hoy en el campo txtFecha
+    ' Format() da formato legible a la fecha del sistema</span>
+    txtFecha.Value = <span class="fn">Format</span>(<span class="fn">Date</span>, <span class="str">"DD/MM/YYYY"</span>)
+
+    <span class="cmt">' ── 4. Actualizar el contador de registros en lblTotal
+    ' Sheets() accede a la hoja por nombre
+    ' Cells(Rows.Count,1).End(xlUp).Row encuentra la última fila con datos</span>
+    <span class="kw">Dim</span> <span class="prop">ws</span> <span class="kw">As</span> Worksheet
+    <span class="kw">Set</span> <span class="prop">ws</span> = Sheets(<span class="str">"BD_Inventario"</span>)
+    <span class="kw">Dim</span> <span class="prop">total</span> <span class="kw">As</span> Long
+    <span class="prop">total</span> = <span class="prop">ws</span>.Cells(<span class="prop">ws</span>.Rows.Count, <span class="num">1</span>).End(xlUp).Row - <span class="num">1</span>
+    lblTotal.Caption = <span class="str">"Total: "</span> & <span class="prop">total</span> & <span class="str">" registros"</span>
+
+<span class="kw">End Sub</span></pre>
+      </div>
+      <div class="explain-box">
+        <div class="ebox-label">Desglose línea por línea</div>
+        <p><strong>With cmbCategoria … End With</strong>: bloque que evita repetir el nombre del control. Cada <code>.AddItem</code> agrega una opción a la lista.</p>
+        <p><strong>Format(Date, "DD/MM/YYYY")</strong>: <code>Date</code> devuelve la fecha actual del sistema. <code>Format()</code> la convierte al formato día/mes/año.</p>
+        <p><strong>ws.Cells(ws.Rows.Count, 1).End(xlUp).Row</strong>: empieza desde la última fila de Excel, sube hasta encontrar la última celda con dato en la columna A. Así sabemos cuántos registros hay. Restamos 1 para no contar el encabezado.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-2')">✓ Código Initialize escrito y sin errores</button>
+    </div>
+  </div>
+
+  <div class="step" id="s3-3">
+    <div class="step-head" onclick="toggleStep('s3-3')">
+      <div class="snum">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Programar btnAgregar_Click con validación</div>
+        <div class="step-subtitle">Valida los campos y escribe el nuevo registro en la hoja</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s3-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué hace este código paso a paso?</div>
+        <p><strong>Paso 1 — Validación:</strong> Antes de escribir en la hoja verifica que los campos obligatorios no estén vacíos. Si alguno está vacío, muestra un MsgBox de advertencia y detiene la ejecución con <code>Exit Sub</code>.</p>
+        <p><strong>Paso 2 — Encontrar la siguiente fila libre:</strong> Usa la misma técnica de <code>End(xlUp).Row + 1</code> para saber en qué fila escribir el nuevo dato.</p>
+        <p><strong>Paso 3 — Escribir los datos:</strong> <code>ws.Cells(fila, columna).Value = ...</code> escribe en la celda específica. La columna 1 es A, 2 es B, etc.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Cómo generar la estructura:</strong> En el menú izquierdo selecciona <code>btnAgregar</code>, en el derecho <code>Click</code>. Escribe dentro del Sub:</div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">frmInventario — btnAgregar_Click</span>
+          <button class="copy-btn" onclick="copyCode(this,'c3-3')">Copiar</button>
+        </div>
+        <pre id="c3-3"><span class="kw">Private Sub</span> <span class="fn">btnAgregar_Click</span>()
+
+    <span class="cmt">' ── VALIDACIÓN: campos obligatorios no pueden estar vacíos
+    ' El operador Or verifica si ALGUNA condición es verdadera</span>
+    <span class="kw">If</span> txtProducto.Value = <span class="str">""</span> <span class="kw">Or</span> _
+       txtCantidad.Value = <span class="str">""</span> <span class="kw">Or</span> _
+       txtPrecio.Value = <span class="str">""</span> <span class="kw">Then</span>
+        <span class="fn">MsgBox</span> <span class="str">"Completa los campos obligatorios (*)"</span>, _
+               vbExclamation, <span class="str">"Campos requeridos"</span>
+        <span class="kw">Exit Sub</span>  <span class="cmt">' detiene la ejecución aquí</span>
+    <span class="kw">End If</span>
+
+    <span class="cmt">' ── VALIDACIÓN: cantidad y precio deben ser números</span>
+    <span class="kw">If Not</span> <span class="fn">IsNumeric</span>(txtCantidad.Value) <span class="kw">Or</span> _
+       <span class="kw">Not</span> <span class="fn">IsNumeric</span>(txtPrecio.Value) <span class="kw">Then</span>
+        <span class="fn">MsgBox</span> <span class="str">"Cantidad y Precio deben ser valores numéricos."</span>, _
+               vbExclamation, <span class="str">"Error de formato"</span>
+        <span class="kw">Exit Sub</span>
+    <span class="kw">End If</span>
+
+    <span class="cmt">' ── REFERENCIA a la hoja de datos</span>
+    <span class="kw">Dim</span> <span class="prop">ws</span> <span class="kw">As</span> Worksheet
+    <span class="kw">Set</span> <span class="prop">ws</span> = Sheets(<span class="str">"BD_Inventario"</span>)
+
+    <span class="cmt">' ── ENCONTRAR la primera fila vacía
+    ' End(xlUp) sube desde el fondo y encuentra el último dato
+    ' +1 da la siguiente fila libre</span>
+    <span class="kw">Dim</span> <span class="prop">UltimaFila</span> <span class="kw">As</span> Long
+    <span class="prop">UltimaFila</span> = <span class="prop">ws</span>.Cells(<span class="prop">ws</span>.Rows.Count, <span class="num">1</span>).End(xlUp).Row + <span class="num">1</span>
+
+    <span class="cmt">' ── ESCRIBIR en la hoja (columna por columna)</span>
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">1</span>).Value = <span class="prop">UltimaFila</span> - <span class="num">1</span>  <span class="cmt">' ID automático</span>
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">2</span>).Value = txtProducto.Value
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">3</span>).Value = cmbCategoria.Value
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">4</span>).Value = <span class="fn">CDbl</span>(txtCantidad.Value) <span class="cmt">' CDbl convierte a número</span>
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">5</span>).Value = <span class="fn">CDbl</span>(txtPrecio.Value)
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">6</span>).Value = txtProveedor.Value
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">7</span>).Value = txtFecha.Value
+    <span class="prop">ws</span>.Cells(<span class="prop">UltimaFila</span>, <span class="num">8</span>).Value = cmbEstado.Value
+
+    <span class="cmt">' ── CONFIRMAR al usuario y limpiar campos</span>
+    <span class="fn">MsgBox</span> <span class="str">"Registro agregado correctamente."</span>, vbInformation
+    <span class="fn">Call</span> btnLimpiar_Click  <span class="cmt">' reutiliza el código de limpiar (lo haremos en Fase 4)</span>
+
+    <span class="cmt">' ── ACTUALIZAR el contador</span>
+    lblTotal.Caption = <span class="str">"Total: "</span> & (<span class="prop">UltimaFila</span> - <span class="num">1</span>) & <span class="str">" registros"</span>
+
+<span class="kw">End Sub</span></pre>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">⚡</span>
+        <div class="tip-text"><strong>Nota:</strong> <code>Call btnLimpiar_Click</code> llama al código del botón Limpiar. Ese código lo escribiremos en la Fase 4. Por ahora deja esa línea; no causará error porque el Sub existe (aunque vacío) desde que colocaste el botón.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-3')">✓ btnAgregar programado</button>
+    </div>
+  </div>
+
+  <div class="step" id="s3-4">
+    <div class="step-head" onclick="toggleStep('s3-4')">
+      <div class="snum">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Probar el formulario por primera vez</div>
+        <div class="step-subtitle">Presiona F5 o el botón ▶ para ejecutar y verificar</div>
+        <div class="step-tags"><span class="stag stag-prueba">Prueba</span></div>
+      </div>
+      <div class="step-check" id="chk-s3-4">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Cómo probar sin salir del editor?</div>
+        <p>Puedes ejecutar el formulario directamente desde el Editor VBA sin regresar a Excel. Estando en el módulo del formulario, presiona <strong>F5</strong> o el botón ▶ de la barra de herramientas. El formulario aparecerá. Verifica que los ComboBox tengan sus opciones, que la fecha aparezca y que el contador diga el número correcto de registros.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Qué probar:</strong><br>1. ¿Los ComboBox tienen las 5 categorías?<br>2. ¿txtFecha muestra la fecha de hoy?<br>3. ¿lblTotal muestra "Total: 3 registros" (o los que hayas capturado)?<br>4. Prueba el botón Agregar con campos vacíos: ¿aparece el mensaje de error?<br>5. Llena todos los campos y agrega un registro: ¿aparece en la hoja BD_Inventario?</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-4')">✓ Formulario probado y funciona</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="entregable-head"><span>✅ Entregable de Fase 3</span></div>
+    <p>Initialize llenando ComboBox, fecha y contador · btnAgregar con validación de campos vacíos y validación numérica · Al menos 1 registro nuevo agregado desde el formulario y visible en BD_Inventario.</p>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(1)">← Fase 2</button>
+    <button class="nav-btn primary" onclick="goPhase(3)">Fase 4: Buscar y Limpiar →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ FASE 4 ════════════════════════════════ -->
+<div class="phase-block" id="phase-3">
+  <div class="phase-progress">
+    <div class="pp done"></div><div class="pp done"></div><div class="pp done"></div><div class="pp active"></div><div class="pp"></div>
+  </div>
+  <div class="phase-header">
+    <div class="phase-eyebrow">
+      <div class="ph-num" style="background:rgba(62,207,142,0.12);color:#3ecf8e;">4</div>
+      <div class="ph-tag" style="background:rgba(62,207,142,0.08);color:#3ecf8e;border:1px solid rgba(62,207,142,0.2);font-family:monospace;font-size:10px;padding:3px 10px;border-radius:99px;">CÓDIGO VBA</div>
+      <div class="ph-time">⏱ 30 minutos</div>
+    </div>
+    <h2>Programación: Buscar, Limpiar y Cerrar</h2>
+    <div class="objetivo"><strong>Objetivo:</strong> Completar los tres botones restantes: Buscar (recorre la hoja y carga datos en los campos), Limpiar (resetea el formulario) y Cerrar (cierra la ventana).</div>
+  </div>
+
+  <div class="step" id="s4-1">
+    <div class="step-head" onclick="toggleStep('s4-1')">
+      <div class="snum">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Programar btnLimpiar_Click</div>
+        <div class="step-subtitle">Vacía todos los controles del formulario para nueva captura</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s4-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué programar Limpiar antes que Buscar?</div>
+        <p>El código de <strong>btnAgregar</strong> ya tiene una línea <code>Call btnLimpiar_Click</code>. Si no programamos Limpiar ahora, cuando Agregar intente llamarlo encontrará un Sub vacío y no limpiará nada. Programamos Limpiar primero para que el flujo completo funcione correctamente.</p>
+        <p><strong>.Value = ""</strong> vacía un TextBox. <strong>.ListIndex = -1</strong> deselecciona un ComboBox (ninguna opción seleccionada). <strong>.SetFocus</strong> pone el cursor en ese campo para que el usuario pueda escribir de inmediato.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">frmInventario — btnLimpiar_Click</span>
+          <button class="copy-btn" onclick="copyCode(this,'c4-1')">Copiar</button>
+        </div>
+        <pre id="c4-1"><span class="kw">Private Sub</span> <span class="fn">btnLimpiar_Click</span>()
+
+    <span class="cmt">' ── Vaciar todos los TextBox del formulario
+    ' .Value = "" asigna cadena vacía (borra el contenido)</span>
+    txtProducto.Value  = <span class="str">""</span>
+    txtCantidad.Value  = <span class="str">""</span>
+    txtPrecio.Value    = <span class="str">""</span>
+    txtProveedor.Value = <span class="str">""</span>
+
+    <span class="cmt">' ── Restablecer la fecha al día de hoy</span>
+    txtFecha.Value = <span class="fn">Format</span>(<span class="fn">Date</span>, <span class="str">"DD/MM/YYYY"</span>)
+
+    <span class="cmt">' ── Deseleccionar los ComboBox
+    ' ListIndex = -1 significa "sin selección"</span>
+    cmbCategoria.ListIndex = -<span class="num">1</span>
+    cmbEstado.ListIndex    = -<span class="num">1</span>
+
+    <span class="cmt">' ── Colocar el cursor en el primer campo</span>
+    txtProducto.<span class="fn">SetFocus</span>
+
+<span class="kw">End Sub</span></pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s4-1')">✓ btnLimpiar programado</button>
+    </div>
+  </div>
+
+  <div class="step" id="s4-2">
+    <div class="step-head" onclick="toggleStep('s4-2')">
+      <div class="snum">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Programar btnBuscar_Click con bucle For…Next</div>
+        <div class="step-subtitle">Recorre cada fila de la hoja buscando el producto escrito</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s4-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Cómo funciona la búsqueda?</div>
+        <p>El código usa un <strong>bucle For…Next</strong> que recorre todas las filas de la hoja desde la fila 2 (primera con datos) hasta la última con contenido. En cada iteración usa <strong>InStr()</strong> para verificar si el texto buscado aparece dentro del nombre del producto (búsqueda parcial: escribir "taladro" encontrará "Taladro eléctrico").</p>
+        <p>Si encuentra una coincidencia, carga todos los valores de esa fila en los controles del formulario y sale del bucle con <strong>Exit For</strong> para no seguir buscando innecesariamente.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">frmInventario — btnBuscar_Click</span>
+          <button class="copy-btn" onclick="copyCode(this,'c4-2')">Copiar</button>
+        </div>
+        <pre id="c4-2"><span class="kw">Private Sub</span> <span class="fn">btnBuscar_Click</span>()
+
+    <span class="cmt">' ── Verificar que el usuario escribió algo en txtProducto</span>
+    <span class="kw">If</span> txtProducto.Value = <span class="str">""</span> <span class="kw">Then</span>
+        <span class="fn">MsgBox</span> <span class="str">"Escribe el nombre del producto a buscar."</span>, _
+               vbInformation, <span class="str">"Búsqueda"</span>
+        <span class="kw">Exit Sub</span>
+    <span class="kw">End If</span>
+
+    <span class="kw">Dim</span> <span class="prop">ws</span> <span class="kw">As</span> Worksheet
+    <span class="kw">Set</span> <span class="prop">ws</span> = Sheets(<span class="str">"BD_Inventario"</span>)
+
+    <span class="kw">Dim</span> <span class="prop">Busqueda</span> <span class="kw">As</span> String
+    <span class="prop">Busqueda</span> = txtProducto.Value  <span class="cmt">' guardar el texto buscado</span>
+
+    <span class="kw">Dim</span> <span class="prop">i</span> <span class="kw">As</span> Long
+    <span class="kw">Dim</span> <span class="prop">Encontrado</span> <span class="kw">As</span> Boolean
+    <span class="prop">Encontrado</span> = <span class="kw">False</span>
+
+    <span class="cmt">' ── BUCLE: recorre cada fila desde la 2 hasta la última con datos</span>
+    <span class="kw">For</span> <span class="prop">i</span> = <span class="num">2</span> <span class="kw">To</span> <span class="prop">ws</span>.Cells(<span class="prop">ws</span>.Rows.Count, <span class="num">1</span>).End(xlUp).Row
+
+        <span class="cmt">' InStr busca texto dentro de otro texto
+        ' vbTextCompare ignora mayúsculas/minúsculas
+        ' > 0 significa que encontró algo</span>
+        <span class="kw">If</span> <span class="fn">InStr</span>(<span class="num">1</span>, <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">2</span>).Value, <span class="prop">Busqueda</span>, vbTextCompare) > <span class="num">0</span> <span class="kw">Then</span>
+
+            <span class="cmt">' ── Cargar los datos de esa fila en los controles</span>
+            txtProducto.Value  = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">2</span>).Value
+            cmbCategoria.Value = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">3</span>).Value
+            txtCantidad.Value  = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">4</span>).Value
+            txtPrecio.Value    = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">5</span>).Value
+            txtProveedor.Value = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">6</span>).Value
+            txtFecha.Value     = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">7</span>).Value
+            cmbEstado.Value    = <span class="prop">ws</span>.Cells(<span class="prop">i</span>, <span class="num">8</span>).Value
+
+            <span class="prop">Encontrado</span> = <span class="kw">True</span>
+            <span class="kw">Exit For</span>  <span class="cmt">' encontrado: detener el bucle</span>
+        <span class="kw">End If</span>
+
+    <span class="kw">Next</span> <span class="prop">i</span>
+
+    <span class="cmt">' ── Si no encontró nada, avisar al usuario</span>
+    <span class="kw">If Not</span> <span class="prop">Encontrado</span> <span class="kw">Then</span>
+        <span class="fn">MsgBox</span> <span class="str">"Producto '"</span> & <span class="prop">Busqueda</span> & <span class="str">"' no encontrado."</span>, _
+               vbInformation, <span class="str">"Sin resultados"</span>
+    <span class="kw">End If</span>
+
+<span class="kw">End Sub</span></pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s4-2')">✓ btnBuscar programado</button>
+    </div>
+  </div>
+
+  <div class="step" id="s4-3">
+    <div class="step-head" onclick="toggleStep('s4-3')">
+      <div class="snum">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Programar btnCerrar_Click y crear botón en la hoja</div>
+        <div class="step-subtitle">Unload Me cierra el formulario; el botón en Excel lo abre</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span><span class="stag stag-excel">Excel</span></div>
+      </div>
+      <div class="step-check" id="chk-s4-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Qué es Unload Me?</div>
+        <p><strong>Unload Me</strong> es la instrucción para cerrar y destruir el formulario de la memoria. <strong>Me</strong> es una referencia especial que apunta al formulario actual (es como decir "a mí mismo"). Si usaras <code>Hide</code> en lugar de <code>Unload</code>, la ventana se ocultaría pero seguiría en memoria; con <code>Unload</code> se elimina completamente.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">frmInventario — btnCerrar_Click</span>
+          <button class="copy-btn" onclick="copyCode(this,'c4-3')">Copiar</button>
+        </div>
+        <pre id="c4-3"><span class="kw">Private Sub</span> <span class="fn">btnCerrar_Click</span>()
+    <span class="cmt">' Unload Me cierra y libera el formulario de la memoria</span>
+    <span class="kw">Unload Me</span>
+<span class="kw">End Sub</span></pre>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Crear botón en la hoja:</strong> Regresa a Excel → pestaña <strong>Desarrollador → Insertar → Botón (control de formulario)</strong> → dibújalo en la hoja → en el cuadro "Asignar macro" selecciona <code>AbrirFormulario</code> → Aceptar → cambia el texto del botón a "Abrir Inventario".</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s4-3')">✓ Cerrar programado y botón en la hoja creado</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="entregable-head"><span>✅ Entregable de Fase 4</span></div>
+    <p>Los 4 botones completamente funcionales · Botón "Abrir Inventario" en la hoja Excel · Flujo completo: abrir → agregar → buscar → limpiar → cerrar, todo sin errores.</p>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(2)">← Fase 3</button>
+    <button class="nav-btn primary" onclick="goPhase(4)">Fase 5: Pruebas y entrega →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ FASE 5 ════════════════════════════════ -->
+<div class="phase-block" id="phase-4">
+  <div class="phase-progress">
+    <div class="pp done"></div><div class="pp done"></div><div class="pp done"></div><div class="pp done"></div><div class="pp active"></div>
+  </div>
+  <div class="phase-header">
+    <div class="phase-eyebrow">
+      <div class="ph-num" style="background:rgba(255,107,107,0.12);color:#ff8fab;">5</div>
+      <div class="ph-tag" style="background:rgba(255,107,107,0.08);color:#ff8fab;border:1px solid rgba(255,107,107,0.2);font-family:monospace;font-size:10px;padding:3px 10px;border-radius:99px;">PRUEBAS Y ENTREGA</div>
+      <div class="ph-time">⏱ 30 minutos</div>
+    </div>
+    <h2>Pruebas, refinamiento y presentación final</h2>
+    <div class="objetivo"><strong>Objetivo:</strong> Verificar el funcionamiento completo con casos de prueba documentados, aplicar mejoras de usabilidad y preparar el archivo para la entrega final al docente.</div>
+  </div>
+
+  <div class="step" id="s5-1">
+    <div class="step-head" onclick="toggleStep('s5-1')">
+      <div class="snum">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Ejecutar los 5 casos de prueba obligatorios</div>
+        <div class="step-subtitle">Documenta el resultado de cada prueba en la hoja Pruebas</div>
+        <div class="step-tags"><span class="stag stag-prueba">Prueba</span><span class="stag stag-excel">Excel</span></div>
+      </div>
+      <div class="step-check" id="chk-s5-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">¿Por qué documentar las pruebas?</div>
+        <p>En ingeniería, ningún sistema se entrega sin pruebas documentadas. Las pruebas demuestran que el software hace lo que se espera en condiciones normales <strong>y</strong> anómalas (errores de usuario). Crear una hoja de pruebas es parte del entregable profesional.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text"><strong>Crea una hoja nueva</strong> llamada <strong>Pruebas</strong> con estas columnas: N° | Caso de prueba | Datos usados | Resultado esperado | Resultado obtenido | ¿Pasó?</div>
+      </div>
+      <div class="check-list" id="checklist-pruebas">
+        <ul class="check-list">
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 1: Agregar registro con todos los campos completos → debe aparecer en BD_Inventario</li>
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 2: Agregar con campos obligatorios vacíos → debe aparecer mensaje de error</li>
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 3: Agregar con letras en Cantidad o Precio → debe aparecer mensaje de error numérico</li>
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 4: Buscar un producto que SÍ existe → campos deben llenarse automáticamente</li>
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 5: Buscar un producto que NO existe → debe aparecer mensaje "no encontrado"</li>
+          <li><div class="chk" onclick="toggleChk(this)"></div>Caso 6: Presionar Limpiar → todos los campos deben quedar vacíos y fecha restablecer</li>
+        </ul>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-1')">✓ Hoja de pruebas completada</button>
+    </div>
+  </div>
+
+  <div class="step" id="s5-2">
+    <div class="step-head" onclick="toggleStep('s5-2')">
+      <div class="snum">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Mejorar el estilo visual del formulario</div>
+        <div class="step-subtitle">Ajustar colores, fuentes y alineación de controles</div>
+        <div class="step-tags"><span class="stag stag-diseño">Diseño</span></div>
+      </div>
+      <div class="step-check" id="chk-s5-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">Propiedades visuales importantes</div>
+        <p>En la ventana de Propiedades (F4) de cada control puedes cambiar: <strong>BackColor</strong> (color de fondo), <strong>ForeColor</strong> (color del texto), <strong>Font</strong> (tipo, tamaño y estilo de fuente), <strong>TextAlign</strong> (alineación del texto). Para el formulario: <strong>BackColor</strong> cambia el color de fondo de la ventana. Usa el editor de colores para elegir tonos suaves y profesionales.</p>
+      </div>
+      <div class="where-box">
+        <span class="where-icon">📍</span>
+        <div class="where-text">Aplica estos cambios en la ventana de propiedades (F4):<br>• Formulario BackColor → color de fondo suave (gris claro o azul muy claro)<br>• Todos los controles → Font: Calibri, 10pt<br>• Botones → usa Format → Align para alinear horizontalmente<br>• lblTotal → ForeColor azul oscuro, Font Bold</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-2')">✓ Formulario con estilo mejorado</button>
+    </div>
+  </div>
+
+  <div class="step" id="s5-3">
+    <div class="step-head" onclick="toggleStep('s5-3')">
+      <div class="snum">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Documentar el código con comentarios</div>
+        <div class="step-subtitle">Cada Sub debe tener al menos 3 líneas de comentario explicativo</div>
+        <div class="step-tags"><span class="stag stag-vba">VBA</span></div>
+      </div>
+      <div class="step-check" id="chk-s5-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">Estructura de comentarios recomendada</div>
+        <p>Los buenos comentarios explican el <strong>propósito</strong> del código, no solo lo que hace literalmente. Comenta el <em>por qué</em>, no el <em>qué</em>. Por ejemplo, en vez de escribir <code>' suma 1 a i</code>, escribe <code>' avanza al siguiente registro de la hoja</code>.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span class="code-label-text">Ejemplo de cabecera de documentación por Sub</span>
+          <button class="copy-btn" onclick="copyCode(this,'c5-3')">Copiar</button>
+        </div>
+        <pre id="c5-3"><span class="cmt">' ─────────────────────────────────────────────
+' Subrutina : btnAgregar_Click
+' Propósito : Valida los campos del formulario y
+'             escribe un nuevo registro en la hoja
+'             BD_Inventario con ID automático.
+' Variables : ws (hoja de destino), UltimaFila (fila libre)
+' Llamadas  : btnLimpiar_Click (limpia tras agregar)
+' ─────────────────────────────────────────────</span></pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-3')">✓ Código documentado con comentarios</button>
+    </div>
+  </div>
+
+  <div class="step" id="s5-4">
+    <div class="step-head" onclick="toggleStep('s5-4')">
+      <div class="snum">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Demostración final al docente</div>
+        <div class="step-subtitle">Flujo completo en vivo: abrir → agregar → buscar → cerrar</div>
+        <div class="step-tags"><span class="stag stag-prueba">Prueba</span></div>
+      </div>
+      <div class="step-check" id="chk-s5-4">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain-box">
+        <div class="ebox-label">Guion de la demostración (en este orden)</div>
+        <p>1. Mostrar la hoja BD_Inventario con los datos capturados.<br>2. Hacer clic en el botón "Abrir Inventario" de la hoja.<br>3. Agregar un producto nuevo llenando todos los campos.<br>4. Verificar que aparece en la hoja y que el contador aumentó.<br>5. Escribir el nombre de un producto en txtProducto y buscar → mostrar que los campos se llenan.<br>6. Presionar Limpiar → mostrar que los campos quedan vacíos.<br>7. Presionar Cerrar → el formulario se cierra correctamente.<br>8. Mostrar la hoja Pruebas con los 6 casos documentados.</p>
+      </div>
+      <div class="tip-box">
+        <span class="tip-icon">⚡</span>
+        <div class="tip-text"><strong>Antes de la demo:</strong> guarda el archivo, cierra el editor VBA y prueba el flujo completo una vez para asegurarte que todo funciona desde Excel sin abrir el editor.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-4')">✓ Demostración completada</button>
+    </div>
+  </div>
+
+  <div class="entregable" style="background:rgba(108,99,255,0.06);border-color:rgba(108,99,255,0.3);">
+    <div class="entregable-head"><span style="color:var(--accent2);">🎓 Entregable Final</span></div>
+    <p style="color:rgba(139,133,255,0.85);">Archivo <strong style="color:var(--accent2);">Inventario_TuNombre.xlsm</strong> con: hoja BD_Inventario con datos · UserForm frmInventario funcional · Hoja Pruebas con 6 casos · Código comentado · Botón en la hoja. Demuestra el flujo completo al docente.</p>
+  </div>
+
+  <div style="margin-top:28px;border:1px solid var(--border2);border-radius:var(--radius-lg);padding:20px;background:var(--bg2);">
+    <div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text);">Criterios de evaluación</div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;">
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 6px;color:var(--text2);">Funcionalidad del formulario</td>
+        <td style="padding:8px 6px;text-align:right;"><span style="background:rgba(62,207,142,0.1);color:#3ecf8e;padding:2px 8px;border-radius:99px;font-family:var(--mono);">40%</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 6px;color:var(--text2);">Validaciones y manejo de errores</td>
+        <td style="padding:8px 6px;text-align:right;"><span style="background:rgba(78,168,222,0.1);color:#4ea8de;padding:2px 8px;border-radius:99px;font-family:var(--mono);">20%</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 6px;color:var(--text2);">Documentación del código</td>
+        <td style="padding:8px 6px;text-align:right;"><span style="background:rgba(108,99,255,0.1);color:#8b85ff;padding:2px 8px;border-radius:99px;font-family:var(--mono);">20%</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 6px;color:var(--text2);">Diseño y usabilidad del formulario</td>
+        <td style="padding:8px 6px;text-align:right;"><span style="background:rgba(245,166,35,0.1);color:#f5a623;padding:2px 8px;border-radius:99px;font-family:var(--mono);">10%</span></td>
+      </tr>
+      <tr>
+        <td style="padding:8px 6px;color:var(--text2);">Hoja de pruebas documentada</td>
+        <td style="padding:8px 6px;text-align:right;"><span style="background:rgba(255,139,171,0.1);color:#ff8fab;padding:2px 8px;border-radius:99px;font-family:var(--mono);">10%</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(3)">← Fase 4</button>
+    <button class="nav-btn" style="opacity:0.4;cursor:default;">Actividad completada ✓</button>
+  </div>
+</div>
+
+</div><!-- .main -->
+
+<script>
+let currentPhase = 0;
+let timerInterval;
+let secondsLeft = 30 * 60;
+let timerRunning = false;
+
+function goPhase(n) {
+  document.querySelectorAll('.phase-block').forEach((b,i) => b.classList.toggle('active', i===n));
+  document.querySelectorAll('.pnav-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+  const dots = document.querySelectorAll('.ndot');
+  dots.forEach((d,i) => { d.classList.remove('active','done'); if(i<n) d.classList.add('done'); if(i===n) d.classList.add('active'); });
+  document.getElementById('nav-prog-text').textContent = 'FASE '+(n+1)+' / 5';
+  currentPhase = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+  resetTimer();
+}
+
+function toggleStep(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function markDone(id) {
+  const el = document.getElementById(id);
+  el.classList.add('completed');
+  el.classList.remove('open');
+  const chk = document.getElementById('chk-'+id);
+  if(chk) chk.textContent = '✓';
+}
+
+function toggleChk(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+function copyCode(btn, id) {
+  const pre = document.getElementById(id);
+  const text = pre.innerText || pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  secondsLeft = 30 * 60;
+  updateTimerDisplay();
+  timerRunning = false;
+  startTimer();
+}
+
+function startTimer() {
+  timerRunning = true;
+  timerInterval = setInterval(() => {
+    if(secondsLeft > 0) { secondsLeft--; updateTimerDisplay(); }
+    else { clearInterval(timerInterval); document.getElementById('timer').textContent = '⏰ Tiempo'; }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft/60).toString().padStart(2,'0');
+  const s = (secondsLeft%60).toString().padStart(2,'0');
+  document.getElementById('timer').textContent = m+':'+s;
+}
+
+startTimer();
+</script>
+</body>
+</html>

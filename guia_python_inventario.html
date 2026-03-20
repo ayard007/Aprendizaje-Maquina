@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía Interactiva — Sistema de Monitoreo de Inventario en Python</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Cabinet+Grotesk:wght@400;500;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f;
+  --bg2:#0d1117;
+  --bg3:#161b22;
+  --bg4:#21262d;
+  --bg5:#30363d;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.12);
+  --border3:rgba(255,255,255,0.2);
+  --text:#e6edf3;
+  --text2:#8b949e;
+  --text3:#484f58;
+  --cyan:#39d0d8;
+  --cyan-bg:rgba(57,208,216,0.07);
+  --cyan-border:rgba(57,208,216,0.2);
+  --green:#3fb950;
+  --green-bg:rgba(63,185,80,0.07);
+  --green-border:rgba(63,185,80,0.2);
+  --yellow:#d29922;
+  --yellow-bg:rgba(210,153,34,0.08);
+  --yellow-border:rgba(210,153,34,0.25);
+  --orange:#f0883e;
+  --orange-bg:rgba(240,136,62,0.08);
+  --orange-border:rgba(240,136,62,0.25);
+  --red:#f85149;
+  --red-bg:rgba(248,81,73,0.07);
+  --red-border:rgba(248,81,73,0.2);
+  --blue:#58a6ff;
+  --blue-bg:rgba(88,166,255,0.07);
+  --blue-border:rgba(88,166,255,0.2);
+  --pink:#f778ba;
+  --mono:'IBM Plex Mono',monospace;
+  --display:'Cabinet Grotesk',sans-serif;
+  --body:'Cabinet Grotesk',sans-serif;
+  --serif:'Lora',serif;
+  --r:8px;
+  --rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.65;min-height:100vh;overflow-x:hidden;}
+
+/* ── GRID BACKGROUND ── */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(57,208,216,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(57,208,216,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(7,9,15,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border2);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;}
+.nav-left{display:flex;align-items:center;gap:12px;}
+.nav-logo{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:0.08em;border:1px solid var(--cyan-border);padding:3px 10px;border-radius:4px;}
+.nav-title{font-size:12px;color:var(--text3);display:none;}
+@media(min-width:600px){.nav-title{display:block;}}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.timer-wrap{display:flex;align-items:center;gap:7px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:6px;padding:4px 12px;}
+.timer-label{font-size:10px;color:var(--yellow);font-family:var(--mono);}
+.timer-val{font-size:13px;font-weight:600;color:var(--yellow);font-family:var(--mono);}
+.nav-phase-track{display:flex;gap:4px;align-items:center;}
+.npt{width:24px;height:24px;border-radius:50%;font-size:10px;font-family:var(--mono);font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--border2);color:var(--text3);transition:all .2s;}
+.npt:hover{border-color:var(--cyan);color:var(--cyan);}
+.npt.active{background:var(--cyan);color:#000;border-color:var(--cyan);}
+.npt.done{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+
+/* ── HERO ── */
+.hero{position:relative;z-index:1;padding:100px 1.5rem 56px;max-width:900px;margin:0 auto;text-align:center;}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;}
+.hero-kicker-text{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--cyan);text-transform:uppercase;background:var(--cyan-bg);border:1px solid var(--cyan-border);padding:4px 14px;border-radius:4px;}
+.blink{animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+h1{font-family:var(--display);font-size:clamp(30px,6vw,58px);font-weight:800;line-height:1.05;margin-bottom:18px;letter-spacing:-0.02em;}
+h1 em{font-style:normal;color:var(--cyan);}
+.hero-sub{font-size:15px;color:var(--text2);max-width:560px;margin:0 auto 36px;line-height:1.7;}
+.hero-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-family:var(--mono);padding:4px 12px;border-radius:4px;border:1px solid;}
+
+/* ── PHASE SELECTOR ── */
+.phase-sel{position:relative;z-index:1;max-width:900px;margin:0 auto 40px;padding:0 1.5rem;}
+.phase-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+@media(max-width:600px){.phase-grid{grid-template-columns:repeat(3,1fr);}}
+.pg-btn{border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;font-family:var(--body);}
+.pg-btn:hover{border-color:var(--cyan-border);background:var(--cyan-bg);}
+.pg-btn.active{border-color:var(--cyan);background:var(--cyan-bg);}
+.pg-btn.done{border-color:var(--green-border);}
+.pg-n{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;transition:color .2s;}
+.pg-btn.active .pg-n{color:var(--cyan);}
+.pg-btn.done .pg-n{color:var(--green);}
+.pg-label{font-size:10px;color:var(--text3);line-height:1.3;}
+.pg-btn.active .pg-label{color:var(--cyan);}
+
+/* ── MAIN ── */
+.main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 1.5rem 120px;}
+
+/* ── PHASE BLOCK ── */
+.phase-block{display:none;}
+.phase-block.active{display:block;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* PROGRESS RAIL */
+.prog-rail{display:flex;gap:3px;margin-bottom:28px;}
+.pr-seg{height:2px;flex:1;border-radius:99px;background:var(--bg4);}
+.pr-seg.done{background:var(--green);}
+.pr-seg.active{background:var(--cyan);}
+
+/* PHASE HEADER */
+.ph{margin-bottom:32px;}
+.ph-eyebrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.ph-badge{font-family:var(--mono);font-size:10px;letter-spacing:0.07em;padding:3px 10px;border-radius:4px;border:1px solid;text-transform:uppercase;}
+.ph-time{font-family:var(--mono);font-size:10px;color:var(--yellow);background:var(--yellow-bg);border:1px solid var(--yellow-border);padding:3px 10px;border-radius:4px;}
+.ph-num-big{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.ph h2{font-family:var(--display);font-size:clamp(22px,4vw,34px);font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;line-height:1.15;}
+.ph-obj{border:1px solid var(--border2);border-left:3px solid var(--cyan);border-radius:0 var(--r) var(--r) 0;background:var(--bg2);padding:12px 16px;font-size:13px;color:var(--text2);line-height:1.65;}
+.ph-obj strong{color:var(--text);}
+
+/* ── COLAB NOTE ── */
+.colab-note{display:flex;align-items:flex-start;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:10px 14px;margin-bottom:24px;}
+.colab-note .cn-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.colab-note .cn-text{font-size:12px;color:var(--text2);line-height:1.5;}
+.colab-note .cn-text strong{color:var(--orange);}
+
+/* ── STEP ── */
+.step{border:1px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;transition:border-color .2s;background:var(--bg2);}
+.step.completed{border-color:var(--green-border);}
+.step.open{border-color:var(--border2);}
+.step-hd{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;}
+.step-hd:hover{background:rgba(255,255,255,0.02);}
+.sn{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;flex-shrink:0;background:var(--bg4);border:1px solid var(--border2);color:var(--text3);transition:all .2s;margin-top:1px;}
+.step.completed .sn{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.step.open .sn{background:var(--cyan-bg);border-color:var(--cyan-border);color:var(--cyan);}
+.stw{flex:1;}
+.st-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3;}
+.st-sub{font-size:11px;color:var(--text3);}
+.st-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.stag{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;border:1px solid;letter-spacing:0.04em;}
+.t-py{color:#3776ab;border-color:rgba(55,118,171,0.3);background:rgba(55,118,171,0.08);}
+.t-pd{color:#e57c26;border-color:rgba(229,124,38,0.3);background:rgba(229,124,38,0.08);}
+.t-np{color:#4dabcf;border-color:rgba(77,171,207,0.3);background:rgba(77,171,207,0.08);}
+.t-plt{color:#11557c;border-color:rgba(17,85,124,0.3);background:rgba(77,171,207,0.12);color:#58a6ff;}
+.t-colab{color:#f9ab00;border-color:rgba(249,171,0,0.3);background:rgba(249,171,0,0.07);}
+.t-logic{color:var(--pink);border-color:rgba(247,120,186,0.3);background:rgba(247,120,186,0.07);}
+.schk{font-size:14px;color:var(--text3);transition:all .2s;flex-shrink:0;margin-top:2px;}
+.step.completed .schk{color:var(--green);}
+
+/* STEP BODY */
+.step-body{display:none;padding:0 16px 16px;}
+.step.open .step-body{display:block;}
+
+/* EXPLAIN */
+.explain{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;}
+.explain .el{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.explain .el::after{content:'';flex:1;height:1px;background:var(--border);}
+.explain p{font-size:13px;color:var(--text2);line-height:1.7;}
+.explain p+p{margin-top:8px;}
+.explain strong{color:var(--text);font-weight:500;}
+.explain code{font-family:var(--mono);font-size:11px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;color:var(--cyan);}
+
+/* WHERE */
+.where{display:flex;gap:10px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;}
+.where-ico{font-size:14px;flex-shrink:0;margin-top:1px;}
+.where-txt{font-size:12px;color:var(--blue);line-height:1.6;}
+.where-txt strong{color:#79b8ff;font-weight:600;}
+.where-txt code{font-family:var(--mono);font-size:11px;background:rgba(88,166,255,0.12);padding:1px 5px;border-radius:3px;}
+
+/* TIP */
+.tip{display:flex;gap:10px;background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:var(--r);padding:10px 14px;margin:10px 0;}
+.tip-ico{font-size:13px;flex-shrink:0;}
+.tip-txt{font-size:12px;color:var(--yellow);line-height:1.5;}
+.tip-txt strong{font-weight:600;}
+
+/* WARNING */
+.warn{display:flex;gap:10px;background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:var(--r);padding:10px 14px;margin:10px 0;}
+.warn-ico{font-size:13px;flex-shrink:0;}
+.warn-txt{font-size:12px;color:var(--orange);line-height:1.5;}
+
+/* CODE */
+.code-wrap{margin:10px 0 14px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border2);}
+.code-bar{background:var(--bg4);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.code-bar-left{display:flex;align-items:center;gap:10px;}
+.cb-dots{display:flex;gap:5px;}
+.cbd{width:9px;height:9px;border-radius:50%;}
+.code-fname{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.04em;}
+.code-cell{font-family:var(--mono);font-size:9px;color:var(--cyan);background:var(--cyan-bg);border:1px solid var(--cyan-border);border-radius:3px;padding:2px 7px;}
+.copy-btn{font-size:10px;font-family:var(--mono);color:var(--text3);background:transparent;border:1px solid var(--border2);border-radius:4px;padding:3px 10px;cursor:pointer;transition:all .2s;}
+.copy-btn:hover{color:var(--cyan);border-color:var(--cyan-border);}
+.copy-btn.ok{color:var(--green);border-color:var(--green-border);}
+pre{background:var(--bg3);padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;line-height:1.8;color:#e6edf3;margin:0;}
+/* syntax colors */
+.kw{color:#ff7b72;}
+.fn{color:#d2a8ff;}
+.str{color:#a5d6ff;}
+.cmt{color:#6e7681;font-style:italic;}
+.num{color:#79c0ff;}
+.op{color:#ff7b72;}
+.cls{color:#ffa657;}
+.var{color:#e6edf3;}
+.dec{color:#79c0ff;}
+.bi{color:#ffa657;}
+
+/* OUTPUT PREVIEW */
+.output-prev{background:#000;border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px;margin:10px 0;font-family:var(--mono);font-size:11px;line-height:1.8;}
+.output-prev .op-label{font-size:9px;color:var(--text3);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:5px;}
+.out-green{color:var(--green);}
+.out-yellow{color:var(--yellow);}
+.out-red{color:var(--red);}
+.out-cyan{color:var(--cyan);}
+.out-white{color:#fff;}
+.out-gray{color:var(--text3);}
+.out-orange{color:var(--orange);}
+
+/* DONE BTN */
+.done-btn{display:inline-flex;align-items:center;gap:7px;background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-family:var(--body);font-size:13px;font-weight:500;padding:8px 18px;border-radius:var(--r);cursor:pointer;margin-top:14px;transition:all .2s;}
+.done-btn:hover{background:rgba(63,185,80,0.14);}
+
+/* ENTREGABLE */
+.entregable{border:1px solid var(--green-border);border-radius:var(--rl);padding:18px 20px;margin-top:32px;background:var(--green-bg);}
+.ent-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ent-head span{font-family:var(--display);font-size:14px;font-weight:700;color:var(--green);}
+.ent-body{font-size:13px;color:rgba(63,185,80,0.8);line-height:1.65;}
+
+/* NAV ACTIONS */
+.nav-actions{display:flex;justify-content:space-between;gap:12px;margin-top:36px;}
+.nav-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-family:var(--body);font-size:13px;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.nav-btn.primary{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:600;}
+.nav-btn.primary:hover{background:#52d8df;}
+.nav-btn:disabled{opacity:0.28;cursor:default;pointer-events:none;}
+
+/* CHECKLIST */
+.checklist{list-style:none;margin-top:12px;}
+.cli{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cli:last-child{border-bottom:none;}
+.chkbox{width:16px;height:16px;border-radius:4px;border:1px solid var(--border2);cursor:pointer;background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .2s;margin-top:2px;}
+.chkbox.on{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.cli-text{font-size:13px;color:var(--text2);line-height:1.5;}
+
+/* SYSTEM DIAGRAM */
+.sys-diagram{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rl);padding:20px;margin:16px 0;}
+.syd-title{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.07em;text-transform:uppercase;margin-bottom:16px;}
+.syd-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;}
+.syd-box{border-radius:var(--r);padding:10px 14px;text-align:center;font-size:11px;font-weight:600;flex:1;min-width:110px;}
+.syd-arrow{color:var(--text3);font-size:18px;flex-shrink:0;}
+.syd-b1{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);}
+.syd-b2{background:var(--cyan-bg);border:1px solid var(--cyan-border);color:var(--cyan);}
+.syd-b3{background:var(--yellow-bg);border:1px solid var(--yellow-border);color:var(--yellow);}
+.syd-b4{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange);}
+.syd-b5{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);}
+
+/* SCORE TABLE */
+.score-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:14px;}
+.score-table th{text-align:left;padding:8px 10px;font-size:10px;font-family:var(--mono);letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border2);}
+.score-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);}
+.score-table tr:last-child td{border-bottom:none;}
+.pct-pill{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:99px;}
+
+/* CELL NUMBER INDICATOR */
+.cell-indicator{display:inline-flex;align-items:center;gap:5px;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;padding:3px 8px;font-family:var(--mono);font-size:10px;color:var(--text2);margin-bottom:8px;}
+.cell-indicator::before{content:'[';color:var(--cyan);}
+.cell-indicator::after{content:']';color:var(--cyan);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-logo">PY&gt;_</div>
+    <span class="nav-title">Computación II · Ing. Industrial</span>
+  </div>
+  <div class="nav-right">
+    <div class="timer-wrap">
+      <span class="timer-label">FASE</span>
+      <span class="timer-val" id="timer">30:00</span>
+    </div>
+    <div class="nav-phase-track">
+      <div class="npt active" onclick="goPhase(0)">1</div>
+      <div class="npt" onclick="goPhase(1)">2</div>
+      <div class="npt" onclick="goPhase(2)">3</div>
+      <div class="npt" onclick="goPhase(3)">4</div>
+      <div class="npt" onclick="goPhase(4)">5</div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-kicker">
+    <span class="hero-kicker-text">▶ ACTIVIDAD GUIADA<span class="blink">_</span></span>
+  </div>
+  <h1>Sistema de <em>Monitoreo</em><br>Automático de Inventario</h1>
+  <p class="hero-sub">Construye paso a paso un sistema en Python que detecta quiebres de stock, calcula puntos de reorden y genera alertas automáticas visuales y textuales.</p>
+  <div class="hero-chips">
+    <span class="chip" style="color:var(--cyan);border-color:var(--cyan-border);background:var(--cyan-bg);">Python 3</span>
+    <span class="chip" style="color:var(--orange);border-color:var(--orange-border);background:var(--orange-bg);">Google Colab</span>
+    <span class="chip" style="color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg);">Pandas · NumPy</span>
+    <span class="chip" style="color:var(--pink);border-color:rgba(247,120,186,0.3);background:rgba(247,120,186,0.07);">Matplotlib</span>
+    <span class="chip" style="color:var(--yellow);border-color:var(--yellow-border);background:var(--yellow-bg);">5 fases · 30 min c/u</span>
+  </div>
+</div>
+
+<!-- PHASE SELECTOR -->
+<div class="phase-sel">
+  <div class="phase-grid">
+    <button class="pg-btn active" onclick="goPhase(0)"><span class="pg-n">1</span><span class="pg-label">Entorno y estructura de datos</span></button>
+    <button class="pg-btn" onclick="goPhase(1)"><span class="pg-n">2</span><span class="pg-label">Cálculo de puntos de reorden</span></button>
+    <button class="pg-btn" onclick="goPhase(2)"><span class="pg-n">3</span><span class="pg-label">Motor de alertas automáticas</span></button>
+    <button class="pg-btn" onclick="goPhase(3)"><span class="pg-n">4</span><span class="pg-label">Visualización y dashboard</span></button>
+    <button class="pg-btn" onclick="goPhase(4)"><span class="pg-n">5</span><span class="pg-label">Integración y pruebas finales</span></button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════════
+     FASE 1 — Entorno y estructura de datos
+══════════════════════════════════════════════ -->
+<div class="phase-block active" id="phase-0">
+  <div class="prog-rail">
+    <div class="pr-seg active"></div><div class="pr-seg"></div><div class="pr-seg"></div><div class="pr-seg"></div><div class="pr-seg"></div>
+  </div>
+  <div class="ph">
+    <div class="ph-eyebrow">
+      <span class="ph-badge" style="color:var(--cyan);border-color:var(--cyan-border);background:var(--cyan-bg);">FASE 01</span>
+      <span class="ph-time">⏱ 30 minutos</span>
+      <span class="ph-num-big">// CELDAS 1–4</span>
+    </div>
+    <h2>Entorno, librerías y<br>estructura de datos</h2>
+    <div class="ph-obj"><strong>Objetivo:</strong> Configurar el notebook de Google Colab, importar las librerías necesarias y crear el DataFrame de inventario que servirá como base de datos del sistema.</div>
+  </div>
+
+  <div class="sys-diagram">
+    <div class="syd-title">Arquitectura del sistema que construirás</div>
+    <div class="syd-flow">
+      <div class="syd-box syd-b1">📦 DataFrame<br>Inventario</div>
+      <div class="syd-arrow">→</div>
+      <div class="syd-box syd-b2">🧮 Cálculo<br>Reorden</div>
+      <div class="syd-arrow">→</div>
+      <div class="syd-box syd-b3">🚨 Motor de<br>Alertas</div>
+      <div class="syd-arrow">→</div>
+      <div class="syd-box syd-b4">📊 Dashboard<br>Visual</div>
+      <div class="syd-arrow">→</div>
+      <div class="syd-box syd-b5">✅ Sistema<br>Integrado</div>
+    </div>
+  </div>
+
+  <!-- STEP 1.1 -->
+  <div class="step" id="s1-1">
+    <div class="step-hd" onclick="toggleStep('s1-1')">
+      <div class="sn">1</div>
+      <div class="stw">
+        <div class="st-title">Crear el notebook en Google Colab y nombrarlo</div>
+        <div class="st-sub">El notebook es tu entorno de trabajo: mezcla código y documentación</div>
+        <div class="st-tags"><span class="stag t-colab">Colab</span></div>
+      </div>
+      <div class="schk" id="chk-s1-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué es Google Colab?</div>
+        <p>Google Colab es un entorno de Jupyter Notebook en la nube, totalmente gratuito, que no requiere instalar nada. Funciona en el navegador y tiene Python con las principales librerías científicas ya instaladas. El código se organiza en <strong>celdas</strong>: bloques independientes que puedes ejecutar uno a uno con <code>Shift + Enter</code> o presionando el botón ▶ de cada celda.</p>
+        <p>Cada celda puede ser de tipo <strong>código</strong> (ejecutable) o <strong>texto</strong> (Markdown, para documentar). Tu sistema completo vivirá en un solo archivo <code>.ipynb</code>.</p>
+      </div>
+      <div class="where">
+        <span class="where-ico">📍</span>
+        <div class="where-txt">
+          <strong>Cómo crear tu notebook:</strong><br>
+          1. Ve a <code>colab.research.google.com</code> e inicia sesión con tu cuenta Google.<br>
+          2. Clic en <strong>Archivo → Nuevo cuaderno</strong>.<br>
+          3. Haz doble clic en el título "Sin título" y cámbialo a: <code>MonitoreoInventario_TuNombre</code>.<br>
+          4. El archivo se guarda automáticamente en tu Google Drive.
+        </div>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-1')">✓ Notebook creado y nombrado</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.2 -->
+  <div class="step" id="s1-2">
+    <div class="step-hd" onclick="toggleStep('s1-2')">
+      <div class="sn">2</div>
+      <div class="stw">
+        <div class="st-title">Celda 1 — Importar librerías y configurar el entorno</div>
+        <div class="st-sub">pandas, numpy, matplotlib y warnings: los cuatro pilares del sistema</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span><span class="stag t-np">NumPy</span><span class="stag t-plt">Matplotlib</span></div>
+      </div>
+      <div class="schk" id="chk-s1-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Para qué sirve cada librería?</div>
+        <p><strong>pandas</strong>: maneja tablas de datos (DataFrames). Es el equivalente a Excel pero programable. Lo usaremos para almacenar y manipular el inventario.</p>
+        <p><strong>numpy</strong>: operaciones matemáticas rápidas sobre arreglos. Lo usaremos para calcular desviaciones estándar, medias y el punto de reorden estadístico.</p>
+        <p><strong>matplotlib.pyplot</strong>: genera gráficas. Con él crearemos el dashboard visual de alertas y niveles de stock.</p>
+        <p><strong>warnings</strong>: módulo estándar de Python para controlar mensajes de advertencia del sistema. Lo usamos para mantener la salida limpia.</p>
+      </div>
+      <div class="where">
+        <span class="where-ico">📍</span>
+        <div class="where-txt"><strong>Dónde escribir:</strong> En la <strong>primera celda de código</strong> del notebook (la que aparece por defecto al crear el archivo). Escribe el siguiente código y ejecuta con <strong>Shift + Enter</strong>.</div>
+      </div>
+      <div class="cell-indicator">Celda 1 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [1]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c1-2')">Copiar</button>
+        </div>
+        <pre id="c1-2"><span class="cmt"># ============================================================
+#  SISTEMA DE MONITOREO AUTOMÁTICO DE INVENTARIO
+#  Computación II — Ingeniería Industrial
+#  Alumno: Tu Nombre | Matrícula: Tu Matrícula
+# ============================================================</span>
+
+<span class="cmt"># ── CELDA 1: Importación de librerías ──────────────────────
+# Importamos todas las herramientas que usará el sistema</span>
+
+<span class="kw">import</span> pandas <span class="kw">as</span> pd          <span class="cmt"># manejo de datos tabulares (DataFrames)</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np           <span class="cmt"># cálculos matemáticos y estadísticos</span>
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt  <span class="cmt"># generación de gráficas</span>
+<span class="kw">import</span> matplotlib.patches <span class="kw">as</span> mpatches  <span class="cmt"># parches para leyendas</span>
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta  <span class="cmt"># manejo de fechas</span>
+<span class="kw">import</span> warnings
+warnings.filterwarnings(<span class="str">'ignore'</span>)    <span class="cmt"># suprime advertencias no críticas</span>
+
+<span class="cmt"># Configuración de estilo para las gráficas</span>
+plt.style.use(<span class="str">'dark_background'</span>)  <span class="cmt"># tema oscuro profesional</span>
+plt.rcParams[<span class="str">'figure.dpi'</span>] = <span class="num">120</span>  <span class="cmt"># resolución de las gráficas</span>
+plt.rcParams[<span class="str">'font.family'</span>] = <span class="str">'monospace'</span>
+
+<span class="fn">print</span>(<span class="str">"✅ Librerías importadas correctamente"</span>)
+<span class="fn">print</span>(<span class="str">f"   pandas  {pd.__version__}"</span>)
+<span class="fn">print</span>(<span class="str">f"   numpy   {np.__version__}"</span>)</pre>
+      </div>
+      <div class="output-prev">
+        <div class="op-label">Salida esperada</div>
+        <span class="out-green">✅ Librerías importadas correctamente</span><br>
+        <span class="out-gray">   pandas  2.x.x</span><br>
+        <span class="out-gray">   numpy   1.x.x</span>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-2')">✓ Celda 1 ejecutada sin errores</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.3 -->
+  <div class="step" id="s1-3">
+    <div class="step-hd" onclick="toggleStep('s1-3')">
+      <div class="sn">3</div>
+      <div class="stw">
+        <div class="st-title">Celda 2 — Crear el DataFrame del inventario con 10 productos</div>
+        <div class="st-sub">El diccionario Python se convierte en tabla con pd.DataFrame()</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span></div>
+      </div>
+      <div class="schk" id="chk-s1-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Cómo funciona un DataFrame de pandas?</div>
+        <p>Un <strong>DataFrame</strong> es una tabla bidimensional con filas y columnas, similar a una hoja de Excel, pero en memoria de Python. Se crea pasando un <strong>diccionario</strong> donde cada clave es el nombre de una columna y su valor es una lista con los datos de esa columna.</p>
+        <p>Las columnas clave para el monitoreo son: <code>stock_actual</code> (cuánto hay ahora), <code>stock_minimo</code> (umbral de alerta), <code>demanda_diaria_promedio</code> (cuánto se consume por día) y <code>tiempo_entrega_dias</code> (días que tarda el proveedor en surtir). Con estas cuatro variables calcularemos todo el sistema.</p>
+        <p>El campo <code>ultima_revision</code> simula cuándo fue el último conteo físico del inventario, usando <code>datetime.now()</code> para generar fechas relativas al día actual.</p>
+      </div>
+      <div class="where">
+        <span class="where-ico">📍</span>
+        <div class="where-txt"><strong>Dónde escribir:</strong> Inserta una <strong>nueva celda</strong> debajo de la Celda 1 (clic en <strong>+ Código</strong> o presiona <code>B</code> en modo comando). Escribe el código y ejecuta con <strong>Shift + Enter</strong>.</div>
+      </div>
+      <div class="cell-indicator">Celda 2 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [2]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c1-3')">Copiar</button>
+        </div>
+        <pre id="c1-3"><span class="cmt"># ── CELDA 2: Estructura de datos del inventario ─────────────
+# Creamos el DataFrame con 10 productos de una planta industrial</span>
+
+hoy = datetime.now()  <span class="cmt"># fecha actual para simular revisiones recientes</span>
+
+datos_inventario = {
+    <span class="str">'producto_id'</span>: [<span class="str">'P001'</span>,<span class="str">'P002'</span>,<span class="str">'P003'</span>,<span class="str">'P004'</span>,<span class="str">'P005'</span>,
+                    <span class="str">'P006'</span>,<span class="str">'P007'</span>,<span class="str">'P008'</span>,<span class="str">'P009'</span>,<span class="str">'P010'</span>],
+
+    <span class="str">'nombre'</span>: [<span class="str">'Tornillo M8'</span>,<span class="str">'Casco Seguridad'</span>,<span class="str">'Cable AWG-12'</span>,
+               <span class="str">'Guante Látex'</span>,<span class="str">'Aceite Hidráulico'</span>,<span class="str">'Filtro de Aire'</span>,
+               <span class="str">'Correa Transmisión'</span>,<span class="str">'Soldadura Electrodo'</span>,
+               <span class="str">'Pintura Anticorrosiva'</span>,<span class="str">'Rodamiento 6205'</span>],
+
+    <span class="str">'categoria'</span>: [<span class="str">'Sujetadores'</span>,<span class="str">'EPP'</span>,<span class="str">'Eléctrico'</span>,<span class="str">'EPP'</span>,<span class="str">'Lubricantes'</span>,
+                  <span class="str">'Filtros'</span>,<span class="str">'Transmisión'</span>,<span class="str">'Soldadura'</span>,<span class="str">'Pintura'</span>,<span class="str">'Rodamientos'</span>],
+
+    <span class="cmt"># Cuántas unidades hay físicamente en el almacén ahora</span>
+    <span class="str">'stock_actual'</span>: [<span class="num">450</span>,<span class="num">8</span>,<span class="num">120</span>,<span class="num">35</span>,<span class="num">6</span>,<span class="num">4</span>,<span class="num">12</span>,<span class="num">80</span>,<span class="num">18</span>,<span class="num">3</span>],
+
+    <span class="cmt"># Nivel mínimo definido por política de la empresa</span>
+    <span class="str">'stock_minimo'</span>: [<span class="num">200</span>,<span class="num">10</span>,<span class="num">50</span>,<span class="num">20</span>,<span class="num">10</span>,<span class="num">5</span>,<span class="num">8</span>,<span class="num">50</span>,<span class="num">15</span>,<span class="num">5</span>],
+
+    <span class="cmt"># Stock máximo que debe mantenerse en bodega</span>
+    <span class="str">'stock_maximo'</span>: [<span class="num">1000</span>,<span class="num">50</span>,<span class="num">300</span>,<span class="num">100</span>,<span class="num">40</span>,<span class="num">20</span>,<span class="num">30</span>,<span class="num">200</span>,<span class="num">60</span>,<span class="num">20</span>],
+
+    <span class="cmt"># Promedio de unidades consumidas por día (histórico)</span>
+    <span class="str">'demanda_diaria_promedio'</span>: [<span class="num">15</span>,<span class="num">0.5</span>,<span class="num">4</span>,<span class="num">3</span>,<span class="num">0.8</span>,<span class="num">0.3</span>,<span class="num">0.5</span>,<span class="num">6</span>,<span class="num">1.2</span>,<span class="num">0.2</span>],
+
+    <span class="cmt"># Desviación estándar de la demanda (variabilidad del consumo)</span>
+    <span class="str">'desviacion_demanda'</span>: [<span class="num">3.5</span>,<span class="num">0.1</span>,<span class="num">1.2</span>,<span class="num">0.8</span>,<span class="num">0.2</span>,<span class="num">0.1</span>,<span class="num">0.15</span>,<span class="num">1.5</span>,<span class="num">0.3</span>,<span class="num">0.05</span>],
+
+    <span class="cmt"># Días que tarda el proveedor desde la orden hasta entrega</span>
+    <span class="str">'tiempo_entrega_dias'</span>: [<span class="num">3</span>,<span class="num">7</span>,<span class="num">5</span>,<span class="num">3</span>,<span class="num">10</span>,<span class="num">14</span>,<span class="num">7</span>,<span class="num">5</span>,<span class="num">10</span>,<span class="num">21</span>],
+
+    <span class="cmt"># Costo unitario en pesos (para calcular valor del inventario)</span>
+    <span class="str">'costo_unitario'</span>: [<span class="num">2.5</span>,<span class="num">180</span>,<span class="num">45</span>,<span class="num">8</span>,<span class="num">350</span>,<span class="num">220</span>,<span class="num">580</span>,<span class="num">12</span>,<span class="num">95</span>,<span class="num">420</span>],
+
+    <span class="cmt"># Fecha del último conteo físico (simulado)</span>
+    <span class="str">'ultima_revision'</span>: [hoy - timedelta(days=x)
+                        <span class="kw">for</span> x <span class="kw">in</span> [<span class="num">1</span>,<span class="num">3</span>,<span class="num">0</span>,<span class="num">2</span>,<span class="num">5</span>,<span class="num">1</span>,<span class="num">4</span>,<span class="num">0</span>,<span class="num">2</span>,<span class="num">7</span>]]
+}
+
+<span class="cmt"># Crear el DataFrame a partir del diccionario</span>
+df = pd.DataFrame(datos_inventario)
+
+<span class="cmt"># Verificar la estructura creada</span>
+<span class="fn">print</span>(<span class="str">f"✅ DataFrame creado: {df.shape[0]} productos, {df.shape[1]} columnas"</span>)
+<span class="fn">print</span>(<span class="str">"\nPrimeras filas del inventario:"</span>)
+df[[<span class="str">'producto_id'</span>,<span class="str">'nombre'</span>,<span class="str">'stock_actual'</span>,<span class="str">'stock_minimo'</span>]].head()</pre>
+      </div>
+      <div class="explain">
+        <div class="el">Desglose de los campos clave</div>
+        <p><strong>demanda_diaria_promedio</strong>: se calcula del historial de consumo. Un tornillo M8 tiene demanda alta (15/día); un rodamiento tiene baja (0.2/día). Esta variabilidad es normal en manufactura.</p>
+        <p><strong>desviacion_demanda</strong>: mide qué tan errática es la demanda. Alta desviación = necesitas más stock de seguridad. La usaremos en la fórmula estadística del punto de reorden.</p>
+        <p><strong>tiempo_entrega_dias</strong>: el factor más crítico. El Rodamiento 6205 tarda 21 días en llegar. Si esperas a que se agote para pedirlo, estarás sin stock 21 días.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-3')">✓ DataFrame creado correctamente</button>
+    </div>
+  </div>
+
+  <!-- STEP 1.4 -->
+  <div class="step" id="s1-4">
+    <div class="step-hd" onclick="toggleStep('s1-4')">
+      <div class="sn">4</div>
+      <div class="stw">
+        <div class="st-title">Celda 3 — Función de exploración inicial del inventario</div>
+        <div class="st-sub">Analiza el estado actual antes de calcular alertas</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span></div>
+      </div>
+      <div class="schk" id="chk-s1-4">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Por qué explorar primero los datos?</div>
+        <p>Antes de aplicar cualquier lógica de alertas, necesitamos entender el estado del inventario: ¿cuántos productos están ya por debajo del mínimo? ¿Cuál es el valor total invertido? ¿Qué categorías son las más críticas? Esta exploración inicial define el contexto del problema.</p>
+        <p>Usamos <code>df.assign()</code> para agregar columnas calculadas sin modificar el DataFrame original. La columna <code>porcentaje_ocupacion</code> indica qué tan lleno está el almacén respecto a su capacidad máxima.</p>
+      </div>
+      <div class="cell-indicator">Celda 3 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [3]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c1-4')">Copiar</button>
+        </div>
+        <pre id="c1-4"><span class="cmt"># ── CELDA 3: Exploración inicial del inventario ─────────────</span>
+
+<span class="kw">def</span> <span class="fn">explorar_inventario</span>(df):
+    <span class="str">"""
+    Analiza el estado actual del inventario y genera un reporte
+    de diagnóstico previo al cálculo de alertas.
+    
+    Parámetros:
+        df (DataFrame): tabla de inventario
+    Retorna:
+        dict con métricas generales del inventario
+    """</span>
+    
+    <span class="cmt"># Calcular métricas generales</span>
+    total_productos   = <span class="fn">len</span>(df)
+    
+    <span class="cmt"># Productos donde el stock actual ya cayó por debajo del mínimo</span>
+    criticos = (df[<span class="str">'stock_actual'</span>] &lt;= df[<span class="str">'stock_minimo'</span>]).<span class="fn">sum</span>()
+    
+    <span class="cmt"># Valor total del inventario = suma de (stock * costo) de todos los productos</span>
+    valor_total = (df[<span class="str">'stock_actual'</span>] * df[<span class="str">'costo_unitario'</span>]).<span class="fn">sum</span>()
+    
+    <span class="cmt"># Porcentaje de ocupación del almacén (stock actual / máximo * 100)</span>
+    df_analisis = df.<span class="fn">assign</span>(
+        valor_producto = df[<span class="str">'stock_actual'</span>] * df[<span class="str">'costo_unitario'</span>],
+        pct_ocupacion  = (df[<span class="str">'stock_actual'</span>] / df[<span class="str">'stock_maximo'</span>] * <span class="num">100</span>).<span class="fn">round</span>(<span class="num">1</span>)
+    )
+    
+    <span class="cmt"># ── Imprimir reporte de diagnóstico ──</span>
+    <span class="fn">print</span>(<span class="str">"=" * 55</span>)
+    <span class="fn">print</span>(<span class="str">"  DIAGNÓSTICO INICIAL DEL INVENTARIO"</span>)
+    <span class="fn">print</span>(<span class="str">"=" * 55</span>)
+    <span class="fn">print</span>(<span class="str">f"  Total de productos en catálogo : {total_productos}"</span>)
+    <span class="fn">print</span>(<span class="str">f"  Productos en estado crítico    : {criticos}"</span>)
+    <span class="fn">print</span>(<span class="str">f"  Valor total del inventario     : ${valor_total:,.2f}"</span>)
+    <span class="fn">print</span>(<span class="str">"─" * 55</span>)
+    
+    <span class="cmt"># Mostrar los 3 productos con menor porcentaje de ocupación</span>
+    <span class="fn">print</span>(<span class="str">"\n  Productos con MENOR nivel de stock:"</span>)
+    mas_bajos = df_analisis.<span class="fn">nsmallest</span>(<span class="num">3</span>, <span class="str">'pct_ocupacion'</span>)
+    <span class="kw">for</span> _, row <span class="kw">in</span> mas_bajos.<span class="fn">iterrows</span>():
+        icono = <span class="str">"🔴"</span> <span class="kw">if</span> row[<span class="str">'stock_actual'</span>] &lt;= row[<span class="str">'stock_minimo'</span>] <span class="kw">else</span> <span class="str">"🟡"</span>
+        <span class="fn">print</span>(<span class="str">f"  {icono} {row['nombre']:22s} {row['pct_ocupacion']:5.1f}% lleno"</span>)
+    
+    <span class="fn">print</span>(<span class="str">"=" * 55</span>)
+    
+    <span class="kw">return</span> {<span class="str">'total'</span>:total_productos, <span class="str">'criticos'</span>:criticos, <span class="str">'valor'</span>:valor_total}
+
+<span class="cmt"># Ejecutar la exploración</span>
+metricas = <span class="fn">explorar_inventario</span>(df)</pre>
+      </div>
+      <div class="explain">
+        <div class="el">Conceptos Python usados en esta celda</div>
+        <p><strong>def función(parámetros):</strong> define una función reutilizable. El bloque con triple comillas (<code>"""..."""</code>) es el <em>docstring</em>, documentación estándar de Python que describe qué hace la función.</p>
+        <p><strong>(condición).sum()</strong>: en pandas, comparar una columna genera una serie de True/False. <code>.sum()</code> cuenta cuántos True hay (True = 1, False = 0).</p>
+        <p><strong>df.nsmallest(n, columna)</strong>: devuelve las n filas con los valores más pequeños en la columna indicada. Es más limpio que ordenar y hacer slice.</p>
+        <p><strong>for _, row in df.iterrows()</strong>: itera fila por fila. El guion bajo <code>_</code> es convención para ignorar el índice que no necesitamos.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s1-4')">✓ Función de exploración ejecutada</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="ent-head"><span>✅ Entregable Fase 1</span></div>
+    <div class="ent-body">Notebook creado en Colab · Celda 1 con importaciones ejecutada sin errores · DataFrame con 10 productos y 11 columnas · Función explorar_inventario mostrando diagnóstico inicial con productos críticos identificados.</div>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" disabled>← Anterior</button>
+    <button class="nav-btn primary" onclick="goPhase(1)">Fase 2: Puntos de reorden →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 2 — Cálculo de puntos de reorden
+══════════════════════════════════════════════ -->
+<div class="phase-block" id="phase-1">
+  <div class="prog-rail">
+    <div class="pr-seg done"></div><div class="pr-seg active"></div><div class="pr-seg"></div><div class="pr-seg"></div><div class="pr-seg"></div>
+  </div>
+  <div class="ph">
+    <div class="ph-eyebrow">
+      <span class="ph-badge" style="color:var(--yellow);border-color:var(--yellow-border);background:var(--yellow-bg);">FASE 02</span>
+      <span class="ph-time">⏱ 30 minutos</span>
+      <span class="ph-num-big">// CELDAS 4–6</span>
+    </div>
+    <h2>Cálculo estadístico de<br>puntos de reorden</h2>
+    <div class="ph-obj"><strong>Objetivo:</strong> Implementar las fórmulas de punto de reorden (ROP) y stock de seguridad usando estadística básica para determinar exactamente en qué nivel de stock se debe generar una orden de compra.</div>
+  </div>
+
+  <div class="colab-note">
+    <span class="cn-icon">💡</span>
+    <div class="cn-text">Continuamos en el mismo notebook. Agrega las nuevas celdas <strong style="color:var(--orange);">debajo</strong> de las anteriores. No modifiques las celdas ya ejecutadas; el DataFrame <code>df</code> sigue disponible en memoria.</div>
+  </div>
+
+  <!-- STEP 2.1 -->
+  <div class="step" id="s2-1">
+    <div class="step-hd" onclick="toggleStep('s2-1')">
+      <div class="sn">1</div>
+      <div class="stw">
+        <div class="st-title">Celda 4 — Fórmula del Punto de Reorden (ROP)</div>
+        <div class="st-sub">ROP = demanda durante el tiempo de entrega + stock de seguridad</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-np">NumPy</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="chk-s2-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">La fórmula del Punto de Reorden</div>
+        <p>El <strong>Punto de Reorden (ROP)</strong> es el nivel de inventario al que se debe lanzar una orden de compra para que el producto llegue justo antes de agotarse. La fórmula completa es:</p>
+        <p style="text-align:center;font-family:var(--mono);background:var(--bg4);padding:10px;border-radius:6px;margin:8px 0;color:var(--cyan);font-size:12px;">ROP = (demanda_diaria × tiempo_entrega) + stock_seguridad</p>
+        <p>El <strong>stock de seguridad</strong> cubre la variabilidad: si la demanda sube inesperadamente o el proveedor tarda más. Se calcula como:</p>
+        <p style="text-align:center;font-family:var(--mono);background:var(--bg4);padding:10px;border-radius:6px;margin:8px 0;color:var(--yellow);font-size:12px;">SS = Z × σ_demanda × √tiempo_entrega</p>
+        <p>Donde <strong>Z = 1.645</strong> corresponde a un nivel de servicio del 95% (5% de probabilidad de quiebre). Este valor proviene de la distribución normal estándar. <code>np.sqrt()</code> calcula la raíz cuadrada.</p>
+      </div>
+      <div class="cell-indicator">Celda 4 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [4]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c2-1')">Copiar</button>
+        </div>
+        <pre id="c2-1"><span class="cmt"># ── CELDA 4: Cálculo del Punto de Reorden (ROP) ─────────────</span>
+
+<span class="cmt"># Nivel de servicio del 95% → Z = 1.645 (valor de tabla normal estándar)
+# Significa que el 95% del tiempo NO habrá quiebre de stock</span>
+Z = <span class="num">1.645</span>
+
+<span class="kw">def</span> <span class="fn">calcular_rop</span>(df, z=<span class="num">1.645</span>):
+    <span class="str">"""
+    Calcula el Punto de Reorden y Stock de Seguridad para cada producto.
+    
+    Fórmulas:
+        Stock Seguridad = Z × σ_demanda × √(tiempo_entrega)
+        ROP = (demanda_diaria × tiempo_entrega) + Stock_Seguridad
+        
+    Parámetros:
+        df : DataFrame del inventario
+        z  : factor de nivel de servicio (default 1.645 = 95%)
+    Retorna:
+        DataFrame con columnas ROP y stock_seguridad añadidas
+    """</span>
+    
+    df_rop = df.<span class="fn">copy</span>()  <span class="cmt"># copia para no modificar el original</span>
+    
+    <span class="cmt"># ── Stock de Seguridad (SS) ──────────────────────────────
+    # Absorbe variaciones de demanda durante el tiempo de entrega
+    # np.sqrt() aplica raíz cuadrada a toda la columna vectorialmente</span>
+    df_rop[<span class="str">'stock_seguridad'</span>] = (
+        z
+        * df_rop[<span class="str">'desviacion_demanda'</span>]
+        * np.<span class="fn">sqrt</span>(df_rop[<span class="str">'tiempo_entrega_dias'</span>])
+    ).<span class="fn">round</span>(<span class="num">1</span>)
+    
+    <span class="cmt"># ── Punto de Reorden (ROP) ──────────────────────────────
+    # Demanda esperada durante el tiempo de entrega + colchón de seguridad</span>
+    df_rop[<span class="str">'punto_reorden'</span>] = (
+        df_rop[<span class="str">'demanda_diaria_promedio'</span>] * df_rop[<span class="str">'tiempo_entrega_dias'</span>]
+        + df_rop[<span class="str">'stock_seguridad'</span>]
+    ).<span class="fn">round</span>(<span class="num">1</span>)
+    
+    <span class="cmt"># ── Días de cobertura restantes ─────────────────────────
+    # Cuántos días durará el stock actual al ritmo de consumo actual</span>
+    df_rop[<span class="str">'dias_cobertura'</span>] = (
+        df_rop[<span class="str">'stock_actual'</span>] / df_rop[<span class="str">'demanda_diaria_promedio'</span>]
+    ).<span class="fn">round</span>(<span class="num">1</span>)
+    
+    <span class="kw">return</span> df_rop
+
+<span class="cmt"># Aplicar la función y actualizar nuestro DataFrame principal</span>
+df = <span class="fn">calcular_rop</span>(df, z=Z)
+
+<span class="cmt"># Mostrar resultados de ROP para verificación</span>
+cols_ver = [<span class="str">'nombre'</span>,<span class="str">'stock_actual'</span>,<span class="str">'stock_seguridad'</span>,<span class="str">'punto_reorden'</span>,<span class="str">'dias_cobertura'</span>]
+<span class="fn">print</span>(<span class="str">"Puntos de Reorden calculados:\n"</span>)
+<span class="fn">print</span>(df[cols_ver].<span class="fn">to_string</span>(index=<span class="kw">False</span>))</pre>
+      </div>
+      <div class="tip">
+        <span class="tip-ico">💡</span>
+        <div class="tip-txt"><strong>Operaciones vectorizadas:</strong> en pandas, cuando escribes <code>df['col1'] * df['col2']</code>, Python multiplica elemento a elemento todas las filas simultáneamente, sin necesidad de un bucle for. Esto es mucho más eficiente con miles de registros.</div>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-1')">✓ Celda 4 ejecutada, ROP calculado</button>
+    </div>
+  </div>
+
+  <!-- STEP 2.2 -->
+  <div class="step" id="s2-2">
+    <div class="step-hd" onclick="toggleStep('s2-2')">
+      <div class="sn">2</div>
+      <div class="stw">
+        <div class="st-title">Celda 5 — Clasificación ABC del inventario</div>
+        <div class="st-sub">Prioriza productos por valor invertido usando el principio de Pareto</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="chk-s2-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué es la clasificación ABC?</div>
+        <p>La <strong>clasificación ABC</strong> (Análisis de Pareto) agrupa productos según su impacto económico: <strong>Clase A</strong> (top 70% del valor total, control estricto), <strong>Clase B</strong> (siguiente 20%, control moderado), <strong>Clase C</strong> (último 10%, control básico). Permite enfocar los recursos de monitoreo donde más importa.</p>
+        <p>Usamos <code>pd.cut()</code> para segmentar un valor continuo (porcentaje acumulado) en categorías discretas (A, B, C) con rangos definidos.</p>
+      </div>
+      <div class="cell-indicator">Celda 5 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [5]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c2-2')">Copiar</button>
+        </div>
+        <pre id="c2-2"><span class="cmt"># ── CELDA 5: Clasificación ABC ──────────────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">clasificar_abc</span>(df):
+    <span class="str">"""
+    Implementa la clasificación ABC (Pareto) del inventario.
+    A = primero 70% del valor | B = siguiente 20% | C = último 10%
+    """</span>
+    
+    df_abc = df.<span class="fn">copy</span>()
+    
+    <span class="cmt"># Calcular el valor de cada producto en inventario</span>
+    df_abc[<span class="str">'valor_inventario'</span>] = df_abc[<span class="str">'stock_actual'</span>] * df_abc[<span class="str">'costo_unitario'</span>]
+    
+    <span class="cmt"># Ordenar de mayor a menor valor (descendente)</span>
+    df_abc = df_abc.<span class="fn">sort_values</span>(<span class="str">'valor_inventario'</span>, ascending=<span class="kw">False</span>)
+    
+    <span class="cmt"># Calcular porcentaje acumulado del valor total
+    # cumsum() suma acumulada | div() divide por el total para obtener %</span>
+    total_valor = df_abc[<span class="str">'valor_inventario'</span>].<span class="fn">sum</span>()
+    df_abc[<span class="str">'pct_valor_acum'</span>] = (
+        df_abc[<span class="str">'valor_inventario'</span>].<span class="fn">cumsum</span>() / total_valor * <span class="num">100</span>
+    )
+    
+    <span class="cmt"># pd.cut() asigna categoría según el rango del % acumulado
+    # bins define los límites: 0-70% → A, 70-90% → B, 90-100% → C</span>
+    df_abc[<span class="str">'clase_abc'</span>] = pd.<span class="fn">cut</span>(
+        df_abc[<span class="str">'pct_valor_acum'</span>],
+        bins=[<span class="num">0</span>, <span class="num">70</span>, <span class="num">90</span>, <span class="num">100</span>],
+        labels=[<span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'C'</span>],
+        include_lowest=<span class="kw">True</span>
+    )
+    
+    <span class="kw">return</span> df_abc
+
+df = <span class="fn">clasificar_abc</span>(df)
+
+<span class="cmt"># Resumen por clase</span>
+<span class="fn">print</span>(<span class="str">"Clasificación ABC del inventario:\n"</span>)
+resumen = df.<span class="fn">groupby</span>(<span class="str">'clase_abc'</span>).<span class="fn">agg</span>(
+    productos=(<span class="str">'nombre'</span>,<span class="str">'count'</span>),
+    valor_total=(<span class="str">'valor_inventario'</span>,<span class="str">'sum'</span>)
+)
+<span class="fn">print</span>(resumen)</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-2')">✓ Clasificación ABC completada</button>
+    </div>
+  </div>
+
+  <!-- STEP 2.3 -->
+  <div class="step" id="s2-3">
+    <div class="step-hd" onclick="toggleStep('s2-3')">
+      <div class="sn">3</div>
+      <div class="stw">
+        <div class="st-title">Celda 6 — Proyección de consumo y fecha estimada de agotamiento</div>
+        <div class="st-sub">Predice cuándo se agotará cada producto si no se hace pedido</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span></div>
+      </div>
+      <div class="schk" id="chk-s2-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Por qué calcular la fecha de agotamiento?</div>
+        <p>Saber que un producto tiene "6 unidades" no dice mucho. Saber que "se agotará en 7.5 días" sí genera urgencia. Al calcular la <strong>fecha estimada de agotamiento</strong>, el sistema puede ordenar las alertas por urgencia real, no solo por cantidad absoluta.</p>
+        <p>Usamos <code>datetime.now() + timedelta(days=x)</code> para sumar días a la fecha actual y obtener la fecha exacta proyectada.</p>
+      </div>
+      <div class="cell-indicator">Celda 6 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [6]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c2-3')">Copiar</button>
+        </div>
+        <pre id="c2-3"><span class="cmt"># ── CELDA 6: Proyección de agotamiento ─────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">proyectar_agotamiento</span>(df):
+    <span class="str">"""
+    Calcula la fecha estimada en que cada producto se agotará
+    si no se realiza ninguna orden de reabastecimiento.
+    """</span>
+    df_proy = df.<span class="fn">copy</span>()
+    hoy = datetime.<span class="fn">now</span>()
+    
+    <span class="cmt"># Fecha proyectada de agotamiento:
+    # timedelta convierte días (float) a un objeto de duración de tiempo
+    # apply() aplica una función fila por fila cuando la operación es compleja</span>
+    df_proy[<span class="str">'fecha_agotamiento'</span>] = df_proy.<span class="fn">apply</span>(
+        <span class="kw">lambda</span> row: hoy + timedelta(days=<span class="fn">float</span>(row[<span class="str">'dias_cobertura'</span>])),
+        axis=<span class="num">1</span>
+    )
+    
+    <span class="cmt"># Bandera: ¿el producto se agotará ANTES de que llegue el nuevo pedido?
+    # True = hay riesgo real de quiebre de stock</span>
+    df_proy[<span class="str">'riesgo_quiebre'</span>] = (
+        df_proy[<span class="str">'dias_cobertura'</span>] &lt; df_proy[<span class="str">'tiempo_entrega_dias'</span>]
+    )
+    
+    <span class="cmt"># Calcular cantidad a pedir (lote económico simplificado)
+    # Pedimos suficiente para llenar al máximo menos el stock actual</span>
+    df_proy[<span class="str">'cantidad_a_pedir'</span>] = np.<span class="fn">maximum</span>(
+        df_proy[<span class="str">'stock_maximo'</span>] - df_proy[<span class="str">'stock_actual'</span>], <span class="num">0</span>
+    )
+    
+    <span class="cmt"># Mostrar productos con riesgo de quiebre</span>
+    en_riesgo = df_proy[df_proy[<span class="str">'riesgo_quiebre'</span>] == <span class="kw">True</span>]
+    <span class="fn">print</span>(<span class="str">f"⚠️  Productos con RIESGO DE QUIEBRE: {len(en_riesgo)}\n"</span>)
+    
+    <span class="kw">for</span> _, row <span class="kw">in</span> en_riesgo.<span class="fn">iterrows</span>():
+        <span class="fn">print</span>(<span class="str">f"  🔴 {row['nombre']}"</span>)
+        <span class="fn">print</span>(<span class="str">f"     Días cobertura : {row['dias_cobertura']:.1f} días"</span>)
+        <span class="fn">print</span>(<span class="str">f"     Tiempo entrega : {row['tiempo_entrega_dias']} días"</span>)
+        <span class="fn">print</span>(<span class="str">f"     Se agota el    : {row['fecha_agotamiento'].strftime('%d/%m/%Y')}"</span>)
+        <span class="fn">print</span>(<span class="str">f"     Pedir urgente  : {row['cantidad_a_pedir']:.0f} unidades\n"</span>)
+    
+    <span class="kw">return</span> df_proy
+
+df = <span class="fn">proyectar_agotamiento</span>(df)</pre>
+      </div>
+      <div class="output-prev">
+        <div class="op-label">Salida esperada (extracto)</div>
+        <span class="out-yellow">⚠️  Productos con RIESGO DE QUIEBRE: 4</span><br><br>
+        <span class="out-red">  🔴 Casco Seguridad</span><br>
+        <span class="out-gray">     Días cobertura : 16.0 días</span><br>
+        <span class="out-gray">     Tiempo entrega : 7 días</span><br>
+        <span class="out-gray">     Se agota el    : 04/04/2025</span><br>
+        <span class="out-orange">     Pedir urgente  : 42 unidades</span>
+      </div>
+      <button class="done-btn" onclick="markDone('s2-3')">✓ Proyección de agotamiento calculada</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="ent-head"><span>✅ Entregable Fase 2</span></div>
+    <div class="ent-body">Columnas punto_reorden, stock_seguridad, dias_cobertura, clase_abc y riesgo_quiebre añadidas al DataFrame · Productos con riesgo de quiebre identificados con fecha exacta · Cantidades a pedir calculadas.</div>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(0)">← Fase 1</button>
+    <button class="nav-btn primary" onclick="goPhase(2)">Fase 3: Motor de alertas →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 3 — Motor de alertas automáticas
+══════════════════════════════════════════════ -->
+<div class="phase-block" id="phase-2">
+  <div class="prog-rail">
+    <div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg active"></div><div class="pr-seg"></div><div class="pr-seg"></div>
+  </div>
+  <div class="ph">
+    <div class="ph-eyebrow">
+      <span class="ph-badge" style="color:var(--orange);border-color:var(--orange-border);background:var(--orange-bg);">FASE 03</span>
+      <span class="ph-time">⏱ 30 minutos</span>
+      <span class="ph-num-big">// CELDAS 7–9</span>
+    </div>
+    <h2>Motor de alertas<br>automáticas</h2>
+    <div class="ph-obj"><strong>Objetivo:</strong> Construir el sistema de clasificación de alertas por nivel de criticidad (CRÍTICO, ADVERTENCIA, ATENCIÓN, NORMAL), generar reportes automáticos y simular el envío de notificaciones por consola.</div>
+  </div>
+
+  <!-- STEP 3.1 -->
+  <div class="step" id="s3-1">
+    <div class="step-hd" onclick="toggleStep('s3-1')">
+      <div class="sn">1</div>
+      <div class="stw">
+        <div class="st-title">Celda 7 — Clasificador de nivel de alerta por producto</div>
+        <div class="st-sub">Lógica condicional anidada para 4 niveles de criticidad</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="chk-s3-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Cómo se determinan los niveles de alerta?</div>
+        <p>El sistema clasifica cada producto en uno de cuatro niveles según múltiples condiciones:</p>
+        <p>🔴 <strong>CRÍTICO</strong>: stock actual ≤ stock mínimo, o stock actual ≤ punto de reorden Y hay riesgo de quiebre.<br>
+        🟠 <strong>ADVERTENCIA</strong>: stock actual ≤ punto de reorden (tiempo de pedir, pero sin urgencia inmediata).<br>
+        🟡 <strong>ATENCIÓN</strong>: stock actual ≤ 1.2× punto de reorden (margen estrecho).<br>
+        🟢 <strong>NORMAL</strong>: stock suficiente, sin acción requerida.</p>
+        <p>Usamos <code>numpy.select()</code> que es más eficiente que múltiples <code>if/elif</code> para aplicar lógica condicional sobre un DataFrame completo.</p>
+      </div>
+      <div class="cell-indicator">Celda 7 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [7]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c3-1')">Copiar</button>
+        </div>
+        <pre id="c3-1"><span class="cmt"># ── CELDA 7: Clasificador de alertas ────────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">clasificar_alertas</span>(df):
+    <span class="str">"""
+    Asigna un nivel de alerta a cada producto según su estado
+    de inventario relativo al punto de reorden y stock mínimo.
+    
+    Niveles: CRÍTICO > ADVERTENCIA > ATENCIÓN > NORMAL
+    """</span>
+    df_al = df.<span class="fn">copy</span>()
+    
+    <span class="cmt"># ── Definir condiciones (en orden de prioridad, más grave primero)
+    # np.select evalúa condiciones en orden y asigna el primer True que encuentre</span>
+    condiciones = [
+        <span class="cmt"># Condición CRÍTICO: agotado/mínimo O quiebre inminente</span>
+        (df_al[<span class="str">'stock_actual'</span>] &lt;= df_al[<span class="str">'stock_minimo'</span>]) |
+        ((df_al[<span class="str">'stock_actual'</span>] &lt;= df_al[<span class="str">'punto_reorden'</span>]) &
+         (df_al[<span class="str">'riesgo_quiebre'</span>] == <span class="kw">True</span>)),
+        
+        <span class="cmt"># Condición ADVERTENCIA: por debajo del punto de reorden</span>
+        df_al[<span class="str">'stock_actual'</span>] &lt;= df_al[<span class="str">'punto_reorden'</span>],
+        
+        <span class="cmt"># Condición ATENCIÓN: en zona de margen ajustado (120% del ROP)</span>
+        df_al[<span class="str">'stock_actual'</span>] &lt;= df_al[<span class="str">'punto_reorden'</span>] * <span class="num">1.2</span>
+    ]
+    
+    <span class="cmt"># Valores a asignar según cada condición (mismo orden)</span>
+    valores = [<span class="str">'CRÍTICO'</span>, <span class="str">'ADVERTENCIA'</span>, <span class="str">'ATENCIÓN'</span>]
+    
+    <span class="cmt"># np.select: evalúa condiciones → asigna valor correspondiente
+    # default='NORMAL' si ninguna condición es verdadera</span>
+    df_al[<span class="str">'nivel_alerta'</span>] = np.<span class="fn">select</span>(
+        condiciones, valores, default=<span class="str">'NORMAL'</span>
+    )
+    
+    <span class="cmt"># Icono visual para cada nivel (para reportes en consola)</span>
+    iconos = {<span class="str">'CRÍTICO'</span>:<span class="str">'🔴'</span>, <span class="str">'ADVERTENCIA'</span>:<span class="str">'🟠'</span>,
+              <span class="str">'ATENCIÓN'</span>:<span class="str">'🟡'</span>, <span class="str">'NORMAL'</span>:<span class="str">'🟢'</span>}
+    df_al[<span class="str">'icono_alerta'</span>] = df_al[<span class="str">'nivel_alerta'</span>].<span class="fn">map</span>(iconos)
+    
+    <span class="cmt"># Prioridad numérica para ordenar alertas (menor = más urgente)</span>
+    prioridad = {<span class="str">'CRÍTICO'</span>:<span class="num">1</span>, <span class="str">'ADVERTENCIA'</span>:<span class="num">2</span>, <span class="str">'ATENCIÓN'</span>:<span class="num">3</span>, <span class="str">'NORMAL'</span>:<span class="num">4</span>}
+    df_al[<span class="str">'prioridad'</span>] = df_al[<span class="str">'nivel_alerta'</span>].<span class="fn">map</span>(prioridad)
+    
+    <span class="cmt"># Ordenar por prioridad (más crítico primero)</span>
+    df_al = df_al.<span class="fn">sort_values</span>(<span class="str">'prioridad'</span>).<span class="fn">reset_index</span>(drop=<span class="kw">True</span>)
+    
+    <span class="kw">return</span> df_al
+
+df = <span class="fn">clasificar_alertas</span>(df)
+
+<span class="cmt"># Resumen de distribución de alertas</span>
+resumen_alertas = df[<span class="str">'nivel_alerta'</span>].<span class="fn">value_counts</span>()
+<span class="fn">print</span>(<span class="str">"Distribución de niveles de alerta:"</span>)
+<span class="kw">for</span> nivel, cnt <span class="kw">in</span> resumen_alertas.<span class="fn">items</span>():
+    icono = {<span class="str">'CRÍTICO'</span>:<span class="str">'🔴'</span>,<span class="str">'ADVERTENCIA'</span>:<span class="str">'🟠'</span>,<span class="str">'ATENCIÓN'</span>:<span class="str">'🟡'</span>,<span class="str">'NORMAL'</span>:<span class="str">'🟢'</span>}[nivel]
+    <span class="fn">print</span>(<span class="str">f"  {icono} {nivel:12s}: {cnt} producto(s)"</span>)</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-1')">✓ Clasificador de alertas funcionando</button>
+    </div>
+  </div>
+
+  <!-- STEP 3.2 -->
+  <div class="step" id="s3-2">
+    <div class="step-hd" onclick="toggleStep('s3-2')">
+      <div class="sn">2</div>
+      <div class="stw">
+        <div class="st-title">Celda 8 — Generador automático de reporte de alertas</div>
+        <div class="st-sub">Imprime un reporte estructurado con todas las acciones requeridas</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span></div>
+      </div>
+      <div class="schk" id="chk-s3-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué contiene el reporte automático?</div>
+        <p>El reporte agrupa las alertas por nivel de criticidad e incluye para cada producto: nombre, stock actual vs punto de reorden, días de cobertura, cantidad a pedir y fecha estimada de agotamiento. Es el documento que el encargado de almacén recibiría cada mañana.</p>
+        <p>Usamos <code>df.groupby()</code> para separar los productos por nivel de alerta y procesarlos en grupos. El método <code>.strftime()</code> formatea fechas a cadenas legibles.</p>
+      </div>
+      <div class="cell-indicator">Celda 8 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [8]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c3-2')">Copiar</button>
+        </div>
+        <pre id="c3-2"><span class="cmt"># ── CELDA 8: Generador de reporte de alertas ────────────────</span>
+
+<span class="kw">def</span> <span class="fn">generar_reporte_alertas</span>(df):
+    <span class="str">"""
+    Genera un reporte completo y estructurado de todas las alertas
+    activas en el inventario, agrupadas por nivel de criticidad.
+    """</span>
+    timestamp = datetime.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%d/%m/%Y %H:%M"</span>)
+    
+    <span class="fn">print</span>(<span class="str">"\n"</span> + <span class="str">"█" * 60</span>)
+    <span class="fn">print</span>(<span class="str">f"  REPORTE DE MONITOREO DE INVENTARIO"</span>)
+    <span class="fn">print</span>(<span class="str">f"  Generado: {timestamp}"</span>)
+    <span class="fn">print</span>(<span class="str">"█" * 60</span>)
+    
+    <span class="cmt"># Procesar cada nivel de alerta por separado
+    # Solo mostramos los niveles que no sean NORMAL</span>
+    niveles_criticos = [<span class="str">'CRÍTICO'</span>, <span class="str">'ADVERTENCIA'</span>, <span class="str">'ATENCIÓN'</span>]
+    
+    alertas_activas = <span class="num">0</span>
+    
+    <span class="kw">for</span> nivel <span class="kw">in</span> niveles_criticos:
+        <span class="cmt"># Filtrar productos de este nivel</span>
+        grupo = df[df[<span class="str">'nivel_alerta'</span>] == nivel]
+        
+        <span class="kw">if</span> <span class="fn">len</span>(grupo) == <span class="num">0</span>:
+            <span class="kw">continue</span>  <span class="cmt"># saltar si no hay productos en este nivel</span>
+        
+        iconos = {<span class="str">'CRÍTICO'</span>:<span class="str">'🔴'</span>,<span class="str">'ADVERTENCIA'</span>:<span class="str">'🟠'</span>,<span class="str">'ATENCIÓN'</span>:<span class="str">'🟡'</span>}
+        icono = iconos[nivel]
+        
+        <span class="fn">print</span>(<span class="str">f"\n{icono} {'─'*8} {nivel} ({len(grupo)} productos) {'─'*8}"</span>)
+        
+        <span class="kw">for</span> _, row <span class="kw">in</span> grupo.<span class="fn">iterrows</span>():
+            alertas_activas += <span class="num">1</span>
+            fecha_str = row[<span class="str">'fecha_agotamiento'</span>].<span class="fn">strftime</span>(<span class="str">"%d/%m/%Y"</span>)
+            
+            <span class="fn">print</span>(<span class="str">f"""
+   Producto    : [{row['producto_id']}] {row['nombre']}
+   Categoría   : {row['categoria']} | Clase ABC: {row['clase_abc']}
+   Stock actual: {row['stock_actual']} uds  →  ROP: {row['punto_reorden']:.0f} uds
+   Cobertura   : {row['dias_cobertura']:.1f} días  →  Agotamiento: {fecha_str}
+   ACCIÓN      : Pedir {row['cantidad_a_pedir']:.0f} uds  (entrega en {row['tiempo_entrega_dias']} días)"""</span>)
+    
+    <span class="fn">print</span>(<span class="str">"\n" + "─" * 60</span>)
+    normales = (df[<span class="str">'nivel_alerta'</span>] == <span class="str">'NORMAL'</span>).<span class="fn">sum</span>()
+    <span class="fn">print</span>(<span class="str">f"  🟢 NORMAL: {normales} producto(s) sin acción requerida"</span>)
+    <span class="fn">print</span>(<span class="str">f"  ⚡ Total alertas activas: {alertas_activas}"</span>)
+    <span class="fn">print</span>(<span class="str">"█" * 60</span>)
+
+<span class="fn">generar_reporte_alertas</span>(df)</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-2')">✓ Reporte de alertas generado</button>
+    </div>
+  </div>
+
+  <!-- STEP 3.3 -->
+  <div class="step" id="s3-3">
+    <div class="step-hd" onclick="toggleStep('s3-3')">
+      <div class="sn">3</div>
+      <div class="stw">
+        <div class="st-title">Celda 9 — Simulador de notificaciones automáticas</div>
+        <div class="st-sub">Genera mensajes de alerta formateados por nivel de prioridad</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="chk-s3-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué simula este módulo?</div>
+        <p>En un sistema real, las notificaciones se enviarían por correo electrónico, SMS o Slack usando APIs externas (SendGrid, Twilio, etc.). Aquí simulamos ese proceso: la función recibe el nivel de alerta, construye el mensaje apropiado según plantillas predefinidas, y lo "envía" imprimiéndolo en consola. La estructura del código es exactamente la misma que usarías con una API real; solo cambiarías el <code>print()</code> por una llamada a la API.</p>
+      </div>
+      <div class="cell-indicator">Celda 9 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [9]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c3-3')">Copiar</button>
+        </div>
+        <pre id="c3-3"><span class="cmt"># ── CELDA 9: Simulador de notificaciones automáticas ────────</span>
+
+<span class="cmt"># Plantillas de mensajes por nivel de alerta
+# f-string multilínea con {variables} para personalizar cada mensaje</span>
+PLANTILLAS = {
+    <span class="str">'CRÍTICO'</span>: <span class="kw">lambda</span> r: <span class="str">f"""
+┌─ 🔴 ALERTA CRÍTICA ──────────────────────────────┐
+│ PRODUCTO: {r['nombre']}
+│ Stock actual {r['stock_actual']} uds ≤ Mínimo {r['stock_minimo']} uds
+│ SE AGOTA: {r['fecha_agotamiento'].strftime('%d/%m/%Y')}
+│ PEDIR AHORA: {r['cantidad_a_pedir']:.0f} unidades
+│ Para: almacén@empresa.com | responsable@empresa.com
+└──────────────────────────────────────────────────┘"""</span>,
+
+    <span class="str">'ADVERTENCIA'</span>: <span class="kw">lambda</span> r: <span class="str">f"""
+┌─ 🟠 ADVERTENCIA ─────────────────────────────────┐
+│ PRODUCTO: {r['nombre']}
+│ Stock {r['stock_actual']} uds — por debajo del ROP ({r['punto_reorden']:.0f})
+│ Cobertura restante: {r['dias_cobertura']:.1f} días
+│ Programar pedido: {r['cantidad_a_pedir']:.0f} unidades
+│ Para: almacén@empresa.com
+└──────────────────────────────────────────────────┘"""</span>,
+
+    <span class="str">'ATENCIÓN'</span>: <span class="kw">lambda</span> r: <span class="str">f"""
+┌─ 🟡 ATENCIÓN ────────────────────────────────────┐
+│ PRODUCTO: {r['nombre']} — margen ajustado
+│ Stock {r['stock_actual']} uds — monitorear consumo
+└──────────────────────────────────────────────────┘"""</span>
+}
+
+<span class="kw">def</span> <span class="fn">enviar_notificaciones</span>(df):
+    <span class="str">"""
+    Simula el envío de notificaciones automáticas por nivel de alerta.
+    En producción, aquí llamarías a una API de email/SMS.
+    """</span>
+    timestamp = datetime.<span class="fn">now</span>().<span class="fn">strftime</span>(<span class="str">"%H:%M:%S"</span>)
+    <span class="fn">print</span>(<span class="str">f"\n📡 [{timestamp}] Procesando notificaciones automáticas...\n"</span>)
+    
+    notifs_enviadas = <span class="num">0</span>
+    
+    <span class="cmt"># Iterar solo sobre productos con alerta activa (no NORMAL)</span>
+    alertas = df[df[<span class="str">'nivel_alerta'</span>] != <span class="str">'NORMAL'</span>]
+    
+    <span class="kw">for</span> _, row <span class="kw">in</span> alertas.<span class="fn">iterrows</span>():
+        nivel = row[<span class="str">'nivel_alerta'</span>]
+        
+        <span class="cmt"># Obtener la plantilla correspondiente al nivel y generar el mensaje</span>
+        <span class="kw">if</span> nivel <span class="kw">in</span> PLANTILLAS:
+            mensaje = PLANTILLAS[nivel](row)  <span class="cmt"># llamar la lambda con la fila</span>
+            <span class="fn">print</span>(mensaje)
+            notifs_enviadas += <span class="num">1</span>
+    
+    <span class="fn">print</span>(<span class="str">f"\n✅ {notifs_enviadas} notificaciones procesadas."</span>)
+    <span class="fn">print</span>(<span class="str">"   (En producción se enviarían por email/SMS/Slack)"</span>)
+
+<span class="fn">enviar_notificaciones</span>(df)</pre>
+      </div>
+      <div class="explain">
+        <div class="el">Lambda functions en Python</div>
+        <p>Una <strong>lambda</strong> es una función anónima de una sola expresión. <code>lambda r: f"..."</code> define una función sin nombre que recibe <code>r</code> (una fila del DataFrame) y devuelve un string formateado. Son ideales para funciones simples que se usan una sola vez, como las plantillas de mensajes aquí.</p>
+        <p>El diccionario <code>PLANTILLAS</code> actúa como un <em>switch</em>: en lugar de <code>if nivel == 'CRÍTICO': ...</code>, simplemente hacemos <code>PLANTILLAS[nivel](row)</code>. Este patrón se llama <strong>dispatch table</strong> y es más limpio y extensible.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s3-3')">✓ Notificaciones generadas</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="ent-head"><span>✅ Entregable Fase 3</span></div>
+    <div class="ent-body">Columna nivel_alerta con 4 categorías · Reporte estructurado con todos los productos alertados · Notificaciones formateadas generadas para cada nivel de criticidad · Sistema ordenado por prioridad (más crítico primero).</div>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(1)">← Fase 2</button>
+    <button class="nav-btn primary" onclick="goPhase(3)">Fase 4: Dashboard visual →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 4 — Dashboard visual con matplotlib
+══════════════════════════════════════════════ -->
+<div class="phase-block" id="phase-3">
+  <div class="prog-rail">
+    <div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg active"></div><div class="pr-seg"></div>
+  </div>
+  <div class="ph">
+    <div class="ph-eyebrow">
+      <span class="ph-badge" style="color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg);">FASE 04</span>
+      <span class="ph-time">⏱ 30 minutos</span>
+      <span class="ph-num-big">// CELDAS 10–11</span>
+    </div>
+    <h2>Dashboard visual<br>con Matplotlib</h2>
+    <div class="ph-obj"><strong>Objetivo:</strong> Crear un dashboard ejecutivo de 4 gráficas que visualicen los niveles de inventario vs puntos de reorden, distribución de alertas, valor del inventario y cobertura de días por producto.</div>
+  </div>
+
+  <!-- STEP 4.1 -->
+  <div class="step" id="s4-1">
+    <div class="step-hd" onclick="toggleStep('s4-1')">
+      <div class="sn">1</div>
+      <div class="stw">
+        <div class="st-title">Celda 10 — Gráfica de niveles de stock vs puntos de reorden</div>
+        <div class="st-sub">Barras horizontales con líneas de umbral: visualización ejecutiva</div>
+        <div class="st-tags"><span class="stag t-plt">Matplotlib</span><span class="stag t-np">NumPy</span></div>
+      </div>
+      <div class="schk" id="chk-s4-1">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué muestra esta gráfica y por qué importa?</div>
+        <p>La gráfica de barras horizontales compara visualmente el <strong>stock actual</strong> de cada producto (barra de color) contra su <strong>punto de reorden</strong> (línea vertical punteada). Un producto cuya barra no alcanza la línea de reorden está en zona de alerta. El color de cada barra refleja su nivel de criticidad, creando un semáforo visual inmediato.</p>
+        <p>Usamos <code>ax.barh()</code> para barras horizontales, <code>ax.axvline()</code> para líneas de referencia vertical, y <code>ax.set_facecolor()</code> para personalizar el fondo del área de la gráfica.</p>
+      </div>
+      <div class="cell-indicator">Celda 10 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [10]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c4-1')">Copiar</button>
+        </div>
+        <pre id="c4-1"><span class="cmt"># ── CELDA 10: Dashboard visual principal ────────────────────</span>
+
+<span class="cmt"># Paleta de colores por nivel de alerta</span>
+COLOR_ALERTA = {
+    <span class="str">'CRÍTICO'</span>    : <span class="str">'#f85149'</span>,   <span class="cmt"># rojo</span>
+    <span class="str">'ADVERTENCIA'</span>: <span class="str">'#f0883e'</span>,   <span class="cmt"># naranja</span>
+    <span class="str">'ATENCIÓN'</span>   : <span class="str">'#d29922'</span>,   <span class="cmt"># amarillo</span>
+    <span class="str">'NORMAL'</span>     : <span class="str">'#3fb950'</span>    <span class="cmt"># verde</span>
+}
+
+<span class="kw">def</span> <span class="fn">crear_dashboard</span>(df):
+    <span class="str">"""
+    Genera un dashboard de 4 gráficas sobre el estado del inventario.
+    Cada subplot muestra una dimensión diferente del análisis.
+    """</span>
+    
+    <span class="cmt"># ── Crear figura con 2×2 subplots (4 gráficas en una figura)
+    # figsize controla el tamaño total en pulgadas (ancho × alto)</span>
+    fig, axes = plt.<span class="fn">subplots</span>(<span class="num">2</span>, <span class="num">2</span>, figsize=(<span class="num">16</span>, <span class="num">12</span>))
+    fig.<span class="fn">suptitle</span>(
+        <span class="str">f'Dashboard de Monitoreo de Inventario — {datetime.now().strftime("%d/%m/%Y")}'</span>,
+        fontsize=<span class="num">14</span>, fontweight=<span class="str">'bold'</span>, color=<span class="str">'white'</span>, y=<span class="num">1.01</span>
+    )
+    
+    <span class="cmt"># ── GRÁFICA 1 (axes[0,0]): Stock actual vs Punto de Reorden ──</span>
+    ax1 = axes[<span class="num">0</span>, <span class="num">0</span>]
+    
+    <span class="cmt"># Asignar color a cada barra según nivel de alerta</span>
+    colores = [COLOR_ALERTA[n] <span class="kw">for</span> n <span class="kw">in</span> df[<span class="str">'nivel_alerta'</span>]]
+    
+    <span class="cmt"># barh: barra horizontal. y=nombres, width=valores, color=lista de colores</span>
+    bars = ax1.<span class="fn">barh</span>(
+        df[<span class="str">'nombre'</span>],
+        df[<span class="str">'stock_actual'</span>],
+        color=colores,
+        alpha=<span class="num">0.85</span>,
+        edgecolor=<span class="str">'white'</span>,
+        linewidth=<span class="num">0.3</span>
+    )
+    
+    <span class="cmt"># Línea vertical punteada para el Punto de Reorden de cada producto
+    # Como cada producto tiene su propio ROP, usamos scatter + vlines</span>
+    <span class="kw">for</span> i, (rop, nombre) <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(df[<span class="str">'punto_reorden'</span>], df[<span class="str">'nombre'</span>])):
+        ax1.<span class="fn">plot</span>([rop, rop], [i-<span class="num">0.4</span>, i+<span class="num">0.4</span>],
+                color=<span class="str">'#58a6ff'</span>, linewidth=<span class="num">2</span>, linestyle=<span class="str">'--'</span>)
+    
+    ax1.<span class="fn">set_title</span>(<span class="str">'Stock Actual vs Punto de Reorden'</span>, fontsize=<span class="num">11</span>, pad=<span class="num">10</span>)
+    ax1.<span class="fn">set_xlabel</span>(<span class="str">'Unidades'</span>)
+    ax1.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelsize=<span class="num">8</span>)
+    
+    <span class="cmt"># Leyenda manual usando parches de color</span>
+    leyenda = [mpatches.<span class="fn">Patch</span>(color=c, label=n)
+               <span class="kw">for</span> n, c <span class="kw">in</span> COLOR_ALERTA.<span class="fn">items</span>()]
+    ax1.<span class="fn">legend</span>(handles=leyenda, loc=<span class="str">'lower right'</span>, fontsize=<span class="num">7</span>)
+    
+    <span class="cmt"># ── GRÁFICA 2 (axes[0,1]): Distribución de alertas (pastel) ──</span>
+    ax2 = axes[<span class="num">0</span>, <span class="num">1</span>]
+    conteo = df[<span class="str">'nivel_alerta'</span>].<span class="fn">value_counts</span>()
+    colores_pastel = [COLOR_ALERTA[n] <span class="kw">for</span> n <span class="kw">in</span> conteo.<span class="fn">index</span>]
+    
+    <span class="cmt"># pie chart: autopct muestra porcentaje en cada rebanada</span>
+    ax2.<span class="fn">pie</span>(
+        conteo.<span class="fn">values</span>,
+        labels=conteo.<span class="fn">index</span>,
+        colors=colores_pastel,
+        autopct=<span class="str">'%1.0f%%'</span>,
+        startangle=<span class="num">90</span>,
+        textprops={<span class="str">'fontsize'</span>: <span class="num">9</span>}
+    )
+    ax2.<span class="fn">set_title</span>(<span class="str">'Distribución de Niveles de Alerta'</span>, fontsize=<span class="num">11</span>, pad=<span class="num">10</span>)
+    
+    <span class="cmt"># ── GRÁFICA 3 (axes[1,0]): Valor de inventario por producto ──</span>
+    ax3 = axes[<span class="num">1</span>, <span class="num">0</span>]
+    df_sorted = df.<span class="fn">sort_values</span>(<span class="str">'valor_inventario'</span>, ascending=<span class="kw">True</span>)
+    colores3 = [COLOR_ALERTA[n] <span class="kw">for</span> n <span class="kw">in</span> df_sorted[<span class="str">'nivel_alerta'</span>]]
+    
+    ax3.<span class="fn">barh</span>(df_sorted[<span class="str">'nombre'</span>], df_sorted[<span class="str">'valor_inventario'</span>],
+            color=colores3, alpha=<span class="num">0.8</span>)
+    ax3.<span class="fn">set_title</span>(<span class="str">'Valor del Inventario por Producto ($)'</span>, fontsize=<span class="num">11</span>, pad=<span class="num">10</span>)
+    ax3.<span class="fn">set_xlabel</span>(<span class="str">'Valor ($)'</span>)
+    ax3.<span class="fn">tick_params</span>(axis=<span class="str">'y'</span>, labelsize=<span class="num">8</span>)
+    
+    <span class="cmt"># ── GRÁFICA 4 (axes[1,1]): Días de cobertura por producto ────</span>
+    ax4 = axes[<span class="num">1</span>, <span class="num">1</span>]
+    colores4 = [COLOR_ALERTA[n] <span class="kw">for</span> n <span class="kw">in</span> df[<span class="str">'nivel_alerta'</span>]]
+    
+    <span class="cmt"># Barras verticales para días de cobertura</span>
+    x_pos = np.<span class="fn">arange</span>(<span class="fn">len</span>(df))  <span class="cmt"># posiciones numéricas para el eje X</span>
+    ax4.<span class="fn">bar</span>(x_pos, df[<span class="str">'dias_cobertura'</span>], color=colores4, alpha=<span class="num">0.85</span>)
+    
+    <span class="cmt"># Línea horizontal de referencia: promedio de tiempo de entrega</span>
+    prom_entrega = df[<span class="str">'tiempo_entrega_dias'</span>].<span class="fn">mean</span>()
+    ax4.<span class="fn">axhline</span>(y=prom_entrega, color=<span class="str">'#58a6ff'</span>,
+                linestyle=<span class="str">'--'</span>, linewidth=<span class="num">1.5</span>,
+                label=<span class="str">f'Prom. entrega: {prom_entrega:.1f} días'</span>)
+    
+    ax4.<span class="fn">set_xticks</span>(x_pos)
+    ax4.<span class="fn">set_xticklabels</span>(df[<span class="str">'nombre'</span>], rotation=<span class="num">45</span>, ha=<span class="str">'right'</span>, fontsize=<span class="num">7</span>)
+    ax4.<span class="fn">set_title</span>(<span class="str">'Días de Cobertura por Producto'</span>, fontsize=<span class="num">11</span>, pad=<span class="num">10</span>)
+    ax4.<span class="fn">set_ylabel</span>(<span class="str">'Días'</span>)
+    ax4.<span class="fn">legend</span>(fontsize=<span class="num">8</span>)
+    
+    <span class="cmt"># Ajuste automático de espaciado entre subplots</span>
+    plt.<span class="fn">tight_layout</span>()
+    plt.<span class="fn">show</span>()
+    <span class="fn">print</span>(<span class="str">"✅ Dashboard generado correctamente"</span>)
+
+<span class="fn">crear_dashboard</span>(df)</pre>
+      </div>
+      <div class="explain">
+        <div class="el">Conceptos matplotlib de esta celda</div>
+        <p><strong>plt.subplots(2,2)</strong>: crea una figura con una cuadrícula de 2 filas × 2 columnas de gráficas. Devuelve la figura (<code>fig</code>) y un array 2D de ejes (<code>axes</code>). Se accede a cada gráfica como <code>axes[fila, columna]</code>.</p>
+        <p><strong>plt.tight_layout()</strong>: ajusta automáticamente los márgenes entre subplots para que no se superpongan etiquetas ni títulos.</p>
+        <p><strong>zip(list1, list2)</strong>: itera simultáneamente sobre dos listas. <code>for i, (rop, nombre) in enumerate(zip(...))</code> da índice, valor1 y valor2 en cada iteración.</p>
+      </div>
+      <button class="done-btn" onclick="markDone('s4-1')">✓ Dashboard de 4 gráficas generado</button>
+    </div>
+  </div>
+
+  <!-- STEP 4.2 -->
+  <div class="step" id="s4-2">
+    <div class="step-hd" onclick="toggleStep('s4-2')">
+      <div class="sn">2</div>
+      <div class="stw">
+        <div class="st-title">Celda 11 — Tabla resumen ejecutiva con métricas clave</div>
+        <div class="st-sub">DataFrame formateado con pandas para reporte final</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-pd">Pandas</span></div>
+      </div>
+      <div class="schk" id="chk-s4-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué es el Styler de pandas?</div>
+        <p>Pandas tiene un módulo <code>Styler</code> que permite aplicar formatos visuales a los DataFrames directamente en el notebook: colores de fondo condicionales, formatos numéricos, barras de progreso en celdas. La tabla resultante se muestra con HTML interactivo en Colab.</p>
+      </div>
+      <div class="cell-indicator">Celda 11 de 12</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [11]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c4-2')">Copiar</button>
+        </div>
+        <pre id="c4-2"><span class="cmt"># ── CELDA 11: Tabla resumen ejecutiva ───────────────────────</span>
+
+<span class="kw">def</span> <span class="fn">tabla_resumen_ejecutiva</span>(df):
+    <span class="str">"""
+    Genera una tabla resumen con las columnas más relevantes,
+    formateada con colores según el nivel de alerta usando
+    pandas Styler para visualización en Colab.
+    """</span>
+    
+    <span class="cmt"># Seleccionar y renombrar columnas para el reporte ejecutivo</span>
+    cols = {
+        <span class="str">'icono_alerta'</span>  : <span class="str">'Alerta'</span>,
+        <span class="str">'nombre'</span>        : <span class="str">'Producto'</span>,
+        <span class="str">'clase_abc'</span>     : <span class="str">'ABC'</span>,
+        <span class="str">'stock_actual'</span>  : <span class="str">'Stock'</span>,
+        <span class="str">'punto_reorden'</span> : <span class="str">'ROP'</span>,
+        <span class="str">'dias_cobertura'</span>: <span class="str">'Días'</span>,
+        <span class="str">'cantidad_a_pedir'</span>:<span class="str">'A Pedir'</span>,
+        <span class="str">'nivel_alerta'</span>  : <span class="str">'Nivel'</span>
+    }
+    
+    tabla = df[<span class="fn">list</span>(cols.<span class="fn">keys</span>())].<span class="fn">rename</span>(columns=cols)
+    
+    <span class="cmt"># Función para colorear filas según nivel de alerta
+    # Esta función se aplica fila por fila (axis=1)</span>
+    <span class="kw">def</span> <span class="fn">colorear_fila</span>(row):
+        colores_bg = {
+            <span class="str">'CRÍTICO'</span>    : <span class="str">'background-color: rgba(248,81,73,0.15)'</span>,
+            <span class="str">'ADVERTENCIA'</span>: <span class="str">'background-color: rgba(240,136,62,0.15)'</span>,
+            <span class="str">'ATENCIÓN'</span>   : <span class="str">'background-color: rgba(210,153,34,0.15)'</span>,
+            <span class="str">'NORMAL'</span>     : <span class="str">''</span>
+        }
+        <span class="cmt"># Retorna lista de estilos CSS para cada celda de la fila</span>
+        estilo = colores_bg.<span class="fn">get</span>(row[<span class="str">'Nivel'</span>], <span class="str">''</span>)
+        <span class="kw">return</span> [estilo] * <span class="fn">len</span>(row)
+    
+    <span class="cmt"># Aplicar estilos: format() para decimales, apply() para colores de fila</span>
+    tabla_estilizada = tabla.<span class="fn">style</span>\
+        .<span class="fn">apply</span>(colorear_fila, axis=<span class="num">1</span>)\
+        .<span class="fn">format</span>({
+            <span class="str">'ROP'</span>    : <span class="str">'{:.1f}'</span>,
+            <span class="str">'Días'</span>   : <span class="str">'{:.1f}'</span>,
+            <span class="str">'A Pedir'</span>: <span class="str">'{:.0f}'</span>
+        })\
+        .<span class="fn">set_caption</span>(<span class="str">'Tabla Ejecutiva de Monitoreo de Inventario'</span>)\
+        .<span class="fn">hide</span>(axis=<span class="str">'index'</span>)
+    
+    <span class="kw">return</span> tabla_estilizada  <span class="cmt"># en Colab, devolver el Styler lo muestra automáticamente</span>
+
+<span class="fn">tabla_resumen_ejecutiva</span>(df)</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s4-2')">✓ Tabla ejecutiva generada</button>
+    </div>
+  </div>
+
+  <div class="entregable">
+    <div class="ent-head"><span>✅ Entregable Fase 4</span></div>
+    <div class="ent-body">Dashboard de 4 gráficas (barras de stock, pastel de alertas, valor de inventario, días de cobertura) con colores semáforo · Tabla ejecutiva con estilo condicional por nivel de alerta.</div>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(2)">← Fase 3</button>
+    <button class="nav-btn primary" onclick="goPhase(4)">Fase 5: Integración →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FASE 5 — Integración y pruebas finales
+══════════════════════════════════════════════ -->
+<div class="phase-block" id="phase-4">
+  <div class="prog-rail">
+    <div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg done"></div><div class="pr-seg active"></div>
+  </div>
+  <div class="ph">
+    <div class="ph-eyebrow">
+      <span class="ph-badge" style="color:var(--green);border-color:var(--green-border);background:var(--green-bg);">FASE 05</span>
+      <span class="ph-time">⏱ 30 minutos</span>
+      <span class="ph-num-big">// CELDA 12 + PRUEBAS</span>
+    </div>
+    <h2>Integración del sistema<br>y pruebas finales</h2>
+    <div class="ph-obj"><strong>Objetivo:</strong> Unificar todas las funciones en una sola función maestra <code>ejecutar_monitoreo()</code>, probar el sistema con distintos escenarios y documentar el notebook completo para entrega.</div>
+  </div>
+
+  <!-- STEP 5.1 -->
+  <div class="step" id="s5-1">
+    <div class="step-hd" onclick="toggleStep('s5-1')">
+      <div class="sn">1</div>
+      <div class="stw">
+        <div class="st-title">Celda 12 — Función maestra que integra todo el pipeline</div>
+        <div class="st-sub">Una sola llamada activa el sistema completo de monitoreo</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="s5-1-chk">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Por qué integrar en una función maestra?</div>
+        <p>Un sistema de monitoreo real necesita ejecutarse repetidamente (cada hora, cada día) sin que el usuario recorra celda por celda. La función <code>ejecutar_monitoreo()</code> encapsula todo el pipeline en una sola llamada. Esto simula cómo funcionaría el sistema en producción: un scheduler (cron job o Cloud Scheduler) invocaría esta función automáticamente a intervalos regulares.</p>
+        <p>El parámetro <code>datos</code> hace la función reutilizable con cualquier DataFrame de inventario, no solo el del ejercicio.</p>
+      </div>
+      <div class="cell-indicator">Celda 12 de 12 — LA ÚLTIMA</div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">MonitoreoInventario.ipynb</span>
+            <span class="code-cell">Celda [12]</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c5-1')">Copiar</button>
+        </div>
+        <pre id="c5-1"><span class="cmt"># ── CELDA 12: Pipeline maestro del sistema ──────────────────
+# ── Esta celda integra todas las funciones anteriores ────────</span>
+
+<span class="kw">def</span> <span class="fn">ejecutar_monitoreo</span>(datos, nivel_servicio=<span class="num">0.95</span>, verbose=<span class="kw">True</span>):
+    <span class="str">"""
+    Pipeline completo del Sistema de Monitoreo Automático de Inventario.
+    
+    Pasos del pipeline:
+        1. Exploración inicial
+        2. Cálculo de ROP y stock de seguridad
+        3. Clasificación ABC
+        4. Proyección de agotamiento
+        5. Clasificación de alertas
+        6. Generación de reporte
+        7. Envío de notificaciones
+        8. Generación de dashboard visual
+        9. Retorno de tabla ejecutiva
+    
+    Parámetros:
+        datos           : DataFrame del inventario
+        nivel_servicio  : 0.90, 0.95 o 0.99 (default 95%)
+        verbose         : si True, muestra output completo
+    
+    Retorna:
+        DataFrame procesado con todas las métricas calculadas
+    """</span>
+    
+    <span class="cmt"># Mapear nivel de servicio a su valor Z de tabla normal</span>
+    tabla_z = {<span class="num">0.90</span>: <span class="num">1.282</span>, <span class="num">0.95</span>: <span class="num">1.645</span>, <span class="num">0.99</span>: <span class="num">2.326</span>}
+    z = tabla_z.<span class="fn">get</span>(nivel_servicio, <span class="num">1.645</span>)
+    
+    <span class="kw">if</span> verbose:
+        <span class="fn">print</span>(<span class="str">f"\n🚀 Iniciando Sistema de Monitoreo..."</span>)
+        <span class="fn">print</span>(<span class="str">f"   Nivel de servicio: {nivel_servicio*100:.0f}%  (Z={z})"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Productos a analizar: {len(datos)}\n"</span>)
+    
+    <span class="cmt"># ── Ejecutar pipeline secuencial ─────────────────────────
+    # Cada función recibe el resultado de la anterior (encadenamiento)</span>
+    
+    df_proc = datos.<span class="fn">copy</span>()
+    
+    <span class="kw">if</span> verbose: <span class="fn">print</span>(<span class="str">"[1/6] Explorando inventario..."</span>)
+    <span class="fn">explorar_inventario</span>(df_proc)
+    
+    <span class="kw">if</span> verbose: <span class="fn">print</span>(<span class="str">"\n[2/6] Calculando puntos de reorden..."</span>)
+    df_proc = <span class="fn">calcular_rop</span>(df_proc, z=z)
+    
+    <span class="kw">if</span> verbose: <span class="fn">print</span>(<span class="str">"[3/6] Clasificando ABC..."</span>)
+    df_proc = <span class="fn">clasificar_abc</span>(df_proc)
+    
+    <span class="kw">if</span> verbose: <span class="fn">print</span>(<span class="str">"[4/6] Proyectando fechas de agotamiento..."</span>)
+    df_proc = <span class="fn">proyectar_agotamiento</span>(df_proc)
+    
+    <span class="kw">if</span> verbose: <span class="fn">print</span>(<span class="str">"[5/6] Clasificando niveles de alerta..."</span>)
+    df_proc = <span class="fn">clasificar_alertas</span>(df_proc)
+    
+    <span class="kw">if</span> verbose:
+        <span class="fn">print</span>(<span class="str">"[6/6] Generando reporte y notificaciones...\n"</span>)
+        <span class="fn">generar_reporte_alertas</span>(df_proc)
+        <span class="fn">enviar_notificaciones</span>(df_proc)
+    
+    <span class="cmt"># Generar dashboard visual siempre</span>
+    <span class="fn">crear_dashboard</span>(df_proc)
+    
+    <span class="kw">if</span> verbose:
+        <span class="fn">print</span>(<span class="str">f"\n✅ Sistema completado — {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"</span>)
+    
+    <span class="kw">return</span> df_proc
+
+<span class="cmt"># ── EJECUTAR EL SISTEMA COMPLETO ──────────────────────────
+# Recreamos el DataFrame original limpio para la demo final
+# (usamos el diccionario datos_inventario de la Celda 2)</span>
+
+hoy = datetime.<span class="fn">now</span>()
+df_original = pd.<span class="fn">DataFrame</span>(datos_inventario)
+df_final = <span class="fn">ejecutar_monitoreo</span>(df_original, nivel_servicio=<span class="num">0.95</span>)
+
+<span class="fn">print</span>(<span class="str">"\n📋 Vista final del DataFrame con todas las métricas:"</span>)
+df_final[[<span class="str">'nombre'</span>,<span class="str">'nivel_alerta'</span>,<span class="str">'punto_reorden'</span>,
+          <span class="str">'dias_cobertura'</span>,<span class="str">'clase_abc'</span>,<span class="str">'cantidad_a_pedir'</span>]]</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-1')">✓ Pipeline maestro ejecutado exitosamente</button>
+    </div>
+  </div>
+
+  <!-- STEP 5.2 -->
+  <div class="step" id="s5-2">
+    <div class="step-hd" onclick="toggleStep('s5-2')">
+      <div class="sn">2</div>
+      <div class="stw">
+        <div class="st-title">Pruebas con escenarios alternativos</div>
+        <div class="st-sub">Modifica parámetros y observa cómo cambia el sistema</div>
+        <div class="st-tags"><span class="stag t-py">Python</span><span class="stag t-logic">Lógica</span></div>
+      </div>
+      <div class="schk" id="chk-s5-2">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">¿Qué probar y qué observar?</div>
+        <p>El sistema es dinámico: cambiar los valores de stock o el nivel de servicio debe producir diferentes alertas. Estas pruebas demuestran que el sistema responde correctamente a distintas condiciones de inventario.</p>
+      </div>
+      <div class="where">
+        <span class="where-ico">📍</span>
+        <div class="where-txt"><strong>Crea una nueva celda de prueba</strong> al final del notebook y ejecuta cada escenario por separado:</div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <div class="code-bar-left">
+            <div class="cb-dots"><div class="cbd" style="background:#ff5f57"></div><div class="cbd" style="background:#febc2e"></div><div class="cbd" style="background:#28c840"></div></div>
+            <span class="code-fname">CELDA DE PRUEBAS</span>
+            <span class="code-cell">Escenarios</span>
+          </div>
+          <button class="copy-btn" onclick="copyCode(this,'c5-2')">Copiar</button>
+        </div>
+        <pre id="c5-2"><span class="cmt"># ══════════════════════════════════════════════════════
+#  PRUEBAS CON ESCENARIOS ALTERNATIVOS
+#  Ejecuta cada bloque por separado y documenta resultados
+# ══════════════════════════════════════════════════════</span>
+
+<span class="cmt"># ── ESCENARIO A: Nivel de servicio del 99% (más conservador)
+# Esperado: los ROPs aumentarán, más productos en ADVERTENCIA</span>
+<span class="fn">print</span>(<span class="str">"ESCENARIO A — Nivel de servicio 99%"</span>)
+df_test_a = pd.<span class="fn">DataFrame</span>(datos_inventario)
+df_test_a = <span class="fn">calcular_rop</span>(df_test_a, z=<span class="num">2.326</span>)
+df_test_a = <span class="fn">proyectar_agotamiento</span>(df_test_a)
+df_test_a = <span class="fn">clasificar_alertas</span>(df_test_a)
+<span class="fn">print</span>(df_test_a[<span class="str">'nivel_alerta'</span>].<span class="fn">value_counts</span>())
+<span class="fn">print</span>()
+
+<span class="cmt"># ── ESCENARIO B: Inventario en crisis (stock reducido al 20%)
+# Esperado: la mayoría en CRÍTICO o ADVERTENCIA</span>
+<span class="fn">print</span>(<span class="str">"ESCENARIO B — Crisis de inventario (20% del stock normal)"</span>)
+df_test_b = pd.<span class="fn">DataFrame</span>(datos_inventario)
+df_test_b[<span class="str">'stock_actual'</span>] = (df_test_b[<span class="str">'stock_actual'</span>] * <span class="num">0.20</span>).<span class="fn">astype</span>(<span class="fn">int</span>)
+df_test_b = <span class="fn">calcular_rop</span>(df_test_b)
+df_test_b = <span class="fn">proyectar_agotamiento</span>(df_test_b)
+df_test_b = <span class="fn">clasificar_alertas</span>(df_test_b)
+<span class="fn">print</span>(df_test_b[<span class="str">'nivel_alerta'</span>].<span class="fn">value_counts</span>())
+<span class="fn">print</span>()
+
+<span class="cmt"># ── ESCENARIO C: Inventario abundante (stock al 150%)
+# Esperado: la mayoría en NORMAL, pocas alertas</span>
+<span class="fn">print</span>(<span class="str">"ESCENARIO C — Inventario abundante (150% del stock normal)"</span>)
+df_test_c = pd.<span class="fn">DataFrame</span>(datos_inventario)
+df_test_c[<span class="str">'stock_actual'</span>] = (df_test_c[<span class="str">'stock_actual'</span>] * <span class="num">1.50</span>).<span class="fn">astype</span>(<span class="fn">int</span>)
+df_test_c = <span class="fn">calcular_rop</span>(df_test_c)
+df_test_c = <span class="fn">proyectar_agotamiento</span>(df_test_c)
+df_test_c = <span class="fn">clasificar_alertas</span>(df_test_c)
+<span class="fn">print</span>(df_test_c[<span class="str">'nivel_alerta'</span>].<span class="fn">value_counts</span>())
+
+<span class="fn">print</span>(<span class="str">"\n✅ Pruebas de escenarios completadas"</span>)
+<span class="fn">print</span>(<span class="str">"   Documenta los resultados en la celda de texto siguiente"</span>)</pre>
+      </div>
+      <button class="done-btn" onclick="markDone('s5-2')">✓ Los 3 escenarios ejecutados y resultados documentados</button>
+    </div>
+  </div>
+
+  <!-- STEP 5.3 -->
+  <div class="step" id="s5-3">
+    <div class="step-hd" onclick="toggleStep('s5-3')">
+      <div class="sn">3</div>
+      <div class="stw">
+        <div class="st-title">Lista de verificación final y entrega del notebook</div>
+        <div class="st-sub">Revisa cada punto antes de compartir el archivo con el docente</div>
+        <div class="st-tags"><span class="stag t-colab">Colab</span></div>
+      </div>
+      <div class="schk" id="chk-s5-3">○</div>
+    </div>
+    <div class="step-body">
+      <div class="explain">
+        <div class="el">Cómo entregar el notebook</div>
+        <p>En Google Colab: <strong>Archivo → Descargar → Descargar .ipynb</strong> para obtener el archivo local. O bien comparte el enlace directo: <strong>Compartir</strong> (botón superior derecho) → cambia permisos a "Cualquier persona con el enlace puede ver".</p>
+      </div>
+      <ul class="checklist">
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">El notebook se llama <code>MonitoreoInventario_TuNombre.ipynb</code></div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">Las 12 celdas principales están ejecutadas sin errores (sin triángulo rojo)</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">El DataFrame tiene columnas: punto_reorden, stock_seguridad, clase_abc, nivel_alerta, dias_cobertura, riesgo_quiebre, cantidad_a_pedir</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">El reporte de alertas identifica correctamente los productos críticos</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">El dashboard de 4 gráficas se muestra en la salida de la Celda 10</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">Los 3 escenarios de prueba están ejecutados y muestran resultados diferentes</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">La función ejecutar_monitoreo() corre exitosamente en la Celda 12</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">Cada celda tiene comentarios explicando el propósito del código</div></li>
+        <li class="cli"><div class="chkbox" onclick="toggleChk(this)"></div><div class="cli-text">Hay al menos 2 celdas de texto Markdown documentando el sistema</div></li>
+      </ul>
+      <button class="done-btn" onclick="markDone('s5-3')">✓ Lista de verificación completada</button>
+    </div>
+  </div>
+
+  <div class="entregable" style="background:rgba(108,166,255,0.06);border-color:rgba(88,166,255,0.3);">
+    <div class="ent-head"><span style="color:var(--blue);">🎓 Entregable Final</span></div>
+    <div class="ent-body" style="color:rgba(88,166,255,0.85);">Archivo <strong style="color:var(--blue);">MonitoreoInventario_TuNombre.ipynb</strong> con 12 celdas funcionales · Pipeline maestro ejecutar_monitoreo() operativo · Dashboard visual con 4 gráficas · 3 escenarios de prueba documentados · Código comentado en todas las funciones.</div>
+  </div>
+
+  <div style="margin-top:28px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:20px;">
+    <div style="font-family:var(--display);font-weight:700;font-size:14px;margin-bottom:14px;color:var(--text);">Criterios de evaluación</div>
+    <table class="score-table">
+      <tr><th>Criterio</th><th style="text-align:right;">Peso</th></tr>
+      <tr><td>Pipeline completo ejecutado sin errores</td><td style="text-align:right;"><span class="pct-pill" style="background:var(--green-bg);color:var(--green);">30%</span></td></tr>
+      <tr><td>Correctitud matemática del ROP y stock de seguridad</td><td style="text-align:right;"><span class="pct-pill" style="background:var(--blue-bg);color:var(--blue);">25%</span></td></tr>
+      <tr><td>Lógica de alertas con 4 niveles funcionando</td><td style="text-align:right;"><span class="pct-pill" style="background:var(--cyan-bg);color:var(--cyan);">20%</span></td></tr>
+      <tr><td>Dashboard visual generado correctamente</td><td style="text-align:right;"><span class="pct-pill" style="background:var(--yellow-bg);color:var(--yellow);">15%</span></td></tr>
+      <tr><td>Documentación del código y pruebas de escenarios</td><td style="text-align:right;"><span class="pct-pill" style="background:var(--orange-bg);color:var(--orange);">10%</span></td></tr>
+    </table>
+  </div>
+
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="goPhase(3)">← Fase 4</button>
+    <button class="nav-btn" style="border-color:var(--green-border);color:var(--green);background:var(--green-bg);">Sistema completado ✓</button>
+  </div>
+</div>
+
+</div><!-- .main -->
+
+<script>
+let currentPhase = 0;
+let timerSecs = 30 * 60;
+let timerInterval;
+
+function goPhase(n) {
+  document.querySelectorAll('.phase-block').forEach((b,i) => b.classList.toggle('active', i===n));
+  document.querySelectorAll('.pg-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+  const npts = document.querySelectorAll('.npt');
+  npts.forEach((d,i) => {
+    d.classList.remove('active','done');
+    if(i < n) d.classList.add('done');
+    if(i === n) d.classList.add('active');
+  });
+  currentPhase = n;
+  resetTimer();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function toggleStep(id) {
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+function markDone(id) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.add('completed');
+  el.classList.remove('open');
+  const chkId = 'chk-' + id;
+  const chk = document.getElementById(chkId) || el.querySelector('.schk');
+  if(chk) chk.textContent = '✓';
+  // also try the schk inside
+  const schk = el.querySelector('.schk');
+  if(schk) schk.textContent = '✓';
+}
+
+function toggleChk(el) {
+  el.classList.toggle('on');
+  el.textContent = el.classList.contains('on') ? '✓' : '';
+}
+
+function copyCode(btn, id) {
+  const pre = document.getElementById(id);
+  if(!pre) return;
+  const text = pre.innerText || pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ copiado';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 2000);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✓'; setTimeout(() => btn.textContent = 'Copiar', 1500);
+  });
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerSecs = 30 * 60;
+  updateTimer();
+  timerInterval = setInterval(() => {
+    if(timerSecs > 0) { timerSecs--; updateTimer(); }
+    else {
+      clearInterval(timerInterval);
+      document.getElementById('timer').textContent = '⏰ --:--';
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const m = Math.floor(timerSecs/60).toString().padStart(2,'0');
+  const s = (timerSecs%60).toString().padStart(2,'0');
+  document.getElementById('timer').textContent = m + ':' + s;
+}
+
+resetTimer();
+</script>
+</body>
+</html>

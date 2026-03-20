@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsiEstadística · Actividad Guiada · Licenciatura en Psicología</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #faf7f2;
+  --ink:      #1c1a17;
+  --cream:    #f0ebe0;
+  --rust:     #b84a2e;
+  --teal:     #1d6b72;
+  --amber:    #c47b1a;
+  --sage:     #4a7c59;
+  --plum:     #6b3a72;
+  --steel:    #3a5472;
+  --border:   #ddd8cc;
+  --muted:    #7a7265;
+  --white:    #ffffff;
+  --shadow:   0 2px 20px rgba(28,26,23,0.08);
+  --p1:       #1d6b72;
+  --p2:       #b84a2e;
+  --p3:       #4a7c59;
+  --p4:       #6b3a72;
+  --p5:       #c47b1a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+/* ===== BARRA SUPERIOR ===== */
+.top-strip {
+  background: var(--ink);
+  color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: var(--teal);
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 40px;
+  background: var(--bg);
+  clip-path: ellipse(55% 100% at 50% 100%);
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(0,0,0,0.1) 0%, transparent 50%);
+}
+
+.header-inner {
+  position: relative;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 56px 36px 80px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: start;
+}
+
+.header-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: rgba(255,255,255,0.4);
+}
+
+header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: white;
+  letter-spacing: -0.5px;
+}
+header h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+  display: block;
+  font-size: 0.65em;
+  margin-top: 6px;
+  letter-spacing: 0;
+}
+
+.header-meta {
+  margin-top: 20px;
+  display: flex;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.meta-pill {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.85);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  letter-spacing: 0.5px;
+  margin: 3px 3px 3px 0;
+  border-radius: 2px;
+}
+
+.time-card {
+  background: var(--rust);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 4px;
+  text-align: center;
+  align-self: center;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+.time-card .time-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+  display: block;
+}
+.time-card .time-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ===== PROGRESS ===== */
+.progress-strip {
+  height: 5px;
+  background: rgba(255,255,255,0.15);
+  position: relative;
+}
+#gp {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd280, #ffaa44);
+  width: 0%;
+  transition: width 0.7s cubic-bezier(.4,0,.2,1);
+}
+
+/* ===== COMPETENCIA ===== */
+.competencia-wrap {
+  max-width: 980px;
+  margin: 48px auto 0;
+  padding: 0 36px;
+}
+.competencia-card {
+  background: var(--ink);
+  color: white;
+  padding: 32px 36px;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.comp-icon {
+  font-size: 36px;
+  line-height: 1;
+  margin-top: 4px;
+}
+.competencia-card h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffd280;
+  margin-bottom: 10px;
+}
+.competencia-card p {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ===== GRID INTRO ===== */
+.intro-grid {
+  max-width: 980px;
+  margin: 32px auto 0;
+  padding: 0 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.intro-tile {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 22px;
+}
+.intro-tile h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.intro-tile ul { list-style: none; }
+.intro-tile ul li {
+  font-size: 13.5px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; gap: 8px; align-items: flex-start;
+  line-height: 1.5;
+}
+.intro-tile ul li:last-child { border-bottom: none; }
+.intro-tile ul li::before { content: '›'; color: var(--teal); flex-shrink: 0; font-weight: 700; }
+
+/* ===== PHASES NAV ===== */
+.phases-nav {
+  max-width: 980px;
+  margin: 48px auto 0;
+  padding: 0 36px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.ptab {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  display: flex; align-items: center; gap: 7px;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+.ptab[data-p="1"] { background: var(--p1); }
+.ptab[data-p="2"] { background: var(--p2); }
+.ptab[data-p="3"] { background: var(--p3); }
+.ptab[data-p="4"] { background: var(--p4); }
+.ptab[data-p="5"] { background: var(--p5); }
+.ptab:hover { filter: brightness(1.12); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.ptab.active { outline: 3px solid var(--ink); outline-offset: 3px; }
+.ptab .ck { display: none; color: #7dffb3; }
+.ptab.done .ck { display: inline; }
+
+/* ===== MAIN ===== */
+main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 36px 100px;
+}
+
+.phase-block { display: none; margin-top: 44px; animation: rise 0.4s ease; }
+.phase-block.active { display: block; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Phase header */
+.ph-head {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 3px solid;
+}
+.ph-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.1;
+  flex-shrink: 0;
+  margin-top: -8px;
+}
+.ph-info { flex: 1; }
+.ph-info h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.ph-info p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.ph-timer {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 3px;
+  border: 2px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+#phase1 .ph-head { border-color: var(--p1); }
+#phase1 .ph-num, #phase1 .ph-info h2 { color: var(--p1); }
+#phase1 .ph-timer { color: var(--p1); border-color: var(--p1); }
+
+#phase2 .ph-head { border-color: var(--p2); }
+#phase2 .ph-num, #phase2 .ph-info h2 { color: var(--p2); }
+#phase2 .ph-timer { color: var(--p2); border-color: var(--p2); }
+
+#phase3 .ph-head { border-color: var(--p3); }
+#phase3 .ph-num, #phase3 .ph-info h2 { color: var(--p3); }
+#phase3 .ph-timer { color: var(--p3); border-color: var(--p3); }
+
+#phase4 .ph-head { border-color: var(--p4); }
+#phase4 .ph-num, #phase4 .ph-info h2 { color: var(--p4); }
+#phase4 .ph-timer { color: var(--p4); border-color: var(--p4); }
+
+#phase5 .ph-head { border-color: var(--p5); }
+#phase5 .ph-num, #phase5 .ph-info h2 { color: var(--p5); }
+#phase5 .ph-timer { color: var(--p5); border-color: var(--p5); }
+
+/* ===== ACTIVITY CARDS ===== */
+.act {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.act:hover { box-shadow: var(--shadow); }
+.act-hd {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.act-hd:hover { background: #faf9f7; }
+.act-ico {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.act-lbl { flex: 1; }
+.act-lbl h4 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+.act-lbl small {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.act-arr {
+  font-size: 18px;
+  color: var(--muted);
+  transition: transform 0.3s;
+}
+.act.open .act-arr { transform: rotate(180deg); }
+.act-bd {
+  display: none;
+  padding: 4px 24px 24px;
+  border-top: 1px solid var(--border);
+}
+.act.open .act-bd { display: block; }
+
+/* ===== CONTENT ELEMENTS ===== */
+.note {
+  display: flex; gap: 12px;
+  padding: 14px 18px;
+  border-radius: 4px;
+  margin: 14px 0;
+  font-size: 14px;
+  line-height: 1.65;
+  align-items: flex-start;
+}
+.note-think { background: #fdf6e3; border-left: 4px solid var(--amber); }
+.note-do    { background: #edfaf0; border-left: 4px solid var(--sage); }
+.note-info  { background: #e8f4f8; border-left: 4px solid var(--teal); }
+.note-warn  { background: #fdecea; border-left: 4px solid var(--rust); }
+.note-icon  { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.note strong { font-weight: 600; }
+
+.pregbox {
+  background: linear-gradient(135deg, #f8f4ff 0%, #f4f8ff 100%);
+  border: 1px dashed #bba8d8;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+.pregbox h5 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--plum);
+  margin-bottom: 12px;
+}
+.pregbox ol { list-style: none; counter-reset: pq; }
+.pregbox ol li {
+  counter-increment: pq;
+  display: flex; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px dotted #cbbce0;
+  font-size: 14px; line-height: 1.6;
+}
+.pregbox ol li:last-child { border-bottom: none; }
+.pregbox ol li::before {
+  content: counter(pq);
+  min-width: 22px; height: 22px;
+  background: var(--plum);
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.steps { list-style: none; counter-reset: s; margin: 14px 0; }
+.steps li {
+  counter-increment: s;
+  display: flex; gap: 14px;
+  margin-bottom: 12px; align-items: flex-start;
+  font-size: 14px; line-height: 1.65;
+}
+.steps li::before {
+  content: counter(s);
+  min-width: 28px; height: 28px;
+  background: var(--ink);
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+/* Excel steps */
+.xl-step {
+  background: #f0f8f1;
+  border: 1px solid #b8d8be;
+  border-left: 4px solid var(--sage);
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin: 10px 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.xl-step::before {
+  content: attr(data-s);
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+code.fx {
+  display: inline-block;
+  background: #1a2e1c;
+  color: #85efac;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin: 1px 2px;
+}
+
+/* Link card */
+.lk {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 18px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 7px 0;
+  text-decoration: none;
+  color: var(--ink);
+  background: #faf9f7;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.lk:hover { border-color: var(--teal); background: white; transform: translateX(5px); }
+.lk .li { font-size: 22px; flex-shrink: 0; }
+.lk .lt { flex: 1; }
+.lk .lt strong { display: block; font-weight: 600; font-size: 14px; }
+.lk .lt span { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+.lk .la { color: var(--muted); font-size: 18px; }
+
+/* Table */
+table.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 14px 0;
+}
+table.dt th {
+  background: var(--ink);
+  color: white;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+table.dt td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+table.dt tr:nth-child(even) td { background: #faf9f7; }
+
+/* Deliverable box */
+.entrega {
+  background: var(--ink);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+.entrega h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffd280;
+  margin-bottom: 10px;
+}
+.entrega ul { list-style: none; }
+.entrega ul li {
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; gap: 10px;
+}
+.entrega ul li:last-child { border-bottom: none; }
+.entrega ul li::before { content: '✦'; color: #ffd280; flex-shrink: 0; }
+
+/* Phase nav btns */
+.pnav { display: flex; justify-content: space-between; margin-top: 36px; gap: 12px; }
+.btn {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 26px;
+  border: none; border-radius: 4px;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-p { background: var(--teal); color: white; }
+.btn-p:hover { background: #155a60; transform: translateY(-2px); }
+.btn-s { background: white; color: var(--ink); border: 1.5px solid var(--border); }
+.btn-s:hover { border-color: var(--ink); transform: translateY(-2px); }
+.btn-fin { background: var(--rust); color: white; margin: 0 auto; display: flex; }
+.btn-fin:hover { background: #9a3d24; transform: translateY(-2px); }
+
+/* Checklist */
+.ck-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 14px; cursor: pointer;
+}
+.ck-item:last-child { border-bottom: none; }
+.ck-item input[type=checkbox] {
+  width: 18px; height: 18px; margin-top: 2px;
+  flex-shrink: 0; accent-color: var(--teal); cursor: pointer;
+}
+.ck-item label { cursor: pointer; line-height: 1.5; }
+.ck-item.done label { text-decoration: line-through; color: var(--muted); }
+
+/* Criterios */
+.criterios {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.crit-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+  background: white;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.crit-pct {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--teal);
+  line-height: 1;
+  flex-shrink: 0;
+  min-width: 52px;
+}
+.crit-desc { font-size: 13px; line-height: 1.5; }
+.crit-desc strong { display: block; font-size: 14px; margin-bottom: 2px; }
+
+/* Final banner */
+.final-banner {
+  display: none;
+  background: var(--teal);
+  color: white;
+  text-align: center;
+  padding: 64px 36px;
+  border-radius: 4px;
+  margin-top: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.final-banner.show { display: block; animation: rise 0.5s ease; }
+.final-banner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    -55deg, transparent, transparent 25px,
+    rgba(255,255,255,0.03) 25px, rgba(255,255,255,0.03) 26px
+  );
+}
+.final-banner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  position: relative;
+  line-height: 1.15;
+}
+.final-banner h2 em { font-style: italic; color: #ffd280; }
+.final-banner p { position: relative; opacity: 0.8; margin: 12px auto; max-width: 520px; font-size: 15px; }
+.stars { font-size: 28px; margin: 16px 0; position: relative; }
+
+/* Progress counter */
+#cc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* Divider */
+.sect-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+@media (max-width: 700px) {
+  .header-inner { grid-template-columns: 1fr; }
+  .intro-grid { grid-template-columns: 1fr; }
+  .competencia-card { grid-template-columns: 1fr; }
+  .ph-num { display: none; }
+  .criterios { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-strip">Licenciatura en Psicología · Estadística Aplicada en Psicología · Actividad Guiada · Unidades V y VI</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="header-eyebrow">Actividad de aprendizaje significativo · 5 fases</div>
+      <h1>
+        Estadística Aplicada
+        <em>en Psicología</em>
+      </h1>
+      <div class="header-meta">
+        <span class="meta-pill">⏱ 5 horas</span>
+        <span class="meta-pill">Unidad V · Tabulación y Representación Gráfica</span>
+        <span class="meta-pill">Unidad VI · Medición Psicológica</span>
+        <span class="meta-pill">Excel guiado</span>
+        <span class="meta-pill">Investigación activa</span>
+      </div>
+    </div>
+    <div class="time-card">
+      <span class="time-num">5</span>
+      <span class="time-label">Horas</span>
+    </div>
+  </div>
+  <div class="progress-strip"><div id="gp"></div></div>
+</header>
+
+<!-- COMPETENCIA -->
+<div class="competencia-wrap">
+  <div class="competencia-card">
+    <div class="comp-icon">🎯</div>
+    <div>
+      <h3>Competencia a desarrollar</h3>
+      <p>El estudiante de psicología aplicará métodos estadísticos de tabulación, representación gráfica y medición psicológica para analizar e interpretar datos de fenómenos psicológicos reales, desarrollando criterio profesional para seleccionar, calcular y comunicar resultados estadísticos en contextos clínicos, educativos y organizacionales.</p>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO TILES -->
+<div class="intro-grid">
+  <div class="intro-tile">
+    <h4>Unidad V · Temas</h4>
+    <ul>
+      <li>Tabulación y representación gráfica de datos</li>
+      <li>Medidas de posición (media, mediana, moda)</li>
+      <li>Medidas de variabilidad (varianza, DE, rango)</li>
+      <li>Interpretación de puntajes en test</li>
+      <li>Muestreo y procedimientos experimentales</li>
+      <li>Medidas de relación y correlación</li>
+    </ul>
+  </div>
+  <div class="intro-tile">
+    <h4>Unidad VI · Temas</h4>
+    <ul>
+      <li>Atributos de la buena medición</li>
+      <li>Normalización y estandarización de pruebas</li>
+      <li>Pruebas en dominio cognoscitivo</li>
+      <li>Pruebas en dominio psicomotor</li>
+      <li>Pruebas en dominio afectivo y conductual</li>
+      <li>Psicología educativa y laboral</li>
+    </ul>
+  </div>
+  <div class="intro-tile">
+    <h4>Lo que construirás</h4>
+    <ul>
+      <li>Tabla de frecuencias + gráficas en Excel</li>
+      <li>Cálculo e interpretación de medidas estadísticas</li>
+      <li>Análisis de correlación entre variables psicológicas</li>
+      <li>Tabla comparativa de pruebas estandarizadas</li>
+      <li>Reporte de análisis psicológico integrado</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PHASES NAV -->
+<nav class="phases-nav">
+  <button class="ptab active" data-p="1" onclick="goPhase(1)"><span class="ck">✓</span> Fase 1 · Exploración</button>
+  <button class="ptab" data-p="2" onclick="goPhase(2)"><span class="ck">✓</span> Fase 2 · Excel Estadístico</button>
+  <button class="ptab" data-p="3" onclick="goPhase(3)"><span class="ck">✓</span> Fase 3 · Muestreo y Correlación</button>
+  <button class="ptab" data-p="4" onclick="goPhase(4)"><span class="ck">✓</span> Fase 4 · Medición Psicológica</button>
+  <button class="ptab" data-p="5" onclick="goPhase(5)"><span class="ck">✓</span> Fase 5 · Síntesis y Cierre</button>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<!-- FASE 1 -->
+<!-- ============================================================ -->
+<div class="phase-block active" id="phase1">
+  <div class="ph-head">
+    <div class="ph-num">1</div>
+    <div class="ph-info">
+      <h2>Exploración y Activación de Conocimientos</h2>
+      <p>Unidad V · Tabulación · Representación Gráfica · Medidas estadísticas</p>
+    </div>
+    <div class="ph-timer">⏱ 50 min</div>
+  </div>
+
+  <!-- 1.1 -->
+  <div class="act open">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#e8f4f8;">🧠</div>
+      <div class="act-lbl">
+        <h4>1.1 · ¿Qué sabes ya? — Exploración previa</h4>
+        <small>Reflexión individual · 10 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-warn">
+        <span class="note-icon">⚠️</span>
+        <div><strong>Antes de consultar cualquier fuente o herramienta:</strong> responde estas preguntas en tu cuaderno o un documento propio con tus palabras actuales. No existe respuesta incorrecta — este es tu punto de partida personal. Las guardarás para comparar al final.</div>
+      </div>
+      <div class="pregbox">
+        <h5>Preguntas de activación — escríbelas antes de investigar</h5>
+        <ol>
+          <li>¿Qué diferencia hay entre la media, la mediana y la moda? Da un ejemplo psicológico de cuándo usarías cada una.</li>
+          <li>¿Para qué sirve saber qué tan dispersos están los datos de un test psicológico?</li>
+          <li>¿Qué significa que un test esté "estandarizado"? ¿Por qué importa en psicología?</li>
+          <li>¿Qué es un percentil? ¿Cómo lo explicarías a un padre de familia sobre el resultado de su hijo?</li>
+          <li>¿Qué relación puede existir entre el nivel de ansiedad de un estudiante y su rendimiento académico? ¿Cómo podrías medirla?</li>
+        </ol>
+      </div>
+      <div class="note note-think">
+        <span class="note-icon">📌</span>
+        <div>Guarda estas respuestas. Las revisarás en la Fase 5 para evidenciar tu aprendizaje real a lo largo de la actividad.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.2 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdf6e3;">🔎</div>
+      <div class="act-lbl">
+        <h4>1.2 · Investigación guiada de conceptos estadísticos</h4>
+        <small>Investigación activa en línea · 25 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div>Visita los recursos siguientes. <strong>Lee activamente</strong>: toma notas propias mientras lees, no copies y pegues. Tu comprensión es el objetivo, no el texto.</div>
+      </div>
+      <a class="lk" href="https://www.khanacademy.org/math/statistics-probability/summarizing-quantitative-data" target="_blank">
+        <div class="li">📊</div>
+        <div class="lt"><strong>Khan Academy · Estadística descriptiva</strong><span>khanacademy.org · Lecciones interactivas con ejercicios en español</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.khanacademy.org/math/statistics-probability/displaying-describing-data" target="_blank">
+        <div class="li">📈</div>
+        <div class="lt"><strong>Khan Academy · Visualización y representación de datos</strong><span>khanacademy.org · Histogramas, diagramas de caja y bigotes, gráficas</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://psicologia.uaeh.edu.mx/nuestro_posgrado/maestria/p_docencia/estadistica_descriptiva.pdf" target="_blank">
+        <div class="li">📄</div>
+        <div class="lt"><strong>UAEH · Estadística descriptiva aplicada a Psicología (PDF)</strong><span>uaeh.edu.mx · Material universitario en español, contextualizado en psicología</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.apa.org/topics/testing-assessment-measurement" target="_blank">
+        <div class="li">🏛️</div>
+        <div class="lt"><strong>APA · Testing, Assessment & Measurement</strong><span>apa.org · Fuente oficial de la American Psychological Association</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="note note-think" style="margin-top:14px;">
+        <span class="note-icon">✏️</span>
+        <div>
+          <strong>Mientras investigas, responde en tu documento:</strong><br>
+          (a) Define con tus propias palabras: media, mediana, moda, varianza, desviación estándar, rango.<br>
+          (b) ¿Qué es una distribución de frecuencias y para qué sirve en psicología?<br>
+          (c) ¿Cuál es la diferencia entre un histograma y un polígono de frecuencias?<br>
+          (d) ¿Qué son los puntajes Z y cómo se usan en la interpretación de test?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.3 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#edfaf0;">🗺️</div>
+      <div class="act-lbl">
+        <h4>1.3 · Mapa conceptual: estadística en psicología</h4>
+        <small>Síntesis visual · 15 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-do">
+        <span class="note-icon">✅</span>
+        <div>Con base en lo investigado, construye un <strong>mapa conceptual</strong> (a mano o digital) que organice visualmente: <em>Medidas de posición → Medidas de variabilidad → Representación gráfica → Interpretación en test psicológicos</em>. Usa flechas con verbos para explicar cómo se relacionan.</div>
+      </div>
+      <a class="lk" href="https://www.mindmeister.com/es" target="_blank">
+        <div class="li">🗺️</div>
+        <div class="lt"><strong>MindMeister · Mapas mentales en línea (gratuito)</strong><span>mindmeister.com · Herramienta colaborativa, exporta en imagen o PDF</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.canva.com/es_mx/graficas/mapas-mentales/" target="_blank">
+        <div class="li">🎨</div>
+        <div class="lt"><strong>Canva · Mapas conceptuales (gratuito)</strong><span>canva.com · Plantillas editables, fáciles y visualmente atractivas</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="entrega">
+        <h4>Entregables · Fase 1</h4>
+        <ul>
+          <li>Respuestas escritas de la activación previa (antes de investigar, conservar original)</li>
+          <li>Notas propias de investigación con definiciones y ejemplos (mínimo 1 cuartilla)</li>
+          <li>Mapa conceptual de la estadística en psicología (imagen o PDF)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnav">
+    <div></div>
+    <button class="btn btn-p" onclick="done(1)">Completé la Fase 1 · Continuar →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FASE 2 -->
+<!-- ============================================================ -->
+<div class="phase-block" id="phase2">
+  <div class="ph-head">
+    <div class="ph-num">2</div>
+    <div class="ph-info">
+      <h2>Tabulación y Análisis Estadístico en Excel</h2>
+      <p>Unidad V · Distribución de frecuencias · Representación gráfica · Medidas de posición y variabilidad</p>
+    </div>
+    <div class="ph-timer">⏱ 80 min</div>
+  </div>
+
+  <!-- 2.1 -->
+  <div class="act open">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#edfaf0;">📋</div>
+      <div class="act-lbl">
+        <h4>2.1 · Construcción del dataset: resultados de test de ansiedad</h4>
+        <small>Excel paso a paso · 20 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div>Eres psicólogo/a en un Centro de Atención Psicológica Universitaria. Aplicaste la <strong>Escala de Ansiedad de Beck (BAI)</strong> a 35 estudiantes de licenciatura. Los puntajes van de 0 a 63 (0–7: mínima; 8–15: leve; 16–25: moderada; 26+: grave). Construirás y analizarás los datos.</div>
+      </div>
+      <div class="xl-step" data-s="Paso 1 · Abre Excel y nombra la hoja como 'Datos_BAI'">
+        En la <strong>Fila 1</strong> escribe los encabezados:<br>
+        A1: <code class="fx">ID_Estudiante</code> &nbsp; B1: <code class="fx">Sexo</code> &nbsp; C1: <code class="fx">Edad</code> &nbsp; D1: <code class="fx">Semestre</code> &nbsp; E1: <code class="fx">Puntaje_BAI</code> &nbsp; F1: <code class="fx">Categoria_Ansiedad</code>
+      </div>
+      <div class="xl-step" data-s="Paso 2 · Captura los siguientes datos (filas 2 a 36)">
+        <table class="dt">
+          <thead><tr><th>ID</th><th>Sexo</th><th>Edad</th><th>Semestre</th><th>Puntaje BAI</th><th>Categoría</th></tr></thead>
+          <tbody>
+            <tr><td>E01</td><td>F</td><td>19</td><td>2</td><td>8</td><td>Leve</td></tr>
+            <tr><td>E02</td><td>M</td><td>21</td><td>4</td><td>24</td><td>Moderada</td></tr>
+            <tr><td>E03</td><td>F</td><td>20</td><td>3</td><td>31</td><td>Grave</td></tr>
+            <tr><td>E04</td><td>F</td><td>22</td><td>6</td><td>5</td><td>Mínima</td></tr>
+            <tr><td>E05</td><td>M</td><td>19</td><td>2</td><td>17</td><td>Moderada</td></tr>
+            <tr><td>E06</td><td>F</td><td>23</td><td>7</td><td>12</td><td>Leve</td></tr>
+            <tr><td>E07</td><td>M</td><td>20</td><td>3</td><td>3</td><td>Mínima</td></tr>
+            <tr><td>E08</td><td>F</td><td>21</td><td>5</td><td>28</td><td>Grave</td></tr>
+            <tr><td>E09</td><td>M</td><td>18</td><td>1</td><td>19</td><td>Moderada</td></tr>
+            <tr><td>E10</td><td>F</td><td>24</td><td>8</td><td>6</td><td>Mínima</td></tr>
+            <tr><td colspan="6" style="text-align:center; color:var(--muted); font-style:italic; font-size:13px; padding:10px;">
+              Continúa capturando 25 registros más. Usa puntajes entre 0 y 45, sexo M/F, edades 18-26, semestres 1-9.<br>
+              <strong>Razona tú los valores:</strong> distribuye las categorías de forma realista para una población universitaria.<br>
+              (Aproximación real: ~30% mínima, ~35% leve, ~25% moderada, ~10% grave)
+            </td></tr>
+          </tbody>
+        </table>
+        <div class="note note-think" style="margin-top:10px;">
+          <span class="note-icon">💡</span>
+          <div><strong>No uses IA para generar los datos.</strong> Piensa en la distribución que sería realista para estudiantes universitarios. Esta decisión es tuya y la defenderás en tu reporte.</div>
+        </div>
+      </div>
+      <div class="xl-step" data-s="Paso 3 · Tabla de frecuencias por categoría">
+        Crea una nueva hoja llamada <strong>"Frecuencias"</strong>. Construye esta tabla manualmente:<br><br>
+        A1: <code class="fx">Categoría</code> &nbsp; B1: <code class="fx">Frecuencia_Abs</code> &nbsp; C1: <code class="fx">Frecuencia_Rel</code> &nbsp; D1: <code class="fx">Frecuencia_%</code><br><br>
+        Para calcular frecuencias absolutas usa:<br>
+        B2: <code class="fx">=COUNTIF(Datos_BAI!F:F,"Mínima")</code><br>
+        B3: <code class="fx">=COUNTIF(Datos_BAI!F:F,"Leve")</code><br>
+        B4: <code class="fx">=COUNTIF(Datos_BAI!F:F,"Moderada")</code><br>
+        B5: <code class="fx">=COUNTIF(Datos_BAI!F:F,"Grave")</code><br>
+        B6: <code class="fx">=SUM(B2:B5)</code> ← Total<br><br>
+        Frecuencia relativa (C2): <code class="fx">=B2/$B$6</code> (arrastra hasta C5)<br>
+        Porcentaje (D2): <code class="fx">=C2*100</code> (arrastra hasta D5)
+      </div>
+    </div>
+  </div>
+
+  <!-- 2.2 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdf6e3;">📐</div>
+      <div class="act-lbl">
+        <h4>2.2 · Medidas de posición y variabilidad</h4>
+        <small>Fórmulas Excel + interpretación psicológica · 30 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="xl-step" data-s="Paso 4 · Hoja 'Estadísticos' — medidas de posición">
+        Crea una hoja llamada <strong>"Estadísticos"</strong>. Calcula para la columna Puntaje_BAI:<br><br>
+        <code class="fx">Media</code> → <code class="fx">=AVERAGE(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Mediana</code> → <code class="fx">=MEDIAN(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Moda</code> → <code class="fx">=MODE(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Mínimo</code> → <code class="fx">=MIN(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Máximo</code> → <code class="fx">=MAX(Datos_BAI!E2:E36)</code>
+      </div>
+      <div class="xl-step" data-s="Paso 5 · Medidas de variabilidad">
+        <code class="fx">Rango</code> → <code class="fx">=MAX(Datos_BAI!E2:E36)-MIN(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Varianza</code> → <code class="fx">=VAR(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Desv. Estándar</code> → <code class="fx">=STDEV(Datos_BAI!E2:E36)</code><br>
+        <code class="fx">Coef. Variación</code> → <code class="fx">=(STDEV(Datos_BAI!E2:E36)/AVERAGE(Datos_BAI!E2:E36))*100</code>
+      </div>
+      <div class="xl-step" data-s="Paso 6 · Percentiles y puntajes Z">
+        <code class="fx">Percentil 25</code> → <code class="fx">=PERCENTILE(Datos_BAI!E2:E36,0.25)</code><br>
+        <code class="fx">Percentil 50</code> → <code class="fx">=PERCENTILE(Datos_BAI!E2:E36,0.5)</code><br>
+        <code class="fx">Percentil 75</code> → <code class="fx">=PERCENTILE(Datos_BAI!E2:E36,0.75)</code><br>
+        <code class="fx">Percentil 90</code> → <code class="fx">=PERCENTILE(Datos_BAI!E2:E36,0.9)</code><br><br>
+        Para calcular el puntaje Z de un estudiante con puntaje 28 (en celda aparte):<br>
+        <code class="fx">=(28-AVERAGE(Datos_BAI!E2:E36))/STDEV(Datos_BAI!E2:E36)</code>
+      </div>
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div>
+          <strong>Interpreta y escribe en tu documento:</strong><br>
+          ① ¿Qué te dice la diferencia entre la media y la mediana sobre la distribución de ansiedad?<br>
+          ② El estudiante E03 tiene puntaje 31. ¿En qué percentil queda? ¿Cómo se lo explicarías a un médico que lo refirió?<br>
+          ③ ¿Qué significa un coeficiente de variación alto en este contexto psicológico?<br>
+          ④ ¿Cuándo es más útil reportar la mediana que la media en un informe psicológico?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2.3 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#f8f4ff;">📊</div>
+      <div class="act-lbl">
+        <h4>2.3 · Representación gráfica de los datos</h4>
+        <small>Gráficas Excel · 30 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="xl-step" data-s="Paso 7 · Gráfica de barras de categorías de ansiedad">
+        1. Ve a la hoja "Frecuencias"<br>
+        2. Selecciona las columnas Categoría y Frecuencia_Abs<br>
+        3. Insertar → Gráfico → Barras agrupadas<br>
+        4. Personaliza: título "Distribución de Niveles de Ansiedad (BAI) — Muestra Universitaria", eje X con categorías, eje Y con frecuencias<br>
+        5. Aplica colores diferenciados por nivel de gravedad (verde=mínima, amarillo=leve, naranja=moderada, rojo=grave)
+      </div>
+      <div class="xl-step" data-s="Paso 8 · Histograma de puntajes continuos">
+        1. Selecciona la columna Puntaje_BAI (hoja Datos_BAI)<br>
+        2. Insertar → Gráfico → Histograma<br>
+        3. Ajusta el número de intervalos a 6 (clic derecho en eje → Dar formato al eje → Número de intervalos: 6)<br>
+        4. Título: "Histograma de Puntajes BAI"<br>
+        5. Observa la forma: ¿se aproxima a una distribución normal? ¿Está sesgada?
+      </div>
+      <div class="xl-step" data-s="Paso 9 · Gráfica de pastel por porcentaje de categorías">
+        1. En hoja "Frecuencias", selecciona Categoría y Frecuencia_%<br>
+        2. Insertar → Gráfico → Circular (pastel)<br>
+        3. Activa etiquetas de datos con porcentaje<br>
+        4. Título: "Distribución porcentual de ansiedad en la muestra"
+      </div>
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div>
+          <strong>Análisis gráfico — escribe en tu reporte:</strong><br>
+          ① ¿Cuál gráfica comunica mejor los resultados a un equipo multidisciplinario? ¿Por qué?<br>
+          ② ¿La distribución se asemeja a una curva normal? ¿Qué implicaciones tiene para la interpretación de los puntajes?<br>
+          ③ Si fueras a presentar este informe a las autoridades universitarias para solicitar más servicios de atención psicológica, ¿qué gráfica elegirías y qué dato destacarías primero?
+        </div>
+      </div>
+      <a class="lk" href="https://support.microsoft.com/es-es/office/crear-un-histograma-85680173-064b-4024-b39d-80f17ff2f4e8" target="_blank">
+        <div class="li">📘</div>
+        <div class="lt"><strong>Microsoft Support · Histograma en Excel (guía oficial)</strong><span>support.microsoft.com · En español, paso a paso con imágenes</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.youtube.com/watch?v=E6P3aGCKIgU" target="_blank">
+        <div class="li">🎬</div>
+        <div class="lt"><strong>Tutorial · Gráficas estadísticas en Excel en español</strong><span>youtube.com · Video práctico de apoyo visual</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="entrega">
+        <h4>Entregables · Fase 2</h4>
+        <ul>
+          <li>Archivo Excel con hoja Datos_BAI (35 estudiantes completos)</li>
+          <li>Hoja Frecuencias con tabla de distribución calculada</li>
+          <li>Hoja Estadísticos con todas las medidas y percentiles</li>
+          <li>Tres gráficas: barras, histograma y pastel con formato profesional</li>
+          <li>Interpretación escrita de los resultados estadísticos en lenguaje psicológico</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnav">
+    <button class="btn btn-s" onclick="goPhase(1)">← Fase anterior</button>
+    <button class="btn btn-p" onclick="done(2)">Completé la Fase 2 · Continuar →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FASE 3 -->
+<!-- ============================================================ -->
+<div class="phase-block" id="phase3">
+  <div class="ph-head">
+    <div class="ph-num">3</div>
+    <div class="ph-info">
+      <h2>Muestreo, Procedimientos Experimentales y Correlación</h2>
+      <p>Unidad V · Muestreo · Procedimientos experimentales · Medidas de relación</p>
+    </div>
+    <div class="ph-timer">⏱ 50 min</div>
+  </div>
+
+  <!-- 3.1 -->
+  <div class="act open">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdecea;">🧪</div>
+      <div class="act-lbl">
+        <h4>3.1 · Muestreo en investigación psicológica</h4>
+        <small>Investigación + reflexión crítica · 20 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div><strong>Antes de leer:</strong> Tu muestra actual tiene 35 estudiantes. ¿Crees que es representativa de todos los estudiantes universitarios de tu ciudad? Escribe tu hipótesis y los posibles sesgos que observas.</div>
+      </div>
+      <a class="lk" href="https://www.scribbr.es/metodologia/tipos-de-muestreo/" target="_blank">
+        <div class="li">📚</div>
+        <div class="lt"><strong>Scribbr · Tipos de muestreo — guía completa en español</strong><span>scribbr.es · Probabilístico vs. no probabilístico, con ejemplos de psicología</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.redalyc.org/pdf/647/64730400006.pdf" target="_blank">
+        <div class="li">📄</div>
+        <div class="lt"><strong>Redalyc · El muestreo en la investigación psicológica (PDF)</strong><span>redalyc.org · Artículo académico en español sobre metodología en psicología</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="pregbox">
+        <h5>Analiza y responde — escríbelo en tu documento</h5>
+        <ol>
+          <li>¿Qué tipo de muestreo usaste al construir tus 35 casos? ¿Probabilístico o no probabilístico? ¿De qué subtipo?</li>
+          <li>¿Qué sesgos introduce ese tipo de muestreo en los resultados del BAI?</li>
+          <li>¿Cómo afecta el tamaño de la muestra (n=35) a la confiabilidad de tus estadísticos?</li>
+          <li>Si quisieras generalizar estos resultados a todos los estudiantes de tu universidad, ¿qué procedimiento de muestreo deberías haber usado?</li>
+          <li>¿Qué diferencia hay entre un diseño experimental y uno correlacional en psicología? ¿Cuál usarías para estudiar la ansiedad universitaria?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3.2 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#e8f4f8;">📉</div>
+      <div class="act-lbl">
+        <h4>3.2 · Medidas de relación: correlación entre variables psicológicas</h4>
+        <small>Excel · Correlación y dispersión · 25 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div>Agregarás una segunda variable a tu dataset: el <strong>Promedio Académico</strong> de cada estudiante (escala 6.0 a 10.0). Luego analizarás si existe relación entre ansiedad y rendimiento académico.</div>
+      </div>
+      <div class="xl-step" data-s="Paso 10 · Agregar variable de promedio académico">
+        En la hoja Datos_BAI, agrega en columna G:<br>
+        G1: <code class="fx">Promedio_Acad</code><br><br>
+        Captura promedios entre 6.0 y 9.8 para los 35 estudiantes.<br>
+        <strong>Piensa:</strong> ¿esperarías que los estudiantes con ansiedad grave tengan promedios más bajos? ¿O no necesariamente? Asigna los valores siguiendo tu razonamiento profesional.
+      </div>
+      <div class="xl-step" data-s="Paso 11 · Diagrama de dispersión Ansiedad vs. Promedio">
+        1. Selecciona columnas E (Puntaje_BAI) y G (Promedio_Acad) simultáneamente<br>
+        2. Insertar → Gráfico → Dispersión (XY Scatter)<br>
+        3. Título: "Relación entre Ansiedad (BAI) y Promedio Académico"<br>
+        4. Eje X: Puntaje BAI · Eje Y: Promedio académico<br>
+        5. Clic derecho en los puntos → "Agregar línea de tendencia" → Lineal → Marcar "Mostrar ecuación" y "Mostrar valor R²"
+      </div>
+      <div class="xl-step" data-s="Paso 12 · Calcular coeficiente de correlación de Pearson">
+        En la hoja "Estadísticos", agrega:<br>
+        <code class="fx">Correlación (r)</code> → <code class="fx">=CORREL(Datos_BAI!E2:E36, Datos_BAI!G2:G36)</code><br><br>
+        Interpreta el valor según la escala de Cohen:<br>
+        r = 0.10–0.29: débil · r = 0.30–0.49: moderada · r ≥ 0.50: fuerte<br>
+        (El signo indica la dirección: negativo = relación inversa)
+      </div>
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div>
+          <strong>Análisis crítico — escribe en tu informe:</strong><br>
+          ① ¿Cuál es el valor r que obtuviste? ¿Es la correlación que esperabas?<br>
+          ② ¿Una correlación negativa significa que la ansiedad <em>causa</em> bajo rendimiento? Argumenta.<br>
+          ③ ¿Qué otras variables podrían estar influyendo en esta relación (variables confusoras)?<br>
+          ④ ¿Qué limitaciones tiene el coeficiente r de Pearson? ¿Cuándo usarías Spearman en vez de Pearson?
+        </div>
+      </div>
+      <a class="lk" href="https://www.statstutor.ac.uk/resources/uploaded/spearmans.pdf" target="_blank">
+        <div class="li">📄</div>
+        <div class="lt"><strong>StatsTutor · Correlación de Spearman vs. Pearson</strong><span>statstutor.ac.uk · Guía sobre cuándo usar cada coeficiente</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="entrega">
+        <h4>Entregables · Fase 3</h4>
+        <ul>
+          <li>Excel actualizado con variable Promedio_Acad y dispersigrama</li>
+          <li>Valor r calculado con interpretación en lenguaje psicológico</li>
+          <li>Respuestas escritas sobre muestreo, sesgos y tipo de diseño</li>
+          <li>Análisis crítico: correlación ≠ causalidad, con argumentación propia</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnav">
+    <button class="btn btn-s" onclick="goPhase(2)">← Fase anterior</button>
+    <button class="btn btn-p" onclick="done(3)">Completé la Fase 3 · Continuar →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FASE 4 -->
+<!-- ============================================================ -->
+<div class="phase-block" id="phase4">
+  <div class="ph-head">
+    <div class="ph-num">4</div>
+    <div class="ph-info">
+      <h2>Medición Educativa y Psicológica</h2>
+      <p>Unidad VI · Atributos de la medición · Normalización · Pruebas estandarizadas por dominio</p>
+    </div>
+    <div class="ph-timer">⏱ 60 min</div>
+  </div>
+
+  <!-- 4.1 -->
+  <div class="act open">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#e8f4f8;">🏛️</div>
+      <div class="act-lbl">
+        <h4>4.1 · Atributos de una buena medición psicológica</h4>
+        <small>Investigación guiada · 15 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div><strong>Antes de investigar:</strong> El BAI que usaste en las fases anteriores, ¿crees que es una buena medición? ¿Qué características debería tener para que confíes en sus resultados? Escribe 3 características desde tu sentido común.</div>
+      </div>
+      <a class="lk" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4604689/" target="_blank">
+        <div class="li">🔬</div>
+        <div class="lt"><strong>PubMed Central · Validez y confiabilidad en instrumentos psicológicos</strong><span>ncbi.nlm.nih.gov · Artículo académico de acceso libre en inglés</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.redalyc.org/pdf/798/79811201.pdf" target="_blank">
+        <div class="li">📄</div>
+        <div class="lt"><strong>Redalyc · Psicometría: confiabilidad y validez de pruebas psicológicas (PDF)</strong><span>redalyc.org · Artículo en español, altamente citado en la disciplina</span></div>
+        <div class="la">→</div>
+      </a>
+      <div class="note note-do" style="margin-top:14px;">
+        <span class="note-icon">✅</span>
+        <div>
+          <strong>Define con tus propias palabras y pon un ejemplo de cada concepto:</strong><br>
+          <strong>Validez</strong> · <strong>Confiabilidad</strong> · <strong>Objetividad</strong> · <strong>Normalización</strong> · <strong>Estandarización</strong><br><br>
+          Luego evalúa el BAI: ¿cumple cada uno de estos atributos? Justifica con lo que investigaste.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4.2 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdf6e3;">🧩</div>
+      <div class="act-lbl">
+        <h4>4.2 · Investigación de pruebas estandarizadas por dominio</h4>
+        <small>Investigación comparativa + Excel · 30 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div>Para cada dominio, investiga una prueba estandarizada real. Anota: nombre oficial, autor/editorial, qué mide exactamente, población objetivo, cómo se puntúa e interpreta, y evidencia de validez reportada.</div>
+      </div>
+
+      <a class="lk" href="https://www.pearsonassessments.com/professional-assessments/products/all/wechsler-adult-intelligence-scale.html" target="_blank">
+        <div class="li">🧠</div>
+        <div class="lt"><strong>WAIS-IV · Dominio Cognoscitivo — Escala de Inteligencia de Wechsler</strong><span>pearsonassessments.com · Prueba de inteligencia para adultos más usada en psicología</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://beck-institute.org/beck-inventory-instruments/" target="_blank">
+        <div class="li">❤️</div>
+        <div class="lt"><strong>Beck Institute · Inventarios de Beck — Dominio Afectivo</strong><span>beck-institute.org · BDI-II (depresión) y BAI (ansiedad) — instrumentos que ya trabajaste</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.mhs.com/MHS-Assessment?prod=conners3" target="_blank">
+        <div class="li">⚙️</div>
+        <div class="lt"><strong>Conners 3 · Dominio Conductual — Evaluación del TDAH</strong><span>mhs.com · Escala de evaluación de conducta de Conners, 3ª edición</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.testpublishers.org" target="_blank">
+        <div class="li">🏃</div>
+        <div class="lt"><strong>ATP · Asociación de editores de test psicológicos</strong><span>testpublishers.org · Información sobre pruebas psicomotoras y estándares</span></div>
+        <div class="la">→</div>
+      </a>
+      <a class="lk" href="https://www.siop.org" target="_blank">
+        <div class="li">🏢</div>
+        <div class="lt"><strong>SIOP · Psicología Industrial/Organizacional</strong><span>siop.org · Evaluación en contextos laborales y educativos</span></div>
+        <div class="la">→</div>
+      </a>
+
+      <div class="xl-step" data-s="Paso 13 · Hoja Excel 'Pruebas_Estandarizadas'">
+        Crea una nueva hoja con estas columnas:<br>
+        <code class="fx">Dominio</code> · <code class="fx">Nombre_Prueba</code> · <code class="fx">Autor_Año</code> · <code class="fx">Qué_Mide</code> · <code class="fx">Población</code> · <code class="fx">Forma_Interpretación</code> · <code class="fx">Validez_Reportada</code> · <code class="fx">Uso_en_México</code><br><br>
+        Llena una fila completa para cada dominio:<br>
+        ① Cognoscitivo &nbsp; ② Psicomotor &nbsp; ③ Afectivo &nbsp; ④ Conductual &nbsp; ⑤ Psicología Educativa/Laboral<br><br>
+        Aplica formato condicional: resalta en amarillo las pruebas disponibles en español y validadas en México.
+      </div>
+
+      <div class="pregbox">
+        <h5>Reflexión comparativa — escríbela en tu documento</h5>
+        <ol>
+          <li>¿Cuál de las 5 pruebas te parece más sólida psicométricamente? ¿Por qué?</li>
+          <li>¿Cuál podría tener más sesgos culturales si se aplica en México sin adaptación? Argumenta.</li>
+          <li>¿Cómo se interpretan los puntajes estándar (puntajes T, CI, percentiles) en cada dominio?</li>
+          <li>¿Qué diferencia hay entre una prueba "referida a normas" y una "referida a criterios"?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4.3 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#edfaf0;">💼</div>
+      <div class="act-lbl">
+        <h4>4.3 · Caso clínico-educativo: elección de instrumentos</h4>
+        <small>Aplicación profesional · 15 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div><strong>Escenario:</strong> Eres psicólogo/a escolar. Se te remite a una estudiante de 16 años con bajo rendimiento académico, dificultades de atención, conductas de evitación y reportes de tristeza frecuente por parte de sus maestros. Debes diseñar una evaluación psicológica integral.</div>
+      </div>
+      <div class="pregbox">
+        <h5>Diseña tu batería de evaluación y justifica cada decisión</h5>
+        <ol>
+          <li>¿Qué dominios evaluarías y en qué orden? Justifica la secuencia.</li>
+          <li>¿Qué prueba estandarizada elegirías para cada dominio? ¿Por qué esa y no otra?</li>
+          <li>¿Cómo garantizarías que las pruebas elegidas son válidas y confiables para esta joven y su contexto sociocultural?</li>
+          <li>¿Cómo interpretarías y comunicarías los resultados a sus padres? ¿Usarías percentiles o categorías? ¿Por qué?</li>
+          <li>¿Qué limitaciones estadísticas de las pruebas debes mencionar en tu informe?</li>
+        </ol>
+      </div>
+      <div class="entrega">
+        <h4>Entregables · Fase 4</h4>
+        <ul>
+          <li>Definiciones propias de los 5 atributos de medición + evaluación del BAI</li>
+          <li>Hoja Excel "Pruebas_Estandarizadas" completada con los 5 dominios</li>
+          <li>Respuestas a la reflexión comparativa entre pruebas</li>
+          <li>Diseño de batería de evaluación para el caso clínico-educativo justificado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnav">
+    <button class="btn btn-s" onclick="goPhase(3)">← Fase anterior</button>
+    <button class="btn btn-p" onclick="done(4)">Completé la Fase 4 · Continuar →</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- FASE 5 -->
+<!-- ============================================================ -->
+<div class="phase-block" id="phase5">
+  <div class="ph-head">
+    <div class="ph-num">5</div>
+    <div class="ph-info">
+      <h2>Síntesis, Reporte Final y Metacognición</h2>
+      <p>Integración de las 4 fases · Análisis crítico · Contraste de aprendizaje</p>
+    </div>
+    <div class="ph-timer">⏱ 60 min</div>
+  </div>
+
+  <!-- 5.1 -->
+  <div class="act open">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdecea;">📝</div>
+      <div class="act-lbl">
+        <h4>5.1 · Reporte psicológico de análisis estadístico</h4>
+        <small>Redacción profesional · 30 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-info">
+        <span class="note-icon">📌</span>
+        <div>Redacta un <strong>reporte psicológico de análisis estadístico</strong> sobre el estudio de ansiedad universitaria que construiste. Este no es un resumen de la actividad — es un documento profesional con tus hallazgos reales de Excel.</div>
+      </div>
+      <ol class="steps">
+        <li><strong>Encabezado profesional:</strong> Título del estudio, nombre del evaluador/a, fecha, institución ficticia.</li>
+        <li><strong>Objetivo del estudio:</strong> ¿Qué se buscaba conocer y por qué es relevante para la psicología universitaria?</li>
+        <li><strong>Descripción de la muestra:</strong> n, distribución por sexo, edad, semestre. Menciona el tipo de muestreo y sus limitaciones.</li>
+        <li><strong>Instrumento utilizado:</strong> Describe brevemente el BAI: qué mide, quién lo desarrolló, sus propiedades psicométricas.</li>
+        <li><strong>Resultados estadísticos:</strong> Reporta media, mediana, DE, percentiles y distribución por categorías. Incluye las gráficas más relevantes. Usa tablas.</li>
+        <li><strong>Análisis de correlación:</strong> Reporta el valor r entre ansiedad y promedio académico. Interpreta la dirección, magnitud y significado psicológico. Aclara los límites causales.</li>
+        <li><strong>Discusión y conclusiones:</strong> ¿Qué significan estos hallazgos para la atención psicológica universitaria? ¿Qué recomendaciones harías?</li>
+        <li><strong>Limitaciones del estudio:</strong> Sé honesto/a sobre las debilidades metodológicas y estadísticas.</li>
+      </ol>
+      <div class="note note-warn">
+        <span class="note-icon">⚠️</span>
+        <div><strong>Sobre el uso de IA:</strong> Puedes consultarla como herramienta de apoyo para redacción. Sin embargo, los datos estadísticos, las gráficas y los valores numéricos son específicamente de tu Excel — ninguna IA los tiene. El análisis e interpretación debe ser tuyo/a. Si tu docente pregunta cualquier número o decisión del reporte, debes poder explicarlo.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5.2 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#e8f4f8;">🔁</div>
+      <div class="act-lbl">
+        <h4>5.2 · Contraste de conocimiento: antes y después</h4>
+        <small>Metacognición · 15 min</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <div class="note note-do">
+        <span class="note-icon">✅</span>
+        <div>Recupera las respuestas que escribiste en la <strong>Fase 1, Actividad 1.1</strong>. Ahora responde las mismas 5 preguntas de nuevo. Coloca ambas versiones en un cuadro comparativo: columna izquierda "Antes", columna derecha "Después".</div>
+      </div>
+      <div class="pregbox">
+        <h5>Preguntas de cierre — respóndelas con tu conocimiento construido</h5>
+        <ol>
+          <li>¿Qué diferencia hay entre la media, la mediana y la moda? Da un ejemplo del BAI que analizaste.</li>
+          <li>¿Para qué sirve saber qué tan dispersos están los datos? ¿Qué te dijo la DE de tu muestra?</li>
+          <li>¿Qué significa que un test esté "estandarizado"? ¿Cómo lo verificaste en las pruebas que investigaste?</li>
+          <li>¿Qué es un percentil? Explícalo usando el caso del estudiante E03 de tu muestra.</li>
+          <li>¿Qué relación encontraste entre ansiedad y promedio? ¿Qué limitaciones tiene esa conclusión?</li>
+        </ol>
+      </div>
+      <div class="note note-think">
+        <span class="note-icon">💡</span>
+        <div>Además del contraste, escribe un párrafo breve: <em>"Lo más importante que aprendí en esta actividad fue..."</em> y <em>"Una pregunta nueva que me surgió y que me gustaría seguir investigando es..."</em></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5.3 -->
+  <div class="act">
+    <div class="act-hd" onclick="tog(this)">
+      <div class="act-ico" style="background:#fdf6e3;">✅</div>
+      <div class="act-lbl">
+        <h4>5.3 · Lista de verificación de entregables</h4>
+        <small>Autoevaluación final</small>
+      </div>
+      <div class="act-arr">▾</div>
+    </div>
+    <div class="act-bd">
+      <p style="font-size:14px; margin-bottom:16px; color:var(--muted);">Marca cada elemento antes de entregar tu actividad completa:</p>
+      <div id="cklist">
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Respuestas de activación previa escritas antes de investigar (Fase 1)</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Notas propias de investigación de conceptos estadísticos (1 cuartilla mínimo)</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Mapa conceptual: medidas estadísticas vinculadas a la psicología</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Excel — Hoja Datos_BAI con 35 estudiantes completos</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Excel — Hoja Frecuencias con tabla de distribución calculada</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Excel — Hoja Estadísticos con media, mediana, DE, varianza, percentiles y Z</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Gráfica de barras por categorías de ansiedad (con formato profesional)</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Histograma de puntajes continuos del BAI</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Gráfica circular de distribución porcentual</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Dispersigrama ansiedad vs. promedio académico con línea de tendencia y R²</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Coeficiente r de Pearson calculado e interpretado en lenguaje psicológico</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Análisis escrito de muestreo: tipo, sesgos y limitaciones</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Excel — Hoja Pruebas_Estandarizadas con los 5 dominios completados</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Batería de evaluación para el caso clínico-educativo (justificada)</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Reporte psicológico de análisis estadístico (8 secciones)</label></div>
+        <div class="ck-item" onclick="chk(this)"><input type="checkbox"><label>Cuadro comparativo: respuestas antes vs. después (metacognición)</label></div>
+      </div>
+      <div id="cc">0 / 16 completados</div>
+
+      <hr class="sect-divider">
+      <h4 style="font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:16px;">Criterios de evaluación sugeridos</h4>
+      <div class="criterios">
+        <div class="crit-card">
+          <div class="crit-pct">30%</div>
+          <div class="crit-desc"><strong>Análisis e interpretación estadística</strong>No solo calcular — sino explicar qué significa cada resultado en contexto psicológico</div>
+        </div>
+        <div class="crit-card">
+          <div class="crit-pct">25%</div>
+          <div class="crit-desc"><strong>Calidad del trabajo en Excel</strong>Datos, fórmulas correctas, gráficas profesionales y organizadas con formato claro</div>
+        </div>
+        <div class="crit-card">
+          <div class="crit-pct">20%</div>
+          <div class="crit-desc"><strong>Reporte psicológico</strong>Redacción profesional, uso correcto de lenguaje técnico, coherencia y fundamentación</div>
+        </div>
+        <div class="crit-card">
+          <div class="crit-pct">15%</div>
+          <div class="crit-desc"><strong>Investigación y profundidad</strong>Fuentes pertinentes consultadas, pruebas estandarizadas bien documentadas</div>
+        </div>
+        <div class="crit-card" style="grid-column:1/-1;">
+          <div class="crit-pct" style="color:var(--rust);">10%</div>
+          <div class="crit-desc"><strong>Metacognición</strong>Evidencia real de aprendizaje: contraste antes/después y reflexión sobre qué nuevas preguntas surgieron</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:40px;">
+    <button class="btn btn-fin" onclick="finalizar()">🎓 Marcar actividad como completada</button>
+  </div>
+
+  <div class="pnav" style="margin-top:24px;">
+    <button class="btn btn-s" onclick="goPhase(4)">← Fase anterior</button>
+    <div></div>
+  </div>
+</div>
+
+<!-- FINAL BANNER -->
+<div class="final-banner" id="fb">
+  <div class="stars">🌟🌟🌟🌟🌟</div>
+  <h2>¡Actividad<br><em>Completada!</em></h2>
+  <p>Has construido conocimiento estadístico aplicado a la psicología de manera activa, reflexiva y significativa a través de 5 fases de trabajo.</p>
+  <p style="font-family:'IBM Plex Mono',monospace; font-size:12px; color:rgba(255,255,255,0.5); margin-top:20px;">
+    Estadística Aplicada en Psicología · Licenciatura en Psicología · 5 horas
+  </p>
+</div>
+
+</main>
+
+<script>
+let done_phases = new Set();
+
+function goPhase(n) {
+  document.querySelectorAll('.phase-block').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('phase' + n).classList.add('active');
+  document.querySelector('.ptab[data-p="' + n + '"]').classList.add('active');
+  document.querySelector('.phases-nav').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  window.scrollTo({ top: document.querySelector('.phases-nav').offsetTop - 16, behavior: 'smooth' });
+}
+
+function done(n) {
+  done_phases.add(n);
+  document.querySelector('.ptab[data-p="' + n + '"]').classList.add('done');
+  document.getElementById('gp').style.width = (done_phases.size / 5 * 100) + '%';
+  if (n < 5) goPhase(n + 1);
+}
+
+function tog(hd) {
+  hd.parentElement.classList.toggle('open');
+}
+
+function chk(item) {
+  const cb = item.querySelector('input');
+  cb.checked = !cb.checked;
+  item.classList.toggle('done', cb.checked);
+  const total = document.querySelectorAll('.ck-item').length;
+  const n = document.querySelectorAll('.ck-item.done').length;
+  document.getElementById('cc').textContent = n + ' / ' + total + ' completados';
+}
+
+function finalizar() {
+  done_phases.add(5);
+  document.querySelector('.ptab[data-p="5"]').classList.add('done');
+  document.getElementById('gp').style.width = '100%';
+  const fb = document.getElementById('fb');
+  fb.classList.add('show');
+  setTimeout(() => fb.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compiladores — Movimiento y Animaciones 2D en Unity</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1628;
+    --bg3: #141c35;
+    --card: #161e38;
+    --border: #1e2d55;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --green: #22d3a5;
+    --yellow: #f5c842;
+    --red: #f76c6c;
+    --orange: #f89c4f;
+    --text: #dde6ff;
+    --text2: #7a8fb5;
+    --text3: #4a5a80;
+    --glow: rgba(79,142,247,0.18);
+    --glow2: rgba(124,58,237,0.18);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content:'';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,14,26,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .nav-logo span { color: var(--green); }
+
+  .nav-links {
+    display: flex;
+    gap: 0.3rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(79,142,247,0.08);
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    transition: width 0.4s ease;
+    z-index: 99;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* MAIN */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 6rem;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem 3rem;
+    position: relative;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(79,142,247,0.12);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 70%, var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    color: var(--text2);
+    font-size: 1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .meta-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .meta-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* SECTION */
+  .section {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform: translateY(12px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  /* PHASE BADGE */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .phase-1 .phase-header::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .phase-2 .phase-header::before { background: linear-gradient(90deg, var(--green), var(--yellow)); }
+
+  .phase-num {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .phase-1 .phase-num { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid var(--accent); }
+  .phase-2 .phase-num { background: rgba(34,211,165,0.15); color: var(--green); border: 1px solid var(--green); }
+
+  .phase-info h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .phase-info p {
+    font-size: 0.85rem;
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 400;
+  }
+  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); }
+  .badge-green { background: rgba(34,211,165,0.15); color: var(--green); border: 1px solid rgba(34,211,165,0.3); }
+  .badge-yellow { background: rgba(245,200,66,0.15); color: var(--yellow); border: 1px solid rgba(245,200,66,0.3); }
+  .badge-red { background: rgba(247,108,108,0.15); color: var(--red); border: 1px solid rgba(247,108,108,0.3); }
+  .badge-orange { background: rgba(248,156,79,0.15); color: var(--orange); border: 1px solid rgba(248,156,79,0.3); }
+
+  .card p, .card li {
+    color: var(--text2);
+    font-size: 0.9rem;
+    line-height: 1.75;
+  }
+  .card ul, .card ol {
+    padding-left: 1.4rem;
+    margin-top: 0.5rem;
+  }
+  .card li { margin-bottom: 0.4rem; }
+
+  /* STEP */
+  .step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-num.green { border-color: var(--green); color: var(--green); }
+  .step-num.yellow { border-color: var(--yellow); color: var(--yellow); }
+
+  .step-content { flex: 1; }
+
+  .step-content h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .step-content p, .step-content li {
+    color: var(--text2);
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  /* CODE */
+  .code-block {
+    background: #07091a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 0.8rem 0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .code-block::before {
+    content: 'C#';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .code-block pre {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    white-space: pre;
+    color: #c9d1d9;
+  }
+
+  .kw { color: #79c0ff; }
+  .cls { color: #ffa657; }
+  .str { color: #a5d6ff; }
+  .cmt { color: #4a5a80; font-style: italic; }
+  .fn { color: #d2a8ff; }
+  .num { color: #f0883e; }
+  .var { color: #e6edf3; }
+
+  /* LINK RESOURCE */
+  .resource-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 0.6rem 0;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .resource-link:hover {
+    border-color: var(--accent);
+    background: rgba(79,142,247,0.06);
+    transform: translateX(4px);
+  }
+
+  .resource-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .resource-link .r-info { flex: 1; }
+  .resource-link .r-title { font-size: 0.88rem; font-weight: 700; }
+  .resource-link .r-sub { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--text3); margin-top: 0.15rem; }
+  .resource-link .r-arrow { color: var(--text3); font-size: 0.8rem; }
+
+  /* ALERT */
+  .alert {
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .alert-info { background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.25); color: var(--text2); }
+  .alert-warn { background: rgba(245,200,66,0.08); border: 1px solid rgba(245,200,66,0.25); color: var(--text2); }
+  .alert-tip { background: rgba(34,211,165,0.08); border: 1px solid rgba(34,211,165,0.25); color: var(--text2); }
+  .alert-think { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.3); color: var(--text2); }
+
+  /* REFLECT */
+  .reflect-box {
+    background: rgba(124,58,237,0.08);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0;
+  }
+
+  .reflect-box h4 {
+    color: #c084fc;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .reflect-box p, .reflect-box li {
+    color: var(--text2);
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  .reflect-box ul { padding-left: 1.2rem; }
+  .reflect-box li { margin-bottom: 0.4rem; }
+
+  /* CHECKLIST */
+  .checklist label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 0.875rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .checklist label:last-child { border-bottom: none; }
+  .checklist input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+  .checklist label.checked { color: var(--green); text-decoration: line-through; text-decoration-color: rgba(34,211,165,0.4); }
+
+  /* TIMER */
+  .timer-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.2rem;
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+  .timer-icon { font-size: 1rem; }
+  .timer-text { font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--yellow); flex: 1; }
+  .timer-duration { font-family: 'Space Mono', monospace; font-size: 0.85rem; font-weight: 700; color: var(--yellow); }
+
+  /* NAV BOTTOM */
+  .nav-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #3d7df5; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(79,142,247,0.3); }
+  .btn-secondary {
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-green {
+    background: var(--green);
+    color: #0a0e1a;
+  }
+  .btn-green:hover { background: #1bbf94; transform: translateY(-1px); }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+    font-size: 0.83rem;
+  }
+  th {
+    background: var(--bg3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    color: var(--text2);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(79,142,247,0.03); }
+
+  /* DIAGRAM */
+  .dir-diagram {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 0.4rem;
+    max-width: 220px;
+    margin: 1rem auto;
+  }
+
+  .dir-cell {
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: var(--bg3);
+    transition: all 0.2s;
+  }
+  .dir-cell:hover { border-color: var(--accent); background: rgba(79,142,247,0.1); }
+  .dir-cell.center { background: rgba(79,142,247,0.15); border-color: var(--accent); }
+  .dir-cell.active { border-color: var(--green); background: rgba(34,211,165,0.1); }
+  .dir-cell span { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--text3); margin-top: 0.2rem; }
+
+  /* GLOW EFFECTS */
+  .glow-accent { color: var(--accent); }
+  .glow-green { color: var(--green); }
+  .glow-yellow { color: var(--yellow); }
+
+  /* OVERVIEW TABLE */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .ov-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+  }
+
+  .ov-card .ov-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .ov-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .ov-card p { font-size: 0.8rem; color: var(--text3); line-height: 1.6; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  @media(max-width:600px){
+    nav { padding: 0 1rem; }
+    main { padding: 1.5rem 1rem 5rem; }
+    .hero h1 { font-size: 1.8rem; }
+    .hero-meta { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<nav>
+  <div class="nav-logo">Unity<span>2D</span> Lab</div>
+  <div class="nav-links" id="navLinks">
+    <button class="nav-btn active" onclick="showSection('intro',this)">Intro</button>
+    <button class="nav-btn" onclick="showSection('setup',this)">Setup</button>
+    <button class="nav-btn" onclick="showSection('assets',this)">Assets</button>
+    <button class="nav-btn" onclick="showSection('fase1a',this)">F1 · Movimiento</button>
+    <button class="nav-btn" onclick="showSection('fase1b',this)">F1 · Script</button>
+    <button class="nav-btn" onclick="showSection('fase1c',this)">F1 · 4 Dir</button>
+    <button class="nav-btn" onclick="showSection('fase2a',this)">F2 · Animator</button>
+    <button class="nav-btn" onclick="showSection('fase2b',this)">F2 · 8 Dir</button>
+    <button class="nav-btn" onclick="showSection('reto',this)">Reto Final</button>
+    <button class="nav-btn" onclick="showSection('entrega',this)">Entrega</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ========== INTRO ========== -->
+<div id="intro" class="section active">
+  <div class="hero">
+    <div class="hero-tag">⚙️ Compiladores · Unidad 3 · Actividad Práctica</div>
+    <h1>Movimiento &amp; Animaciones<br>de Personaje 2D en Unity</h1>
+    <p>Construirás desde cero un personaje 2D completamente funcional con movimiento en 4 y 8 direcciones, animaciones blend tree y física controlada — todo en Unity como entorno de compilación en tiempo real.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><span class="meta-val">5h</span><span class="meta-lbl">Duración total</span></div>
+      <div class="meta-item"><span class="meta-val">2</span><span class="meta-lbl">Fases</span></div>
+      <div class="meta-item"><span class="meta-val">8</span><span class="meta-lbl">Módulos</span></div>
+      <div class="meta-item"><span class="meta-val">C#</span><span class="meta-lbl">Lenguaje</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 Objetivos de Aprendizaje</div>
+    <ul>
+      <li>Identificar a Unity como <strong>compilador Just-In-Time (JIT)</strong> que traduce C# a IL y luego a código máquina mediante Mono/IL2CPP.</li>
+      <li>Implementar el ciclo <strong>Input → Lógica → Physics → Render</strong> a través de scripts MonoBehaviour.</li>
+      <li>Programar movimiento en <strong>4 direcciones</strong> (arriba, abajo, izquierda, derecha) con vectores normalizados.</li>
+      <li>Escalar a <strong>8 direcciones</strong> añadiendo diagonales y usando Blend Trees en el Animator.</li>
+      <li>Conectar parámetros de animación con variables de código mediante la <strong>API de Animator</strong>.</li>
+    </ul>
+  </div>
+
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-icon">🔧</div>
+      <h4>Fase 1 · 2.5h</h4>
+      <p>Configuración del proyecto, importación de assets y movimiento de personaje en 4 direcciones con física 2D.</p>
+    </div>
+    <div class="ov-card">
+      <div class="ov-icon">🎬</div>
+      <h4>Fase 2 · 2h</h4>
+      <p>Sistema de animaciones con Animator Controller, Blend Trees para 8 direcciones y conexión con el código.</p>
+    </div>
+    <div class="ov-card">
+      <div class="ov-icon">🏆</div>
+      <h4>Reto Final · 30min</h4>
+      <p>Integración completa y personalización del sistema. Demostrás lo aprendido con tu propio personaje.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Sobre el uso de IA:</strong> Puedes consultar herramientas de IA para entender conceptos, pero cada bloque de código deberás escribirlo <strong>tú mismo</strong> en Unity. Las preguntas de reflexión (🧠) están diseñadas para que ninguna IA pueda responderlas sin que tú hayas hecho el ejercicio real.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <span></span>
+    <button class="btn btn-primary" onclick="showSection('setup',document.querySelectorAll('.nav-btn')[1])">Comenzar → Configuración</button>
+  </div>
+</div>
+
+<!-- ========== SETUP ========== -->
+<div id="setup" class="section">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 1 · Configuración del entorno</span>
+    <span class="timer-duration">~30 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🛠 Requisitos previos</div>
+    <p>Antes de iniciar, verifica que tengas instalado:</p>
+    <br>
+    <div class="checklist" id="setupCheck">
+      <label><input type="checkbox" onchange="checkLabel(this)"> Unity Hub instalado (versión 3.x o superior)</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> Unity Editor 2022 LTS o 2023 instalado con módulo <strong>Windows/Mac Build Support</strong></label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> Visual Studio 2022 o VS Code con extensión C#</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> Cuenta en Unity ID (gratuita)</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 Recursos de instalación <span class="badge badge-blue">Externos</span></div>
+    <a class="resource-link" href="https://unity.com/download" target="_blank">
+      <div class="resource-icon" style="background:rgba(79,142,247,0.1)">🎮</div>
+      <div class="r-info">
+        <div class="r-title">unity.com/download</div>
+        <div class="r-sub">Descarga oficial de Unity Hub → selecciona Unity 2022 LTS</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://learn.unity.com/tutorial/install-unity-editor" target="_blank">
+      <div class="resource-icon" style="background:rgba(34,211,165,0.1)">📖</div>
+      <div class="r-info">
+        <div class="r-title">learn.unity.com · Instalar Unity Editor</div>
+        <div class="r-sub">Tutorial oficial paso a paso de instalación</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://docs.unity3d.com/Manual/2DOrthographic.html" target="_blank">
+      <div class="resource-icon" style="background:rgba(245,200,66,0.1)">📚</div>
+      <div class="r-info">
+        <div class="r-title">docs.unity3d.com · Proyectos 2D</div>
+        <div class="r-sub">Documentación oficial sobre cámara ortográfica y modo 2D</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🆕 Paso a paso: Crear el proyecto</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Abrir Unity Hub → New Project</h4>
+        <p>Selecciona la plantilla <strong>2D (Built-in Render Pipeline)</strong>. Nómbralo <code>MovimientoPersonaje2D</code>. Elige una carpeta sin espacios en la ruta.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Estructura de carpetas</h4>
+        <p>En el panel <strong>Project</strong>, crea las siguientes carpetas dentro de <code>Assets/</code>:</p>
+        <div class="code-block">
+          <pre><span class="cmt">// Estructura recomendada en Assets/</span>
+Assets/
+├── Sprites/
+│   ├── Personaje/
+│   └── Fondo/
+├── Scripts/
+├── Animations/
+│   └── Controllers/
+└── Scenes/</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Verificar configuración 2D</h4>
+        <p>Menú <strong>Edit → Project Settings → Editor</strong>: asegúrate de que <em>Default Behavior Mode</em> esté en <strong>2D</strong>. Confirma que la cámara principal tiene <em>Projection: Orthographic</em>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Guardar la escena base</h4>
+        <p>Ctrl+S → guarda como <code>Assets/Scenes/GameScene.unity</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-tip">
+    <span class="alert-icon">💡</span>
+    <div><strong>¿Por qué Unity como compilador?</strong> Unity usa <strong>Roslyn</strong> para compilar tu C# a <em>Intermediate Language (IL)</em>, luego Mono/IL2CPP lo traduce a código de máquina. Cada vez que presionas Play, Unity recompila los scripts modificados. Esto es compilación <strong>incremental Just-In-Time</strong>.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('intro',document.querySelectorAll('.nav-btn')[0])">← Intro</button>
+    <button class="btn btn-primary" onclick="showSection('assets',document.querySelectorAll('.nav-btn')[2])">Siguiente → Assets</button>
+  </div>
+</div>
+
+<!-- ========== ASSETS ========== -->
+<div id="assets" class="section">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 2 · Importación de assets</span>
+    <span class="timer-duration">~20 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎨 Assets gratuitos para descargar <span class="badge badge-green">Gratis</span></div>
+    <p>Descarga los sprites de personaje y fondo de estos sitios oficiales y libres de derechos:</p>
+    <br>
+
+    <a class="resource-link" href="https://assetstore.unity.com/packages/2d/characters/2d-characters-top-down-3rd-person-controller-202201" target="_blank">
+      <div class="resource-icon" style="background:rgba(79,142,247,0.1)">🧑</div>
+      <div class="r-info">
+        <div class="r-title">Unity Asset Store · 2D Top-Down Characters</div>
+        <div class="r-sub">Personajes con sprites en 4 y 8 direcciones — gratuito</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+
+    <a class="resource-link" href="https://assetstore.unity.com/packages/2d/environments/free-asset-2d-handcrafted-art-117049" target="_blank">
+      <div class="resource-icon" style="background:rgba(34,211,165,0.1)">🌲</div>
+      <div class="r-info">
+        <div class="r-title">Unity Asset Store · Free 2D Handcrafted Art</div>
+        <div class="r-sub">Tiles y fondos top-down gratuitos</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+
+    <a class="resource-link" href="https://itch.io/game-assets/free/tag-top-down" target="_blank">
+      <div class="resource-icon" style="background:rgba(245,200,66,0.1)">🎭</div>
+      <div class="r-info">
+        <div class="r-title">itch.io · Free Top-Down Game Assets</div>
+        <div class="r-sub">Amplia selección de sprites top-down con licencia abierta</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+
+    <a class="resource-link" href="https://kenney.nl/assets?q=top+down" target="_blank">
+      <div class="resource-icon" style="background:rgba(248,156,79,0.1)">🏪</div>
+      <div class="r-info">
+        <div class="r-title">kenney.nl · Top-Down Assets</div>
+        <div class="r-sub">Assets CC0 (dominio público) — personajes, tiles y fondos listos para Unity</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+
+    <a class="resource-link" href="https://opengameart.org/content/lpc-character-sprites" target="_blank">
+      <div class="resource-icon" style="background:rgba(124,58,237,0.1)">🎮</div>
+      <div class="r-info">
+        <div class="r-title">OpenGameArt · LPC Character Sprites</div>
+        <div class="r-sub">Spritesheet clásico en 4 y 8 direcciones (walk cycle completo)</div>
+      </div>
+      <span class="r-arrow">↗</span>
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📥 Importar sprites a Unity</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Arrastrar la imagen al proyecto</h4>
+        <p>Arrastra el archivo PNG/spritesheet a la carpeta <code>Assets/Sprites/Personaje/</code> en el panel Project.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Configurar Texture Import Settings</h4>
+        <p>Selecciona el sprite en Project → en el Inspector configura:</p>
+        <table>
+          <tr><th>Propiedad</th><th>Valor</th><th>Por qué</th></tr>
+          <tr><td>Texture Type</td><td>Sprite (2D and UI)</td><td>Activa el modo sprite</td></tr>
+          <tr><td>Sprite Mode</td><td>Multiple</td><td>Para spritesheets</td></tr>
+          <tr><td>Pixels Per Unit</td><td>16 ó 32</td><td>Según resolución del sprite</td></tr>
+          <tr><td>Filter Mode</td><td>Point (no filter)</td><td>Evita blur en pixel art</td></tr>
+          <tr><td>Compression</td><td>None</td><td>Sprites pequeños no necesitan compresión</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Slice del spritesheet</h4>
+        <p>Click en <strong>Sprite Editor</strong> → <em>Slice</em> → selecciona <strong>Grid By Cell Size</strong> → ingresa el ancho y alto de cada frame (ej. 48×48 px) → Apply. Unity cortará automáticamente todos los frames.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Crear el GameObject del personaje</h4>
+        <p>Arrastra uno de los frames del spritesheet a la escena. Esto crea un <strong>GameObject</strong> con <em>Sprite Renderer</em>. Renómbralo <code>Jugador</code>. Añade los componentes: <strong>Rigidbody2D</strong> (Gravity Scale = 0, Constraints = Freeze Rotation Z) y <strong>CapsuleCollider2D</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="reflect-box">
+    <h4>🧠 Reflexión A (escribe tu respuesta en tu libreta)</h4>
+    <ul>
+      <li>¿Por qué ponemos <em>Gravity Scale = 0</em> en un juego top-down? ¿Qué pasaría si lo dejáramos en 1?</li>
+      <li>¿Cuál es la diferencia entre un <em>Rigidbody2D</em> Kinematic y uno Dynamic? ¿Cuál usarías para un personaje controlado por el jugador?</li>
+      <li>Cuando Unity importa el spritesheet y lo compila al construir el juego, ¿en qué etapa del pipeline de compilación participan los shaders de sprites?</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('setup',document.querySelectorAll('.nav-btn')[1])">← Setup</button>
+    <button class="btn btn-primary" onclick="showSection('fase1a',document.querySelectorAll('.nav-btn')[3])">Siguiente → Fase 1: Movimiento</button>
+  </div>
+</div>
+
+<!-- ========== FASE 1A ========== -->
+<div id="fase1a" class="section phase-1">
+  <div class="phase-header">
+    <div class="phase-num">1</div>
+    <div class="phase-info">
+      <h2>Fase 1 · Movimiento de Personaje</h2>
+      <p>Duración: ~2.5 horas · C# · Rigidbody2D · Input System</p>
+    </div>
+  </div>
+
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 3 · Fundamentos de movimiento 2D</span>
+    <span class="timer-duration">~45 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧭 ¿Cómo funciona el movimiento en Unity?</div>
+    <p>Antes de programar, comprende el flujo de datos:</p>
+    <br>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;text-align:center;margin:1rem 0;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;">
+        <div style="font-size:1.2rem;margin-bottom:0.3rem;">🎮</div>
+        <strong>Input</strong><br><span style="color:var(--text3);font-size:0.7rem;">Teclado/Gamepad</span>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.2rem;">→</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;">
+        <div style="font-size:1.2rem;margin-bottom:0.3rem;">⚙️</div>
+        <strong>Script C#</strong><br><span style="color:var(--text3);font-size:0.7rem;">Lógica · Vector2</span>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.2rem;">→</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;text-align:center;margin:0.5rem 0;">
+      <div style="background:rgba(79,142,247,0.08);border:1px solid var(--accent);border-radius:8px;padding:0.8rem;font-size:0.75rem;">
+        <div style="font-size:1.2rem;margin-bottom:0.3rem;">🔵</div>
+        <strong>Rigidbody2D</strong><br><span style="color:var(--text3);font-size:0.7rem;">velocity / MovePosition</span>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.2rem;">→</div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:0.8rem;font-size:0.75rem;">
+        <div style="font-size:1.2rem;margin-bottom:0.3rem;">🖥</div>
+        <strong>Render</strong><br><span style="color:var(--text3);font-size:0.7rem;">SpriteRenderer</span>
+      </div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📐 El Vector de Movimiento</div>
+    <p>El movimiento en 2D se representa como un <strong>Vector2(x, y)</strong>. Para las 4 direcciones básicas:</p>
+    <br>
+
+    <div class="dir-diagram">
+      <div class="dir-cell"></div>
+      <div class="dir-cell active">↑<span>W / ↑</span></div>
+      <div class="dir-cell"></div>
+      <div class="dir-cell active">←<span>A / ←</span></div>
+      <div class="dir-cell center">●<span>Player</span></div>
+      <div class="dir-cell active">→<span>D / →</span></div>
+      <div class="dir-cell"></div>
+      <div class="dir-cell active">↓<span>S / ↓</span></div>
+      <div class="dir-cell"></div>
+    </div>
+
+    <br>
+    <table>
+      <tr><th>Dirección</th><th>Tecla</th><th>Vector2</th></tr>
+      <tr><td>Arriba</td><td>W / ↑</td><td><code>(0, 1)</code></td></tr>
+      <tr><td>Abajo</td><td>S / ↓</td><td><code>(0, -1)</code></td></tr>
+      <tr><td>Izquierda</td><td>A / ←</td><td><code>(-1, 0)</code></td></tr>
+      <tr><td>Derecha</td><td>D / →</td><td><code>(1, 0)</code></td></tr>
+    </table>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">ℹ️</span>
+    <div><strong>Normalización:</strong> Cuando se presionan dos teclas simultáneamente (diagonal), el vector resultante tiene magnitud <code>√2 ≈ 1.41</code>. Normalizar lo lleva de vuelta a magnitud 1 para velocidad consistente. Unity tiene <code>Vector2.normalized</code> y <code>.sqrMagnitude > 0</code> para verificar si hay movimiento.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('assets',document.querySelectorAll('.nav-btn')[2])">← Assets</button>
+    <button class="btn btn-primary" onclick="showSection('fase1b',document.querySelectorAll('.nav-btn')[4])">Siguiente → Escribir el Script</button>
+  </div>
+</div>
+
+<!-- ========== FASE 1B ========== -->
+<div id="fase1b" class="section phase-1">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 4 · Programación del PlayerController</span>
+    <span class="timer-duration">~50 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💻 Crear el Script PlayerController <span class="badge badge-yellow">Código</span></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Crear el archivo C#</h4>
+        <p>En Project → <code>Assets/Scripts/</code> → click derecho → <strong>Create → C# Script</strong> → nómbralo <code>PlayerController</code>. Doble click para abrir en Visual Studio.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Variables y referencias (escribe esto primero)</h4>
+        <div class="code-block"><pre><span class="kw">using</span> <span class="cls">UnityEngine</span>;
+
+<span class="kw">public class</span> <span class="cls">PlayerController</span> : <span class="cls">MonoBehaviour</span>
+{
+    <span class="cmt">// ——— Inspector Variables ———</span>
+    [<span class="cls">Header</span>(<span class="str">"Movimiento"</span>)]
+    [<span class="cls">SerializeField</span>] <span class="kw">private float</span> <span class="var">velocidad</span> = <span class="num">3f</span>;
+
+    <span class="cmt">// ——— Referencias privadas ———</span>
+    <span class="kw">private</span> <span class="cls">Rigidbody2D</span> <span class="var">rb</span>;
+    <span class="kw">private</span> <span class="cls">Vector2</span> <span class="var">direccion</span>;
+}</pre></div>
+        <div class="alert alert-tip">
+          <span class="alert-icon">💡</span>
+          <div><code>[SerializeField]</code> expone la variable en el Inspector sin hacerla public. Así el diseñador ajusta la velocidad sin tocar el código.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Método Awake — obtener referencias</h4>
+        <div class="code-block"><pre>    <span class="kw">void</span> <span class="fn">Awake</span>()
+    {
+        <span class="cmt">// GetComponent busca en THIS GameObject</span>
+        <span class="var">rb</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">Rigidbody2D</span>&gt;();
+    }</pre></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Método Update — leer input</h4>
+        <p><strong>Update</strong> se ejecuta cada frame (render). Aquí sólo lees input, nunca mueves físicamente.</p>
+        <div class="code-block"><pre>    <span class="kw">void</span> <span class="fn">Update</span>()
+    {
+        <span class="cmt">// Input.GetAxisRaw evita suavizado (valores exactos -1, 0 o 1)</span>
+        <span class="kw">float</span> <span class="var">horizontal</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Horizontal"</span>);
+        <span class="kw">float</span> <span class="var">vertical</span>   = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Vertical"</span>);
+
+        <span class="var">direccion</span> = <span class="kw">new</span> <span class="cls">Vector2</span>(<span class="var">horizontal</span>, <span class="var">vertical</span>).<span class="var">normalized</span>;
+    }</pre></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Método FixedUpdate — aplicar física</h4>
+        <p><strong>FixedUpdate</strong> corre a paso fijo (50 Hz por defecto). Aquí aplicas fuerzas y velocidad al Rigidbody.</p>
+        <div class="code-block"><pre>    <span class="kw">void</span> <span class="fn">FixedUpdate</span>()
+    {
+        <span class="cmt">// Mover directamente con velocity (sin inercia)</span>
+        <span class="var">rb</span>.<span class="var">velocity</span> = <span class="var">direccion</span> * <span class="var">velocidad</span>;
+    }</pre></div>
+        <div class="alert alert-warn">
+          <span class="alert-icon">⚠️</span>
+          <div>¿Por qué NO mover en Update? Porque Update depende del framerate. Si el juego corre a 30 FPS vs 120 FPS, el personaje se movería a diferente velocidad. FixedUpdate garantiza consistencia física.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Asignar el script al personaje</h4>
+        <p>Arrastra el script <code>PlayerController</code> desde Project al GameObject <strong>Jugador</strong> en la jerarquía, o usa <em>Add Component</em> en el Inspector.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">▶️ Probar el movimiento</div>
+    <div class="step">
+      <div class="step-num green">✓</div>
+      <div class="step-content">
+        <h4>Play Mode → verificación</h4>
+        <p>Presiona <strong>Play</strong> (▶) en Unity. El personaje debe moverse con WASD o las flechas. Verifica:</p>
+        <div class="checklist">
+          <label><input type="checkbox" onchange="checkLabel(this)"> El personaje se mueve ↑↓←→</label>
+          <label><input type="checkbox" onchange="checkLabel(this)"> En diagonal la velocidad es igual que en línea recta (normalización funciona)</label>
+          <label><input type="checkbox" onchange="checkLabel(this)"> Al soltar las teclas el personaje se detiene inmediatamente</label>
+          <label><input type="checkbox" onchange="checkLabel(this)"> El personaje no rota al chocar (Freeze Rotation Z activo)</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reflect-box">
+    <h4>🧠 Reflexión B — Preguntas de análisis</h4>
+    <ul>
+      <li>Abre la consola de Unity y añade <code>Debug.Log(direccion)</code> en Update. ¿Qué valores ves al presionar sólo W? ¿Y al presionar W+D simultáneamente?</li>
+      <li>Cambia <code>GetAxisRaw</code> a <code>GetAxis</code>. ¿Qué diferencia observas al iniciar y detener el movimiento? ¿Cuál produce el efecto de "resbaladizo"?</li>
+      <li>¿Qué es el <em>IL (Intermediate Language)</em> que Unity genera de tu script C#? ¿En qué se diferencia de bytecode de Java?</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('fase1a',document.querySelectorAll('.nav-btn')[3])">← Fundamentos</button>
+    <button class="btn btn-primary" onclick="showSection('fase1c',document.querySelectorAll('.nav-btn')[5])">Siguiente → 4 Direcciones Completo</button>
+  </div>
+</div>
+
+<!-- ========== FASE 1C ========== -->
+<div id="fase1c" class="section phase-1">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 5 · Sistema de 4 direcciones + flip de sprite</span>
+    <span class="timer-duration">~35 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 Voltear el sprite según dirección</div>
+    <p>Para que el personaje "mire" hacia donde se mueve, necesitas voltear el Sprite Renderer horizontalmente:</p>
+    <br>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Agregar referencia al SpriteRenderer</h4>
+        <div class="code-block"><pre>    <span class="cmt">// Añade esta variable junto a las otras</span>
+    <span class="kw">private</span> <span class="cls">SpriteRenderer</span> <span class="var">sr</span>;
+
+    <span class="kw">void</span> <span class="fn">Awake</span>()
+    {
+        <span class="var">rb</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">Rigidbody2D</span>&gt;();
+        <span class="var">sr</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">SpriteRenderer</span>&gt;();
+    }</pre></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Flip horizontal en Update</h4>
+        <div class="code-block"><pre>    <span class="kw">void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">float</span> <span class="var">h</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Horizontal"</span>);
+        <span class="kw">float</span> <span class="var">v</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Vertical"</span>);
+
+        <span class="var">direccion</span> = <span class="kw">new</span> <span class="cls">Vector2</span>(<span class="var">h</span>, <span class="var">v</span>).<span class="var">normalized</span>;
+
+        <span class="cmt">// Voltear sprite según movimiento horizontal</span>
+        <span class="kw">if</span> (<span class="var">h</span> != <span class="num">0</span>)
+        {
+            <span class="var">sr</span>.<span class="var">flipX</span> = (<span class="var">h</span> &lt; <span class="num">0</span>); <span class="cmt">// true = mirando izquierda</span>
+        }
+    }</pre></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Detectar dirección predominante (para animaciones)</h4>
+        <p>Agrega una propiedad que indique la dirección principal del último movimiento:</p>
+        <div class="code-block"><pre>    <span class="cmt">// Variable para rastrear última dirección</span>
+    <span class="kw">public</span> <span class="cls">Vector2</span> <span class="var">UltimaDireccion</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">float</span> <span class="var">h</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Horizontal"</span>);
+        <span class="kw">float</span> <span class="var">v</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Vertical"</span>);
+
+        <span class="var">direccion</span> = <span class="kw">new</span> <span class="cls">Vector2</span>(<span class="var">h</span>, <span class="var">v</span>).<span class="var">normalized</span>;
+
+        <span class="kw">if</span> (<span class="var">direccion</span> != <span class="cls">Vector2</span>.<span class="var">zero</span>)
+        {
+            <span class="var">UltimaDireccion</span> = <span class="var">direccion</span>;
+        }
+
+        <span class="kw">if</span> (<span class="var">h</span> != <span class="num">0</span>)
+            <span class="var">sr</span>.<span class="var">flipX</span> = (<span class="var">h</span> &lt; <span class="num">0</span>);
+    }</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 Script completo Fase 1</div>
+    <div class="code-block"><pre><span class="kw">using</span> <span class="cls">UnityEngine</span>;
+
+<span class="kw">public class</span> <span class="cls">PlayerController</span> : <span class="cls">MonoBehaviour</span>
+{
+    [<span class="cls">Header</span>(<span class="str">"Movimiento"</span>)]
+    [<span class="cls">SerializeField</span>] <span class="kw">private float</span> <span class="var">velocidad</span> = <span class="num">3f</span>;
+
+    <span class="kw">private</span> <span class="cls">Rigidbody2D</span>  <span class="var">rb</span>;
+    <span class="kw">private</span> <span class="cls">SpriteRenderer</span> <span class="var">sr</span>;
+    <span class="kw">private</span> <span class="cls">Vector2</span> <span class="var">direccion</span>;
+
+    <span class="kw">public</span> <span class="cls">Vector2</span> <span class="var">UltimaDireccion</span> { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">void</span> <span class="fn">Awake</span>()
+    {
+        <span class="var">rb</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">Rigidbody2D</span>&gt;();
+        <span class="var">sr</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">SpriteRenderer</span>&gt;();
+        <span class="var">UltimaDireccion</span> = <span class="cls">Vector2</span>.<span class="var">down</span>; <span class="cmt">// inicia mirando abajo</span>
+    }
+
+    <span class="kw">void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">float</span> <span class="var">h</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Horizontal"</span>);
+        <span class="kw">float</span> <span class="var">v</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Vertical"</span>);
+
+        <span class="var">direccion</span> = <span class="kw">new</span> <span class="cls">Vector2</span>(<span class="var">h</span>, <span class="var">v</span>).<span class="var">normalized</span>;
+
+        <span class="kw">if</span> (<span class="var">direccion</span> != <span class="cls">Vector2</span>.<span class="var">zero</span>)
+            <span class="var">UltimaDireccion</span> = <span class="var">direccion</span>;
+
+        <span class="kw">if</span> (<span class="var">h</span> != <span class="num">0</span>)
+            <span class="var">sr</span>.<span class="var">flipX</span> = (<span class="var">h</span> &lt; <span class="num">0</span>);
+    }
+
+    <span class="kw">void</span> <span class="fn">FixedUpdate</span>()
+    {
+        <span class="var">rb</span>.<span class="var">velocity</span> = <span class="var">direccion</span> * <span class="var">velocidad</span>;
+    }
+}</pre></div>
+  </div>
+
+  <div class="alert alert-tip">
+    <span class="alert-icon">💡</span>
+    <div>Documentación de referencia para esta sección: <a href="https://docs.unity3d.com/ScriptReference/Rigidbody2D.html" target="_blank" style="color:var(--accent)">docs.unity3d.com/ScriptReference/Rigidbody2D</a> y <a href="https://docs.unity3d.com/ScriptReference/Input.GetAxisRaw.html" target="_blank" style="color:var(--accent)">Input.GetAxisRaw</a></div>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('fase1b',document.querySelectorAll('.nav-btn')[4])">← Script</button>
+    <button class="btn btn-green" onclick="showSection('fase2a',document.querySelectorAll('.nav-btn')[6])">✓ Fase 1 completa → Iniciar Fase 2</button>
+  </div>
+</div>
+
+<!-- ========== FASE 2A ========== -->
+<div id="fase2a" class="section phase-2">
+  <div class="phase-header">
+    <div class="phase-num">2</div>
+    <div class="phase-info">
+      <h2>Fase 2 · Animaciones con Blend Tree</h2>
+      <p>Duración: ~2 horas · Animator · Blend Trees · 8 Direcciones</p>
+    </div>
+  </div>
+
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 6 · Animator Controller y clips de animación</span>
+    <span class="timer-duration">~50 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎬 Crear el Animator Controller</div>
+
+    <div class="step">
+      <div class="step-num green">1</div>
+      <div class="step-content">
+        <h4>Crear el asset Animator Controller</h4>
+        <p>Project → <code>Assets/Animations/Controllers/</code> → click derecho → <strong>Create → Animator Controller</strong> → nómbralo <code>PlayerAnimator</code>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">2</div>
+      <div class="step-content">
+        <h4>Añadir Animator al GameObject</h4>
+        <p>Selecciona <strong>Jugador</strong> en la jerarquía → Inspector → <strong>Add Component → Animator</strong>. Arrastra <code>PlayerAnimator</code> al campo <em>Controller</em>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-content">
+        <h4>Crear animaciones de caminata por dirección</h4>
+        <p>Para movimiento en 4 direcciones necesitas al menos estas animaciones:</p>
+        <table>
+          <tr><th>Nombre del Clip</th><th>Dirección</th><th>Frames del Spritesheet</th></tr>
+          <tr><td>Walk_Down</td><td>↓ Sur</td><td>Fila 0 del spritesheet</td></tr>
+          <tr><td>Walk_Up</td><td>↑ Norte</td><td>Fila 3 del spritesheet</td></tr>
+          <tr><td>Walk_Side</td><td>← → Lateral</td><td>Fila 1 del spritesheet</td></tr>
+          <tr><td>Idle_Down</td><td>Quieto mirando abajo</td><td>Frame 0, fila 0</td></tr>
+        </table>
+        <br>
+        <p>Para crear cada clip: selecciona el personaje en la jerarquía → menú <strong>Window → Animation → Animation</strong> → <em>Create</em> → guarda en <code>Assets/Animations/</code>. Arrastra los frames del spritesheet al timeline.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">4</div>
+      <div class="step-content">
+        <h4>Añadir parámetros al Animator</h4>
+        <p>En la ventana <strong>Animator</strong> (pestaña Parameters), agrega:</p>
+        <table>
+          <tr><th>Nombre</th><th>Tipo</th><th>Uso</th></tr>
+          <tr><td>moveX</td><td>Float</td><td>Componente horizontal de movimiento</td></tr>
+          <tr><td>moveY</td><td>Float</td><td>Componente vertical de movimiento</td></tr>
+          <tr><td>isMoving</td><td>Bool</td><td>Si el personaje se está moviendo</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌀 Crear el Blend Tree</div>
+    <p>Un <strong>Blend Tree</strong> combina múltiples animaciones basándose en valores float, perfectamente para movimiento omnidireccional.</p>
+    <br>
+
+    <div class="step">
+      <div class="step-num green">5</div>
+      <div class="step-content">
+        <h4>Crear Blend Tree en el Animator</h4>
+        <p>En la ventana Animator → click derecho en el área vacía → <strong>Create State → From New Blend Tree</strong>. Nombra el estado <code>Walk</code>. Doble click para entrar al Blend Tree.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">6</div>
+      <div class="step-content">
+        <h4>Configurar el Blend Tree 2D Simple Directional</h4>
+        <p>En el Inspector del Blend Tree:</p>
+        <ul>
+          <li>Blend Type: <strong>2D Simple Directional</strong></li>
+          <li>Parameters: <strong>moveX</strong> y <strong>moveY</strong></li>
+          <li>Añade motions con el botón <strong>+</strong>:</li>
+        </ul>
+        <br>
+        <table>
+          <tr><th>Motion (Clip)</th><th>Pos X</th><th>Pos Y</th></tr>
+          <tr><td>Walk_Down</td><td>0</td><td>-1</td></tr>
+          <tr><td>Walk_Up</td><td>0</td><td>1</td></tr>
+          <tr><td>Walk_Side</td><td>1</td><td>0</td></tr>
+          <tr><td>Walk_Side (flipX)</td><td>-1</td><td>0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">7</div>
+      <div class="step-content">
+        <h4>Transiciones Idle ↔ Walk</h4>
+        <p>Regresa al nivel raíz del Animator. Crea un estado <code>Idle</code> con el clip <code>Idle_Down</code>. Configura transiciones:</p>
+        <ul>
+          <li><strong>Any State → Walk:</strong> condición <code>isMoving = true</code></li>
+          <li><strong>Walk → Idle:</strong> condición <code>isMoving = false</code></li>
+          <li>En ambas transiciones: deshabilita <em>Has Exit Time</em> para respuesta inmediata.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">ℹ️</span>
+    <div>Referencia oficial: <a href="https://docs.unity3d.com/Manual/class-BlendTree.html" target="_blank" style="color:var(--accent)">docs.unity3d.com/Manual/class-BlendTree</a> — explica todos los tipos de Blend Tree y cuándo usar cada uno.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('fase1c',document.querySelectorAll('.nav-btn')[5])">← Fase 1</button>
+    <button class="btn btn-primary" onclick="showSection('fase2b',document.querySelectorAll('.nav-btn')[7])">Siguiente → 8 Direcciones + Código</button>
+  </div>
+</div>
+
+<!-- ========== FASE 2B ========== -->
+<div id="fase2b" class="section phase-2">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 7 · 8 Direcciones: código y conexión Animator</span>
+    <span class="timer-duration">~70 min</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔗 Conectar el código con el Animator <span class="badge badge-green">Código</span></div>
+
+    <div class="step">
+      <div class="step-num green">1</div>
+      <div class="step-content">
+        <h4>Actualizar PlayerController — agregar Animator</h4>
+        <div class="code-block"><pre><span class="kw">using</span> <span class="cls">UnityEngine</span>;
+
+<span class="kw">public class</span> <span class="cls">PlayerController</span> : <span class="cls">MonoBehaviour</span>
+{
+    [<span class="cls">Header</span>(<span class="str">"Movimiento"</span>)]
+    [<span class="cls">SerializeField</span>] <span class="kw">private float</span> <span class="var">velocidad</span> = <span class="num">3f</span>;
+
+    <span class="kw">private</span> <span class="cls">Rigidbody2D</span>   <span class="var">rb</span>;
+    <span class="kw">private</span> <span class="cls">SpriteRenderer</span> <span class="var">sr</span>;
+    <span class="kw">private</span> <span class="cls">Animator</span>       <span class="var">anim</span>;
+    <span class="kw">private</span> <span class="cls">Vector2</span>        <span class="var">direccion</span>;
+
+    <span class="cmt">// Hashes = más eficiente que strings en cada frame</span>
+    <span class="kw">private static readonly int</span> <span class="var">HashMoveX</span>     = <span class="cls">Animator</span>.<span class="fn">StringToHash</span>(<span class="str">"moveX"</span>);
+    <span class="kw">private static readonly int</span> <span class="var">HashMoveY</span>     = <span class="cls">Animator</span>.<span class="fn">StringToHash</span>(<span class="str">"moveY"</span>);
+    <span class="kw">private static readonly int</span> <span class="var">HashIsMoving</span>  = <span class="cls">Animator</span>.<span class="fn">StringToHash</span>(<span class="str">"isMoving"</span>);
+
+    <span class="kw">void</span> <span class="fn">Awake</span>()
+    {
+        <span class="var">rb</span>   = <span class="fn">GetComponent</span>&lt;<span class="cls">Rigidbody2D</span>&gt;();
+        <span class="var">sr</span>   = <span class="fn">GetComponent</span>&lt;<span class="cls">SpriteRenderer</span>&gt;();
+        <span class="var">anim</span> = <span class="fn">GetComponent</span>&lt;<span class="cls">Animator</span>&gt;();
+    }</pre></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">2</div>
+      <div class="step-content">
+        <h4>Update — input y actualizar Animator</h4>
+        <div class="code-block"><pre>    <span class="kw">void</span> <span class="fn">Update</span>()
+    {
+        <span class="kw">float</span> <span class="var">h</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Horizontal"</span>);
+        <span class="kw">float</span> <span class="var">v</span> = <span class="cls">Input</span>.<span class="fn">GetAxisRaw</span>(<span class="str">"Vertical"</span>);
+
+        <span class="var">direccion</span> = <span class="kw">new</span> <span class="cls">Vector2</span>(<span class="var">h</span>, <span class="var">v</span>).<span class="var">normalized</span>;
+
+        <span class="kw">bool</span> <span class="var">moviéndose</span> = <span class="var">direccion</span>.<span class="var">sqrMagnitude</span> > <span class="num">0.01f</span>;
+
+        <span class="cmt">// Enviar parámetros al Animator</span>
+        <span class="var">anim</span>.<span class="fn">SetBool</span>(<span class="var">HashIsMoving</span>, <span class="var">moviéndose</span>);
+
+        <span class="kw">if</span> (<span class="var">moviéndose</span>)
+        {
+            <span class="var">anim</span>.<span class="fn">SetFloat</span>(<span class="var">HashMoveX</span>, <span class="var">direccion</span>.<span class="var">x</span>);
+            <span class="var">anim</span>.<span class="fn">SetFloat</span>(<span class="var">HashMoveY</span>, <span class="var">direccion</span>.<span class="var">y</span>);
+
+            <span class="cmt">// Flip horizontal para movimiento lateral</span>
+            <span class="kw">if</span> (<span class="var">h</span> != <span class="num">0</span>)
+                <span class="var">sr</span>.<span class="var">flipX</span> = (<span class="var">h</span> &lt; <span class="num">0</span>);
+        }
+    }
+
+    <span class="kw">void</span> <span class="fn">FixedUpdate</span>()
+    {
+        <span class="var">rb</span>.<span class="var">velocity</span> = <span class="var">direccion</span> * <span class="var">velocidad</span>;
+    }
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧭 Extender a 8 Direcciones</div>
+
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-content">
+        <h4>Añadir clips diagonales al Blend Tree</h4>
+        <p>Si tu spritesheet incluye animaciones diagonales, agrégalas al Blend Tree con estas posiciones:</p>
+        <table>
+          <tr><th>Motion</th><th>Pos X</th><th>Pos Y</th></tr>
+          <tr><td>Walk_Down</td><td>0</td><td>-1</td></tr>
+          <tr><td>Walk_Up</td><td>0</td><td>1</td></tr>
+          <tr><td>Walk_Right</td><td>1</td><td>0</td></tr>
+          <tr><td>Walk_Left</td><td>-1</td><td>0</td></tr>
+          <tr><td>Walk_DiagDownRight</td><td>0.7</td><td>-0.7</td></tr>
+          <tr><td>Walk_DiagDownLeft</td><td>-0.7</td><td>-0.7</td></tr>
+          <tr><td>Walk_DiagUpRight</td><td>0.7</td><td>0.7</td></tr>
+          <tr><td>Walk_DiagUpLeft</td><td>-0.7</td><td>0.7</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">4</div>
+      <div class="step-content">
+        <h4>Visualización de las 8 direcciones</h4>
+        <div class="dir-diagram">
+          <div class="dir-cell active">↖<span>NW</span></div>
+          <div class="dir-cell active">↑<span>N</span></div>
+          <div class="dir-cell active">↗<span>NE</span></div>
+          <div class="dir-cell active">←<span>W</span></div>
+          <div class="dir-cell center">●</div>
+          <div class="dir-cell active">→<span>E</span></div>
+          <div class="dir-cell active">↙<span>SW</span></div>
+          <div class="dir-cell active">↓<span>S</span></div>
+          <div class="dir-cell active">↘<span>SE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">5</div>
+      <div class="step-content">
+        <h4>Alternativa: Blend Tree 2D Freeform Directional</h4>
+        <p>Si quieres que Unity interpole automáticamente entre las 8 animaciones sin clips diagonales separados, cambia el tipo del Blend Tree a <strong>2D Freeform Directional</strong>. Mantendrás sólo los 4 clips cardinales pero las transiciones diagonales serán suaves y automáticas.</p>
+        <div class="alert alert-info">
+          <span class="alert-icon">ℹ️</span>
+          <div>Lee: <a href="https://docs.unity3d.com/Manual/BlendTree-2DBlending.html" target="_blank" style="color:var(--accent)">docs.unity3d.com/Manual/BlendTree-2DBlending</a> — diferencias entre Simple Directional y Freeform Directional.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reflect-box">
+    <h4>🧠 Reflexión C — Preguntas de análisis profundo</h4>
+    <ul>
+      <li>¿Por qué usamos <code>Animator.StringToHash()</code> en vez de pasar el string directamente en cada frame? ¿Qué impacto tiene en la compilación y en el rendimiento?</li>
+      <li>Describe con tus palabras qué hace el Blend Tree 2D cuando tu personaje se mueve en diagonal (ángulo de 45°). ¿Qué animaciones mezcla y en qué proporción?</li>
+      <li>¿En qué etapa del ciclo de vida de Unity se actualizan las animaciones? ¿Antes o después de FixedUpdate? Investiga el orden de ejecución de eventos en Unity y dibuja un diagrama en tu libreta.</li>
+      <li>Si un compañero te pregunta a una IA "dame el código completo del PlayerController", ¿por qué eso NO es suficiente para terminar la actividad? Lista al menos 3 razones.</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('fase2a',document.querySelectorAll('.nav-btn')[6])">← Animator Controller</button>
+    <button class="btn btn-primary" onclick="showSection('reto',document.querySelectorAll('.nav-btn')[8])">Siguiente → Reto Final</button>
+  </div>
+</div>
+
+<!-- ========== RETO FINAL ========== -->
+<div id="reto" class="section">
+  <div class="timer-bar">
+    <span class="timer-icon">⏱</span>
+    <span class="timer-text">Módulo 8 · Reto de integración final</span>
+    <span class="timer-duration">~30 min</span>
+  </div>
+
+  <div class="card" style="border-color:var(--yellow)">
+    <div class="card-title">🏆 Reto Final — Integración Completa</div>
+    <p>En este reto aplicas <strong>todo</strong> lo construido en las 2 fases para lograr un personaje completamente funcional. Trabaja de manera individual.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Requisitos obligatorios <span class="badge badge-yellow">Evaluados</span></div>
+    <div class="checklist" id="retoCheck">
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R1:</strong> El personaje se mueve en las 4 direcciones (W/A/S/D o flechas)</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R2:</strong> El personaje también se mueve en las 4 diagonales (8 direcciones totales)</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R3:</strong> La velocidad diagonal es igual a la de movimiento recto (normalización)</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R4:</strong> El sprite voltea correctamente al moverse a izquierda/derecha</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R5:</strong> Al caminar se reproduce la animación de caminata correcta según dirección</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R6:</strong> Al detenerse se reproduce la animación Idle mirando la última dirección</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R7:</strong> El personaje tiene Collider y no atraviesa paredes (añade al menos 2 obstáculos con Collider2D)</label>
+      <label><input type="checkbox" onchange="checkLabel(this)"> <strong>R8:</strong> El fondo/tilemap está integrado en la escena</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚡ Retos opcionales (puntos extra)</div>
+    <ul>
+      <li>🏃 Agregar animación de <strong>correr</strong> al mantener presionado Shift (velocidad × 1.8)</li>
+      <li>🎒 Agregar animación de <strong>Idle lateral</strong> además del Idle_Down</li>
+      <li>📷 Hacer que la cámara <strong>siga al jugador</strong> con Cinemachine o un script de seguimiento suave</li>
+      <li>🗺 Implementar un <strong>mini-mapa</strong> usando una segunda cámara con Culling Mask</li>
+      <li>🔊 Agregar <strong>sonido de pasos</strong> sincronizado con las animaciones via Animation Events</li>
+    </ul>
+  </div>
+
+  <div class="reflect-box">
+    <h4>🧠 Reflexión Final — Compiladores en Unity</h4>
+    <ul>
+      <li>Cuando presionas <em>Build</em> en Unity con IL2CPP, ¿qué ocurre con tu script C#? Describe el proceso completo de compilación: C# → IL → C++ nativo.</li>
+      <li>¿En qué se diferencia la compilación de Unity (AOT con IL2CPP) de la compilación JIT de .NET estándar? ¿Cuál es más rápida en ejecución y cuál en desarrollo?</li>
+      <li>¿Cómo se relaciona el concepto de <em>tokens</em> y <em>árbol sintáctico (AST)</em> de la teoría de compiladores con el proceso que hace Roslyn cuando analiza tu PlayerController.cs?</li>
+      <li>Escribe con tus palabras: si un alumno le pide a una IA que le genere todo el código de este proyecto, ¿qué partes de la actividad NO podría haber aprendido? Sé específico.</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('fase2b',document.querySelectorAll('.nav-btn')[7])">← 8 Direcciones</button>
+    <button class="btn btn-primary" onclick="showSection('entrega',document.querySelectorAll('.nav-btn')[9])">Siguiente → Entrega</button>
+  </div>
+</div>
+
+<!-- ========== ENTREGA ========== -->
+<div id="entrega" class="section">
+  <div class="card" style="border-color:var(--green)">
+    <div class="card-title" style="color:var(--green)">🎓 Criterios de Evaluación y Entrega</div>
+    <table>
+      <tr><th>Criterio</th><th>Puntos</th></tr>
+      <tr><td>Movimiento 4 direcciones funcional (R1–R3)</td><td>20 pts</td></tr>
+      <tr><td>Movimiento 8 direcciones con normalización</td><td>15 pts</td></tr>
+      <tr><td>Sistema de animaciones Blend Tree conectado</td><td>25 pts</td></tr>
+      <tr><td>Idle correcto por dirección</td><td>10 pts</td></tr>
+      <tr><td>Escena con fondo y colisionadores</td><td>10 pts</td></tr>
+      <tr><td>Reflexiones escritas (A, B, C, Final)</td><td>15 pts</td></tr>
+      <tr><td>Orden y comentarios en el código</td><td>5 pts</td></tr>
+      <tr><td><em>Reto opcional (cualquiera)</em></td><td><em>+5 pts</em></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📤 ¿Qué entregar?</div>
+    <ol style="padding-left:1.4rem;color:var(--text2);font-size:0.9rem;line-height:2;">
+      <li>Carpeta comprimida (.zip) del proyecto Unity completo (sin la carpeta <code>Library/</code>)</li>
+      <li>Documento PDF con las 4 reflexiones escritas a mano o en digital</li>
+      <li>Video de 1–2 min (puede ser grabación de pantalla) mostrando el personaje moviéndose en 8 direcciones con animaciones</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 Referencias y recursos adicionales</div>
+    <a class="resource-link" href="https://docs.unity3d.com/Manual/AnimationOverview.html" target="_blank">
+      <div class="resource-icon" style="background:rgba(79,142,247,0.1)">📖</div>
+      <div class="r-info"><div class="r-title">Unity Docs · Animation System Overview</div><div class="r-sub">Guía oficial completa del sistema de animaciones</div></div>
+      <span class="r-arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://learn.unity.com/tutorial/controlling-animation" target="_blank">
+      <div class="resource-icon" style="background:rgba(34,211,165,0.1)">🎓</div>
+      <div class="r-info"><div class="r-title">Unity Learn · Controlling Animation</div><div class="r-sub">Tutorial interactivo oficial sobre Animator y Blend Trees</div></div>
+      <span class="r-arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://docs.unity3d.com/Manual/ScriptingConcepts.html" target="_blank">
+      <div class="resource-icon" style="background:rgba(245,200,66,0.1)">⚙️</div>
+      <div class="r-info"><div class="r-title">Unity Docs · Scripting Concepts</div><div class="r-sub">MonoBehaviour, ciclo de vida, compilación en Unity</div></div>
+      <span class="r-arrow">↗</span>
+    </a>
+    <a class="resource-link" href="https://docs.unity3d.com/Manual/IL2CPP.html" target="_blank">
+      <div class="resource-icon" style="background:rgba(124,58,237,0.1)">🔧</div>
+      <div class="r-info"><div class="r-title">Unity Docs · IL2CPP</div><div class="r-sub">Cómo Unity compila C# → IL → C++ nativo (relevante para Compiladores)</div></div>
+      <span class="r-arrow">↗</span>
+    </a>
+  </div>
+
+  <div class="alert alert-tip">
+    <span class="alert-icon">🎉</span>
+    <div><strong>¡Felicidades por completar la actividad!</strong> Has construido un sistema de movimiento y animación que demuestra los principios del ciclo compilación-ejecución de Unity. Cada Script.cs que escribiste pasó por el compilador Roslyn, se convirtió en IL y fue ejecutado por el runtime de Mono — eso <em>es</em> un compilador en acción.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <button class="btn btn-secondary" onclick="showSection('reto',document.querySelectorAll('.nav-btn')[8])">← Reto Final</button>
+    <button class="btn btn-green" onclick="showSection('intro',document.querySelectorAll('.nav-btn')[0])">↩ Ver desde el inicio</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+  const sections = ['intro','setup','assets','fase1a','fase1b','fase1c','fase2a','fase2b','reto','entrega'];
+
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+
+    const idx = sections.indexOf(id);
+    const pct = ((idx) / (sections.length - 1)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  function checkLabel(checkbox) {
+    checkbox.parentElement.classList.toggle('checked', checkbox.checked);
+  }
+</script>
+</body>
+</html>

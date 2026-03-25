@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML-601 · Chatbots de Atención al Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --surface: #111318;
+  --surface2: #181c23;
+  --border: #232838;
+  --accent: #00e5ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --accent4: #10b981;
+  --danger: #ef4444;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --code-bg: #0d1117;
+  --phase1: #3b82f6;
+  --phase2: #8b5cf6;
+  --reto: #f59e0b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ═══════════════ HEADER ═══════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,229,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(124,58,237,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,229,255,0.08);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeDown 0.6s ease both;
+}
+
+.badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s ease infinite; }
+
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.4rem, 6vw, 4.8rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 60%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  max-width: 580px;
+  margin: 0 auto 36px;
+  animation: fadeUp 0.7s 0.2s ease both;
+  font-weight: 300;
+}
+
+.meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  animation: fadeUp 0.7s 0.3s ease both;
+  margin-bottom: 44px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px 32px;
+  border-radius: 10px;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  animation: fadeUp 0.7s 0.4s ease both;
+  box-shadow: 0 0 40px rgba(0,229,255,0.2);
+}
+
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(0,229,255,0.35); }
+
+/* ═══════════════ NAV ═══════════════ */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,12,16,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 12px 0;
+}
+
+.nav-inner::-webkit-scrollbar { display: none; }
+
+.nav-link {
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Space Mono', monospace;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.p1 { color: var(--phase1); }
+.nav-link.p2 { color: var(--phase2); }
+.nav-link.reto { color: var(--reto); }
+
+/* ═══════════════ LAYOUT ═══════════════ */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+section { padding: 80px 0; }
+
+/* ═══════════════ SECTION HEADERS ═══════════════ */
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-tag::before {
+  content: '';
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+}
+
+.tag-p1 { color: var(--phase1); }
+.tag-p1::before { background: var(--phase1); }
+.tag-p2 { color: var(--phase2); }
+.tag-p2::before { background: var(--phase2); }
+.tag-reto { color: var(--reto); }
+.tag-reto::before { background: var(--reto); }
+.tag-intro { color: var(--accent); }
+.tag-intro::before { background: var(--accent); }
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-desc {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  max-width: 620px;
+  font-weight: 300;
+  margin-bottom: 48px;
+}
+
+/* ═══════════════ TIMELINE OVERVIEW ═══════════════ */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 60px;
+}
+
+.tl-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.tl-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.tl-card.p1::before { background: var(--phase1); }
+.tl-card.p2::before { background: var(--phase2); }
+.tl-card.reto::before { background: var(--reto); }
+
+.tl-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.15); }
+
+.tl-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.tl-card.p1 .tl-time { color: var(--phase1); }
+.tl-card.p2 .tl-time { color: var(--phase2); }
+.tl-card.reto .tl-time { color: var(--reto); }
+
+.tl-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.tl-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+/* ═══════════════ STEP BLOCKS ═══════════════ */
+.step-block {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  margin-bottom: 32px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.step-block:hover { border-color: rgba(255,255,255,0.12); }
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 28px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.p1-num { background: rgba(59,130,246,0.15); color: var(--phase1); border: 1px solid rgba(59,130,246,0.3); }
+.p2-num { background: rgba(139,92,246,0.15); color: var(--phase2); border: 1px solid rgba(139,92,246,0.3); }
+.reto-num { background: rgba(245,158,11,0.15); color: var(--reto); border: 1px solid rgba(245,158,11,0.3); }
+
+.step-info { flex: 1; }
+
+.step-info h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.step-info p {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.step-duration {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 6px;
+  background: var(--surface2);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.step-body {
+  padding: 0 28px 28px;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+
+.step-body.open { display: block; }
+
+/* ═══════════════ CONTENT INSIDE STEPS ═══════════════ */
+.step-body h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 24px 0 10px;
+  color: var(--text);
+}
+
+.step-body p { margin-bottom: 12px; color: var(--text-dim); font-size: 14.5px; }
+.step-body ul, .step-body ol { margin: 10px 0 16px 20px; color: var(--text-dim); font-size: 14.5px; }
+.step-body li { margin-bottom: 6px; }
+
+.step-body a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,229,255,0.3);
+  transition: border-color 0.2s;
+}
+.step-body a:hover { border-color: var(--accent); }
+
+/* ═══════════════ CODE BLOCKS ═══════════════ */
+.code-wrap {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 16px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-label .ext {
+  background: rgba(0,229,255,0.1);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.copy-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.copy-btn.copied { color: var(--accent4); border-color: var(--accent4); }
+
+pre {
+  padding: 20px;
+  overflow-x: auto;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #e2e8f0;
+}
+
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.str { color: #c3e88d; }
+.cm { color: #546e7a; font-style: italic; }
+.num { color: #f78c6c; }
+.cls { color: #ffcb6b; }
+
+/* ═══════════════ CALLOUTS ═══════════════ */
+.callout {
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body { flex: 1; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+.callout-body p { margin: 0; color: inherit; font-size: 13.5px; }
+
+.callout.info { background: rgba(0,229,255,0.06); border: 1px solid rgba(0,229,255,0.2); color: #94e4f0; }
+.callout.warn { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+.callout.tip { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); color: #6ee7b7; }
+.callout.danger { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+.callout.reflect { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.25); color: #c4b5fd; }
+
+/* ═══════════════ QUESTIONS ═══════════════ */
+.reflect-box {
+  background: rgba(124,58,237,0.07);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 10px 10px 0;
+  padding: 20px 24px;
+  margin: 20px 0;
+}
+
+.reflect-box .rb-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #a78bfa;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reflect-box ol { margin: 0 0 0 18px; }
+.reflect-box li {
+  margin-bottom: 10px;
+  color: #c4b5fd;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* ═══════════════ LINKS EXTERNOS ═══════════════ */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.ext-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition: all 0.2s;
+  color: var(--text);
+}
+
+.ext-link:hover { border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.05); transform: translateY(-2px); }
+
+.ext-link .el-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ext-link .el-text { flex: 1; }
+.ext-link .el-text strong { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.ext-link .el-text span { font-size: 11.5px; color: var(--text-muted); }
+
+/* ═══════════════ CHECKLIST ═══════════════ */
+.checklist {
+  list-style: none;
+  margin: 12px 0 20px;
+  padding: 0;
+}
+
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.checklist li::before {
+  content: '○';
+  font-size: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.checklist li.done { color: var(--accent4); }
+.checklist li.done::before { content: '✓'; color: var(--accent4); }
+
+/* ═══════════════ CODE ANNOTATION ═══════════════ */
+.annot {
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid var(--accent4);
+  padding: 10px 14px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-size: 12.5px;
+  color: #86efac;
+  font-family: 'DM Sans', sans-serif;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ═══════════════ RETO SECTION ═══════════════ */
+.reto-header {
+  background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(239,68,68,0.08) 100%);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.reto-header::before {
+  content: '⚡';
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 80px;
+  opacity: 0.06;
+}
+
+.reto-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--reto);
+  margin-bottom: 10px;
+}
+
+.reto-header p { color: #fbbf24; font-size: 15px; font-weight: 300; margin: 0; }
+
+.points-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245,158,11,0.15);
+  border: 1px solid rgba(245,158,11,0.4);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--reto);
+  margin-bottom: 16px;
+}
+
+/* ═══════════════ DIVIDER ═══════════════ */
+.phase-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 60px 0 40px;
+}
+
+.phase-divider::before, .phase-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.phase-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.phase-label.p1 { color: var(--phase1); border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.07); }
+.phase-label.p2 { color: var(--phase2); border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.07); }
+.phase-label.reto { color: var(--reto); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); }
+
+/* ═══════════════ ENTREGA ═══════════════ */
+.entrega-card {
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(0,229,255,0.04) 100%);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 60px;
+}
+
+.entrega-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.crit-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.crit-item .crit-pts {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.crit-item p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ═══════════════ FOOTER ═══════════════ */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 32px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+}
+
+footer a { color: var(--accent); text-decoration: none; }
+
+/* ═══════════════ PROGRESS BAR ═══════════════ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+  z-index: 999;
+  transition: width 0.1s;
+}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:640px) {
+  .step-header { flex-wrap: wrap; }
+  .step-duration { width: 100%; }
+  .links-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- ════════════════════════════════════
+     HERO
+═════════════════════════════════════ -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="badge"><span></span> Ingeniería en Computación · 6° Semestre · ML-601</div>
+  <h1>Construye tu propio<br><em>Chatbot de Atención<br>al Cliente</em></h1>
+  <p>Actividad guiada de Aprendizaje Máquina — Python + VS Code. Diseñarás, programarás y mejorarás un chatbot funcional en 6 horas.</p>
+  <div class="meta-chips">
+    <div class="chip"><div class="dot" style="background:#3b82f6"></div> Fase 1 — 3 h</div>
+    <div class="chip"><div class="dot" style="background:#8b5cf6"></div> Fase 2 — 2.5 h</div>
+    <div class="chip"><div class="dot" style="background:#f59e0b"></div> Reto Extra — 1 h</div>
+    <div class="chip"><div class="dot" style="background:#10b981"></div> Python 3.10+</div>
+    <div class="chip"><div class="dot" style="background:#00e5ff"></div> VS Code</div>
+  </div>
+  <a href="#inicio" class="start-btn">Comenzar actividad →</a>
+</section>
+
+<!-- ════════════════════════════════════
+     STICKY NAV
+═════════════════════════════════════ -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="#inicio" class="nav-link">Inicio</a>
+    <a href="#fase1" class="nav-link p1">FASE 1</a>
+    <a href="#p1s1" class="nav-link p1">1 · Entorno</a>
+    <a href="#p1s2" class="nav-link p1">2 · Investigación</a>
+    <a href="#p1s3" class="nav-link p1">3 · NLP base</a>
+    <a href="#p1s4" class="nav-link p1">4 · Intenciones</a>
+    <a href="#fase2" class="nav-link p2">FASE 2</a>
+    <a href="#p2s1" class="nav-link p2">5 · Motor de respuesta</a>
+    <a href="#p2s2" class="nav-link p2">6 · Contexto</a>
+    <a href="#p2s3" class="nav-link p2">7 · Servicio real</a>
+    <a href="#p2s4" class="nav-link p2">8 · Integración final</a>
+    <a href="#reto" class="nav-link reto">⚡ RETO</a>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════
+     OVERVIEW
+═════════════════════════════════════ -->
+<section id="inicio">
+  <div class="container">
+    <div class="section-tag tag-intro">Introducción</div>
+    <h2 class="section-title">¿Qué vas a construir?</h2>
+    <p class="section-desc">En esta actividad desarrollarás un chatbot de atención al cliente usando Python y técnicas de NLP. Al finalizar tendrás un sistema que entiende intenciones, mantiene contexto y responde preguntas de un servicio real que tú elijas.</p>
+
+    <div class="timeline">
+      <div class="tl-card p1">
+        <div class="tl-time">FASE 1 · 0:00 – 3:00 h</div>
+        <h4>Fundamentos y NLP</h4>
+        <p>Entorno, investigación, preprocesamiento de texto e intenciones.</p>
+      </div>
+      <div class="tl-card p2">
+        <div class="tl-time">FASE 2 · 3:00 – 5:30 h</div>
+        <h4>Motor y contexto</h4>
+        <p>Respuestas dinámicas, manejo de sesión y despliegue del servicio.</p>
+      </div>
+      <div class="tl-card reto">
+        <div class="tl-time">RETO · 5:30 – 6:30 h</div>
+        <h4>Funcionalidad avanzada</h4>
+        <p>IA generativa, handoff, métricas o multilenguaje.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Cómo usar esta guía</strong>
+        <p>Cada paso tiene código que debes escribir (no sólo copiar), una explicación de <em>por qué</em> funciona así, y preguntas de reflexión. Anota tus respuestas en un documento aparte que entregarás junto con el código.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Antes de empezar — requisitos</strong>
+        <p>Python ≥ 3.10 · VS Code instalado · pip actualizado · Conexión a internet · Cuenta en GitHub (recomendado).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     FASE 1
+═════════════════════════════════════ -->
+<section id="fase1">
+  <div class="container">
+    <div class="phase-divider">
+      <div class="phase-label p1">🔵 FASE 1 · Fundamentos y NLP · 3 horas</div>
+    </div>
+    <div class="section-tag tag-p1">Fase 1 · Pasos 1-4</div>
+    <h2 class="section-title">Construye las bases de tu chatbot</h2>
+    <p class="section-desc">Configurarás tu entorno, investigarás sobre chatbots para atención al cliente, aprenderás a procesar texto con Python y definirás las intenciones de tu servicio.</p>
+
+    <!-- PASO 1 -->
+    <div class="step-block" id="p1s1">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p1-num">01</div>
+        <div class="step-info">
+          <h3>Configura tu entorno de desarrollo</h3>
+          <p>VS Code, Python, extensiones clave y estructura del proyecto</p>
+        </div>
+        <div class="step-duration">~30 min</div>
+      </div>
+      <div class="step-body open">
+
+        <h4>1.1 · Instala las extensiones de VS Code</h4>
+        <p>Abre VS Code y ve a la sección de <strong>Extensiones</strong> (Ctrl+Shift+X). Instala:</p>
+        <ul>
+          <li><strong>Python</strong> (Microsoft) — soporte completo para Python.</li>
+          <li><strong>Pylance</strong> — autocompletado inteligente.</li>
+          <li><strong>Jupyter</strong> — para correr celdas interactivas.</li>
+          <li><strong>GitHub Copilot</strong> (opcional) — asistente de código.</li>
+        </ul>
+
+        <div class="callout tip">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <strong>Selecciona el intérprete correcto</strong>
+            <p>Pulsa <code>Ctrl+Shift+P</code> → "Python: Select Interpreter" → elige Python 3.10 o superior.</p>
+          </div>
+        </div>
+
+        <h4>1.2 · Crea la estructura del proyecto</h4>
+        <p>En tu terminal de VS Code (<code>Ctrl+`</code>) ejecuta:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">bash</span> Terminal — Estructura del proyecto</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre>mkdir chatbot_cliente
+cd chatbot_cliente
+mkdir data models utils
+touch main.py intents.json utils/nlp.py utils/responder.py
+code .</pre>
+        </div>
+
+        <h4>1.3 · Instala las dependencias necesarias</h4>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">bash</span> Terminal — Instalación de librerías</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre>pip install nltk scikit-learn numpy flask colorama</pre>
+        </div>
+        <div class="annot">📦 nltk → procesamiento de lenguaje natural | scikit-learn → ML | flask → servidor web opcional | colorama → colores en terminal</div>
+
+        <h4>1.4 · Descarga recursos de NLTK</h4>
+        <p>Crea un archivo <code>setup.py</code> y escribe:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> setup.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> nltk
+
+<span class="cm"># Descarga los recursos necesarios para procesar español</span>
+nltk.download(<span class="str">'punkt'</span>)
+nltk.download(<span class="str">'stopwords'</span>)
+nltk.download(<span class="str">'wordnet'</span>)
+nltk.download(<span class="str">'averaged_perceptron_tagger'</span>)
+
+<span class="fn">print</span>(<span class="str">"✅ Recursos de NLTK descargados correctamente."</span>)</pre>
+        </div>
+        <div class="annot">▶ Ejecuta: <strong>python setup.py</strong> en la terminal. Verás los mensajes de descarga.</div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 1.A — antes de continuar, escribe tus respuestas</div>
+          <ol>
+            <li>¿Qué hace NLTK que no podría hacer Python sin librerías adicionales?</li>
+            <li>¿Por qué separamos el proyecto en carpetas (<code>utils/</code>, <code>data/</code>, <code>models/</code>)?</li>
+            <li>¿Qué es un entorno virtual y cuándo sería conveniente usarlo aquí?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="step-block" id="p1s2">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p1-num">02</div>
+        <div class="step-info">
+          <h3>Investiga y define tu chatbot</h3>
+          <p>Exploración de recursos externos y diseño del dominio de tu servicio</p>
+        </div>
+        <div class="step-duration">~45 min</div>
+      </div>
+      <div class="step-body">
+
+        <h4>2.1 · Explora estos recursos antes de programar</h4>
+        <p>Visita los siguientes enlaces y toma notas de lo que aplica a tu chatbot. Anota al menos <strong>3 ideas concretas</strong> de cada enlace que incorporarás.</p>
+
+        <div class="links-grid">
+          <a href="https://rasa.com/docs/rasa/nlu-training-data/" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(124,58,237,0.12)">🤖</div>
+            <div class="el-text"><strong>Rasa NLU — Training Data</strong><span>Formato de intenciones y entidades</span></div>
+          </a>
+          <a href="https://www.ibm.com/topics/chatbots" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(0,229,255,0.1)">🔷</div>
+            <div class="el-text"><strong>IBM — What is a Chatbot?</strong><span>Tipos y casos de uso empresariales</span></div>
+          </a>
+          <a href="https://chatbotsmagazine.com" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(16,185,129,0.1)">📰</div>
+            <div class="el-text"><strong>Chatbots Magazine</strong><span>Tendencias y mejores prácticas</span></div>
+          </a>
+          <a href="https://www.tidio.com/blog/chatbot-scripts/" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(245,158,11,0.1)">📝</div>
+            <div class="el-text"><strong>Tidio — Chatbot Scripts</strong><span>Ejemplos de diálogos reales</span></div>
+          </a>
+          <a href="https://developers.google.com/assistant/conversational/df-asdk/dialogflow-fulfillment-library" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(239,68,68,0.1)">🔴</div>
+            <div class="el-text"><strong>Dialogflow Concepts</strong><span>Intenciones, entidades y contexto</span></div>
+          </a>
+          <a href="https://botpress.com/blog/customer-service-chatbot" target="_blank" class="ext-link">
+            <div class="el-icon" style="background:rgba(59,130,246,0.1)">💬</div>
+            <div class="el-text"><strong>Botpress — Customer Service</strong><span>Guía práctica de atención al cliente</span></div>
+          </a>
+        </div>
+
+        <h4>2.2 · Elige tu dominio de servicio</h4>
+        <p>Selecciona <strong>uno</strong> de los siguientes servicios (o propón uno con aprobación del profesor):</p>
+        <ul>
+          <li>🍕 <strong>Restaurante / delivery</strong> — pedidos, menú, horarios, rastreo</li>
+          <li>🏥 <strong>Clínica médica</strong> — citas, especialidades, ubicación, precios</li>
+          <li>✈️ <strong>Agencia de viajes</strong> — vuelos, paquetes, reservas, cancelaciones</li>
+          <li>🛒 <strong>Tienda en línea</strong> — productos, envío, devoluciones, facturación</li>
+          <li>🏦 <strong>Banco / fintech</strong> — saldos, transferencias, bloqueos, préstamos</li>
+        </ul>
+
+        <div class="callout reflect">
+          <div class="callout-icon">🧭</div>
+          <div class="callout-body">
+            <strong>Documenta tu elección</strong>
+            <p>Escribe en tu documento de notas: ① ¿Qué servicio elegiste? ② ¿Cuáles son las 5 preguntas más frecuentes que recibiría? ③ ¿Qué información NO debería dar el chatbot (límites del sistema)?</p>
+          </div>
+        </div>
+
+        <h4>2.3 · Crea el archivo de intenciones base</h4>
+        <p>Abre <code>intents.json</code> y escribe la estructura (adapta los textos a tu servicio elegido):</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">json</span> intents.json — Estructura de intenciones</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre>{
+  <span class="str">"intents"</span>: [
+    {
+      <span class="str">"tag"</span>: <span class="str">"saludo"</span>,
+      <span class="str">"patterns"</span>: [
+        <span class="str">"Hola"</span>, <span class="str">"Buenos días"</span>, <span class="str">"Buenas tardes"</span>,
+        <span class="str">"Hola, necesito ayuda"</span>, <span class="str">"Hey"</span>, <span class="str">"Qué tal"</span>
+      ],
+      <span class="str">"responses"</span>: [
+        <span class="str">"¡Hola! Bienvenido a nuestro servicio. ¿En qué puedo ayudarte hoy?"</span>,
+        <span class="str">"¡Buenas! Estoy aquí para asistirte. ¿Qué necesitas?"</span>
+      ]
+    },
+    {
+      <span class="str">"tag"</span>: <span class="str">"despedida"</span>,
+      <span class="str">"patterns"</span>: [
+        <span class="str">"Adiós"</span>, <span class="str">"Hasta luego"</span>, <span class="str">"Chao"</span>,
+        <span class="str">"Ya no necesito ayuda"</span>, <span class="str">"Gracias, bye"</span>
+      ],
+      <span class="str">"responses"</span>: [
+        <span class="str">"¡Hasta luego! Que tengas un excelente día."</span>,
+        <span class="str">"Fue un placer ayudarte. ¡Vuelve pronto!"</span>
+      ]
+    },
+    {
+      <span class="str">"tag"</span>: <span class="str">"horario"</span>,
+      <span class="str">"patterns"</span>: [
+        <span class="str">"¿Cuál es su horario?"</span>, <span class="str">"¿A qué hora abren?"</span>,
+        <span class="str">"¿Están abiertos los domingos?"</span>, <span class="str">"horario de atención"</span>
+      ],
+      <span class="str">"responses"</span>: [
+        <span class="str">"Atendemos de lunes a viernes de 9:00 a 21:00 y sábados de 10:00 a 18:00."</span>
+      ]
+    },
+    {
+      <span class="str">"tag"</span>: <span class="str">"AÑADE_TU_INTENCION_1"</span>,
+      <span class="str">"patterns"</span>: [<span class="str">"escribe frases de ejemplo para tu servicio"</span>],
+      <span class="str">"responses"</span>: [<span class="str">"respuesta específica de tu servicio"</span>]
+    },
+    {
+      <span class="str">"tag"</span>: <span class="str">"no_entiendo"</span>,
+      <span class="str">"patterns"</span>: [],
+      <span class="str">"responses"</span>: [
+        <span class="str">"Lo siento, no entendí tu consulta. ¿Puedes reformularla?"</span>,
+        <span class="str">"No estoy seguro de cómo ayudarte con eso. ¿Puedes darme más detalles?"</span>
+      ]
+    }
+  ]
+}</pre>
+        </div>
+        <div class="annot">🎯 <strong>Tu tarea:</strong> agrega al menos <strong>5 intenciones adicionales</strong> propias de tu servicio elegido, con mínimo 6 patrones cada una.</div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 2.A</div>
+          <ol>
+            <li>¿Qué es una "intención" en el contexto de NLP y cómo difiere de una "entidad"?</li>
+            <li>¿Por qué es importante tener múltiples patrones por intención? ¿Qué pasa si tienes pocos?</li>
+            <li>De los recursos que revisaste, ¿qué técnica de manejo de conversación te pareció más útil para tu servicio? Explica por qué.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="step-block" id="p1s3">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p1-num">03</div>
+        <div class="step-info">
+          <h3>Procesamiento de lenguaje natural</h3>
+          <p>Tokenización, lematización y vectorización de texto en Python</p>
+        </div>
+        <div class="step-duration">~50 min</div>
+      </div>
+      <div class="step-body">
+
+        <h4>3.1 · Módulo NLP — procesamiento del texto</h4>
+        <p>Abre <code>utils/nlp.py</code> y escribe el siguiente código. Lee cada comentario antes de avanzar.</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/nlp.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> nltk
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> nltk.stem <span class="kw">import</span> <span class="cls">SnowballStemmer</span>
+<span class="kw">from</span> nltk.corpus <span class="kw">import</span> stopwords
+<span class="kw">import</span> string
+<span class="kw">import</span> json
+
+<span class="cm"># Usamos SnowballStemmer para español (reduce palabras a su raíz)</span>
+<span class="cm"># Ejemplo: "comprando", "compré", "compras" → "compr"</span>
+stemmer = <span class="cls">SnowballStemmer</span>(<span class="str">'spanish'</span>)
+stop_words = <span class="fn">set</span>(stopwords.words(<span class="str">'spanish'</span>))
+
+
+<span class="kw">def</span> <span class="fn">tokenizar</span>(texto: <span class="fn">str</span>) -> <span class="fn">list</span>[<span class="fn">str</span>]:
+    <span class="str">"""
+    Divide el texto en tokens (palabras) y los normaliza.
+    Pasos: minúsculas → eliminar puntuación → tokenizar → quitar stopwords
+    """</span>
+    <span class="cm"># 1. Convertir a minúsculas</span>
+    texto = texto.lower()
+    
+    <span class="cm"># 2. Eliminar signos de puntuación</span>
+    texto = texto.translate(<span class="fn">str</span>.maketrans(<span class="str">''</span>, <span class="str">''</span>, string.punctuation))
+    
+    <span class="cm"># 3. Tokenizar (dividir en palabras)</span>
+    tokens = nltk.word_tokenize(texto, language=<span class="str">'spanish'</span>)
+    
+    <span class="cm"># 4. Eliminar stopwords (palabras sin valor semántico)</span>
+    tokens = [t <span class="kw">for</span> t <span class="kw">in</span> tokens <span class="kw">if</span> t <span class="kw">not in</span> stop_words]
+    
+    <span class="kw">return</span> tokens
+
+
+<span class="kw">def</span> <span class="fn">lematizar</span>(tokens: <span class="fn">list</span>[<span class="fn">str</span>]) -> <span class="fn">list</span>[<span class="fn">str</span>]:
+    <span class="str">"""
+    Aplica stemming a cada token para obtener su raíz morfológica.
+    """</span>
+    <span class="kw">return</span> [stemmer.stem(t) <span class="kw">for</span> t <span class="kw">in</span> tokens]
+
+
+<span class="kw">def</span> <span class="fn">bolsa_de_palabras</span>(tokens: <span class="fn">list</span>[<span class="fn">str</span>], vocabulario: <span class="fn">list</span>[<span class="fn">str</span>]) -> np.ndarray:
+    <span class="str">"""
+    Convierte tokens en un vector numérico (Bag of Words).
+    Cada posición indica si la palabra del vocabulario aparece (1) o no (0).
+    
+    Ejemplo:
+        vocabulario = ['compr', 'envi', 'precio']
+        tokens      = ['compr', 'precio']
+        resultado   = [1, 0, 1]
+    """</span>
+    raices = <span class="fn">lematizar</span>(tokens)
+    vector = np.zeros(<span class="fn">len</span>(vocabulario), dtype=np.float32)
+    
+    <span class="kw">for</span> i, palabra <span class="kw">in</span> <span class="fn">enumerate</span>(vocabulario):
+        <span class="kw">if</span> palabra <span class="kw">in</span> raices:
+            vector[i] = <span class="num">1.0</span>
+    
+    <span class="kw">return</span> vector
+
+
+<span class="kw">def</span> <span class="fn">preprocesar_intents</span>(archivo_json: <span class="fn">str</span>) -> <span class="fn">tuple</span>:
+    <span class="str">"""
+    Lee intents.json y construye el vocabulario y los datos de entrenamiento.
+    
+    Retorna:
+        vocabulario: lista de raíces únicas de todas las palabras
+        clases:      lista de etiquetas (tags) de intenciones
+        documentos:  lista de (tokens, tag) para entrenamiento
+    """</span>
+    <span class="kw">with</span> <span class="fn">open</span>(archivo_json, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+        datos = json.load(f)
+    
+    vocabulario = []
+    clases = []
+    documentos = []
+    
+    <span class="kw">for</span> intent <span class="kw">in</span> datos[<span class="str">'intents'</span>]:
+        tag = intent[<span class="str">'tag'</span>]
+        
+        <span class="kw">if</span> tag <span class="kw">not in</span> clases:
+            clases.append(tag)
+        
+        <span class="kw">for</span> patron <span class="kw">in</span> intent[<span class="str">'patterns'</span>]:
+            tokens = <span class="fn">tokenizar</span>(patron)
+            raices = <span class="fn">lematizar</span>(tokens)
+            vocabulario.extend(raices)
+            documentos.append((tokens, tag))
+    
+    <span class="cm"># Vocabulario único y ordenado</span>
+    vocabulario = <span class="fn">sorted</span>(<span class="fn">set</span>(vocabulario))
+    clases = <span class="fn">sorted</span>(<span class="fn">set</span>(clases))
+    
+    <span class="kw">return</span> vocabulario, clases, documentos, datos
+
+
+<span class="cm"># ── Prueba rápida del módulo ──────────────────────────────</span>
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    texto_prueba = <span class="str">"¿Cuándo puedo recoger mi pedido en la tienda?"</span>
+    tokens = <span class="fn">tokenizar</span>(texto_prueba)
+    raices = <span class="fn">lematizar</span>(tokens)
+    <span class="fn">print</span>(<span class="str">f"Texto:  {texto_prueba}"</span>)
+    <span class="fn">print</span>(<span class="str">f"Tokens: {tokens}"</span>)
+    <span class="fn">print</span>(<span class="str">f"Raíces: {raices}"</span>)</pre>
+        </div>
+        <div class="annot">▶ Prueba el módulo: <strong>python utils/nlp.py</strong> — deberías ver los tokens y raíces del texto de prueba.</div>
+
+        <div class="callout tip">
+          <div class="callout-icon">🔬</div>
+          <div class="callout-body">
+            <strong>Experimenta con el preprocesamiento</strong>
+            <p>Cambia el texto de prueba por frases de tu servicio. Observa qué stopwords se eliminan y qué raíces produce SnowballStemmer. ¿El resultado tiene sentido?</p>
+          </div>
+        </div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 3.A</div>
+          <ol>
+            <li>¿Qué diferencia hay entre <em>stemming</em> y <em>lematización</em>? ¿Cuál es más precisa?</li>
+            <li>Ejecuta la función con la frase "Quiero comprar una pizza grande con extra queso". ¿Qué tokens y raíces obtienes? ¿Hay alguna pérdida de significado importante?</li>
+            <li>¿Por qué representamos el texto como una "bolsa de palabras" en lugar de guardar el texto original?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="step-block" id="p1s4">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p1-num">04</div>
+        <div class="step-info">
+          <h3>Clasificador de intenciones con Machine Learning</h3>
+          <p>Entrena un modelo que identifica qué quiere el usuario</p>
+        </div>
+        <div class="step-duration">~55 min</div>
+      </div>
+      <div class="step-body">
+
+        <h4>4.1 · Preparar los datos de entrenamiento</h4>
+        <p>Crea el archivo <code>utils/trainer.py</code>:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/trainer.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pickle
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> <span class="cls">RandomForestClassifier</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> classification_report
+<span class="kw">from</span> utils.nlp <span class="kw">import</span> preprocesar_intents, bolsa_de_palabras, lematizar, tokenizar
+
+
+<span class="kw">def</span> <span class="fn">construir_dataset</span>(vocabulario, clases, documentos):
+    <span class="str">"""
+    Convierte los documentos en matrices X (características) e y (etiquetas).
+    Cada fila de X es el vector Bag-of-Words del patrón.
+    Cada valor de y es el índice numérico de la clase (intención).
+    """</span>
+    X = []
+    y = []
+    
+    <span class="kw">for</span> tokens, tag <span class="kw">in</span> documentos:
+        vector = bolsa_de_palabras(tokens, vocabulario)
+        X.append(vector)
+        y.append(clases.index(tag))
+    
+    <span class="kw">return</span> np.array(X), np.array(y)
+
+
+<span class="kw">def</span> <span class="fn">entrenar_modelo</span>(archivo_intents=<span class="str">'intents.json'</span>):
+    <span class="fn">print</span>(<span class="str">"🔄 Cargando y preprocesando datos..."</span>)
+    vocabulario, clases, documentos, _ = preprocesar_intents(archivo_intents)
+    
+    <span class="fn">print</span>(<span class="str">f"   Vocabulario: {len(vocabulario)} palabras"</span>)
+    <span class="fn">print</span>(<span class="str">f"   Intenciones: {clases}"</span>)
+    <span class="fn">print</span>(<span class="str">f"   Ejemplos: {len(documentos)} patrones"</span>)
+    
+    <span class="cm"># Construir matriz de entrenamiento</span>
+    X, y = <span class="fn">construir_dataset</span>(vocabulario, clases, documentos)
+    
+    <span class="cm"># Dividir en entrenamiento / validación (80/20)</span>
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>
+    )
+    
+    <span class="fn">print</span>(<span class="str">"\n🤖 Entrenando Random Forest Classifier..."</span>)
+    
+    <span class="cm"># RandomForest: conjunto de árboles de decisión</span>
+    <span class="cm"># n_estimators = número de árboles (más = más preciso pero más lento)</span>
+    modelo = <span class="cls">RandomForestClassifier</span>(
+        n_estimators=<span class="num">200</span>,
+        random_state=<span class="num">42</span>,
+        max_depth=<span class="num">10</span>
+    )
+    modelo.fit(X_train, y_train)
+    
+    <span class="cm"># Evaluar el modelo</span>
+    <span class="fn">print</span>(<span class="str">"\n📊 Métricas de evaluación:"</span>)
+    y_pred = modelo.predict(X_test)
+    nombres = [clases[i] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">sorted</span>(<span class="fn">set</span>(y_test))]
+    <span class="fn">print</span>(classification_report(y_test, y_pred, target_names=nombres, zero_division=<span class="num">0</span>))
+    
+    <span class="cm"># Guardar modelo y metadatos</span>
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">'models/chatbot_model.pkl'</span>, <span class="str">'wb'</span>) <span class="kw">as</span> f:
+        pickle.dump({
+            <span class="str">'modelo'</span>: modelo,
+            <span class="str">'vocabulario'</span>: vocabulario,
+            <span class="str">'clases'</span>: clases
+        }, f)
+    
+    <span class="fn">print</span>(<span class="str">"\n✅ Modelo guardado en models/chatbot_model.pkl"</span>)
+    <span class="kw">return</span> modelo, vocabulario, clases
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    <span class="fn">entrenar_modelo</span>()</pre>
+        </div>
+        <div class="annot">▶ Ejecuta: <strong>python utils/trainer.py</strong> — verás las métricas de precisión del modelo.</div>
+
+        <div class="callout warn">
+          <div class="callout-icon">📉</div>
+          <div class="callout-body">
+            <strong>Si la precisión es baja (&lt;70%)</strong>
+            <p>Agrega más patrones a tus intenciones (mínimo 8-10 por intención) y evita que diferentes intenciones compartan las mismas frases.</p>
+          </div>
+        </div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 4.A — Análisis del modelo</div>
+          <ol>
+            <li>¿Qué significa <em>precision</em>, <em>recall</em> y <em>F1-score</em> en el reporte de clasificación? Explica en tus palabras.</li>
+            <li>¿Por qué dividimos los datos en entrenamiento y prueba? ¿Qué problema evitamos?</li>
+            <li>¿Por qué usamos Random Forest y no una Regresión Logística simple o una Red Neuronal? ¿Cuáles serían las ventajas/desventajas de cada uno para este problema?</li>
+            <li>Observa las intenciones con menor F1. ¿Por qué crees que el modelo las confunde?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     FASE 2
+═════════════════════════════════════ -->
+<section id="fase2">
+  <div class="container">
+    <div class="phase-divider">
+      <div class="phase-label p2">🟣 FASE 2 · Motor de Respuesta y Despliegue · 2.5 horas</div>
+    </div>
+    <div class="section-tag tag-p2">Fase 2 · Pasos 5-8</div>
+    <h2 class="section-title">Convierte el modelo en un chatbot real</h2>
+    <p class="section-desc">Construirás el motor de respuestas, manejarás el contexto de la conversación y desplegarás el chatbot con una interfaz de terminal o web básica.</p>
+
+    <!-- PASO 5 -->
+    <div class="step-block" id="p2s1">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p2-num">05</div>
+        <div class="step-info">
+          <h3>Motor de respuestas inteligente</h3>
+          <p>Carga el modelo y genera respuestas con nivel de confianza</p>
+        </div>
+        <div class="step-duration">~40 min</div>
+      </div>
+      <div class="step-body">
+        <h4>5.1 · Módulo de respuestas</h4>
+        <p>Abre <code>utils/responder.py</code>:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/responder.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> pickle
+<span class="kw">import</span> random
+<span class="kw">import</span> json
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> utils.nlp <span class="kw">import</span> tokenizar, bolsa_de_palabras
+
+<span class="cm"># Umbral de confianza mínima para aceptar una predicción</span>
+<span class="cm"># Si el modelo está menos seguro que esto → respuesta de fallback</span>
+UMBRAL_CONFIANZA = <span class="num">0.45</span>
+
+
+<span class="kw">class</span> <span class="cls">ChatbotResponder</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, modelo_path=<span class="str">'models/chatbot_model.pkl'</span>,
+                 intents_path=<span class="str">'intents.json'</span>):
+        
+        <span class="cm"># Cargar modelo entrenado</span>
+        <span class="kw">with</span> <span class="fn">open</span>(modelo_path, <span class="str">'rb'</span>) <span class="kw">as</span> f:
+            datos = pickle.load(f)
+        
+        <span class="kw">self</span>.modelo = datos[<span class="str">'modelo'</span>]
+        <span class="kw">self</span>.vocabulario = datos[<span class="str">'vocabulario'</span>]
+        <span class="kw">self</span>.clases = datos[<span class="str">'clases'</span>]
+        
+        <span class="cm"># Cargar respuestas del JSON</span>
+        <span class="kw">with</span> <span class="fn">open</span>(intents_path, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+            self.intents = json.load(f)[<span class="str">'intents'</span>]
+    
+    <span class="kw">def</span> <span class="fn">predecir_intencion</span>(<span class="kw">self</span>, texto: <span class="fn">str</span>) -> <span class="fn">tuple</span>[<span class="fn">str</span>, <span class="fn">float</span>]:
+        <span class="str">"""
+        Predice la intención del texto y retorna (tag, confianza).
+        """</span>
+        tokens = tokenizar(texto)
+        vector = bolsa_de_palabras(tokens, <span class="kw">self</span>.vocabulario).reshape(<span class="num">1</span>, -<span class="num">1</span>)
+        
+        <span class="cm"># predict_proba retorna la probabilidad de cada clase</span>
+        probabilidades = <span class="kw">self</span>.modelo.predict_proba(vector)[<span class="num">0</span>]
+        indice_max = np.argmax(probabilidades)
+        confianza = probabilidades[indice_max]
+        tag = <span class="kw">self</span>.clases[indice_max]
+        
+        <span class="kw">return</span> tag, <span class="fn">float</span>(confianza)
+    
+    <span class="kw">def</span> <span class="fn">obtener_respuesta</span>(<span class="kw">self</span>, texto: <span class="fn">str</span>) -> <span class="fn">dict</span>:
+        <span class="str">"""
+        Procesa el texto del usuario y devuelve un diccionario con:
+        - respuesta: texto a mostrar al usuario
+        - intencion: tag detectado
+        - confianza: nivel de certeza (0.0 a 1.0)
+        - fallback: True si no se entendió la consulta
+        """</span>
+        tag, confianza = <span class="kw">self</span>.predecir_intencion(texto)
+        
+        <span class="cm"># Si la confianza es baja → usar intención de fallback</span>
+        <span class="kw">if</span> confianza < UMBRAL_CONFIANZA:
+            tag = <span class="str">'no_entiendo'</span>
+        
+        <span class="cm"># Buscar respuestas del tag en intents.json</span>
+        respuestas = []
+        <span class="kw">for</span> intent <span class="kw">in</span> <span class="kw">self</span>.intents:
+            <span class="kw">if</span> intent[<span class="str">'tag'</span>] == tag:
+                respuestas = intent[<span class="str">'responses'</span>]
+                <span class="kw">break</span>
+        
+        <span class="cm"># Elegir respuesta aleatoria (variedad en las respuestas)</span>
+        respuesta = random.choice(respuestas) <span class="kw">if</span> respuestas <span class="kw">else</span> \
+                    <span class="str">"Lo siento, no tengo información sobre eso."</span>
+        
+        <span class="kw">return</span> {
+            <span class="str">'respuesta'</span>: respuesta,
+            <span class="str">'intencion'</span>: tag,
+            <span class="str">'confianza'</span>: <span class="fn">round</span>(confianza, <span class="num">3</span>),
+            <span class="str">'fallback'</span>: tag == <span class="str">'no_entiendo'</span>
+        }</pre>
+        </div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 5.A</div>
+          <ol>
+            <li>¿Qué valor de umbral de confianza elegirías para un chatbot bancario vs. uno de restaurante? ¿Por qué?</li>
+            <li>¿Qué ventajas tiene seleccionar la respuesta de forma aleatoria entre varias opciones?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 6 -->
+    <div class="step-block" id="p2s2">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p2-num">06</div>
+        <div class="step-info">
+          <h3>Manejo de contexto conversacional</h3>
+          <p>Tu chatbot recuerda el hilo de la conversación</p>
+        </div>
+        <div class="step-duration">~35 min</div>
+      </div>
+      <div class="step-body">
+        <h4>6.1 · Gestor de contexto</h4>
+        <p>Crea <code>utils/contexto.py</code>:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/contexto.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+
+
+<span class="kw">class</span> <span class="cls">ContextoConversacion</span>:
+    <span class="str">"""
+    Mantiene el estado de la conversación actual.
+    
+    Almacena:
+    - historial: últimos N turnos de la conversación
+    - ultima_intencion: intención del turno anterior
+    - datos_usuario: información recopilada (nombre, pedido, etc.)
+    - conteo_fallbacks: cuántas veces no se entendió al usuario
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, max_historial: <span class="fn">int</span> = <span class="num">10</span>):
+        <span class="kw">self</span>.historial = deque(maxlen=max_historial)
+        <span class="kw">self</span>.ultima_intencion = <span class="kw">None</span>
+        <span class="kw">self</span>.datos_usuario = {}
+        <span class="kw">self</span>.conteo_fallbacks = <span class="num">0</span>
+        <span class="kw">self</span>.inicio = datetime.now()
+    
+    <span class="kw">def</span> <span class="fn">agregar_turno</span>(<span class="kw">self</span>, usuario: <span class="fn">str</span>, bot: <span class="fn">str</span>, intencion: <span class="fn">str</span>):
+        <span class="kw">self</span>.historial.append({
+            <span class="str">'tiempo'</span>: datetime.now().strftime(<span class="str">'%H:%M:%S'</span>),
+            <span class="str">'usuario'</span>: usuario,
+            <span class="str">'bot'</span>: bot,
+            <span class="str">'intencion'</span>: intencion
+        })
+        <span class="kw">self</span>.ultima_intencion = intencion
+        <span class="kw">if</span> intencion == <span class="str">'no_entiendo'</span>:
+            <span class="kw">self</span>.conteo_fallbacks += <span class="num">1</span>
+    
+    <span class="kw">def</span> <span class="fn">guardar_dato</span>(<span class="kw">self</span>, clave: <span class="fn">str</span>, valor):
+        <span class="str">"""Guarda un dato del usuario (ej: 'nombre': 'María')"""</span>
+        <span class="kw">self</span>.datos_usuario[clave] = valor
+    
+    <span class="kw">def</span> <span class="fn">necesita_escalacion</span>(<span class="kw">self</span>) -> <span class="fn">bool</span>:
+        <span class="str">"""
+        Detecta si el usuario necesita hablar con un humano.
+        Criterio: 3 o más fallbacks consecutivos.
+        """</span>
+        ultimas = <span class="fn">list</span>(<span class="kw">self</span>.historial)[-<span class="num">3</span>:]
+        fallbacks = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> t <span class="kw">in</span> ultimas <span class="kw">if</span> t[<span class="str">'intencion'</span>] == <span class="str">'no_entiendo'</span>)
+        <span class="kw">return</span> fallbacks >= <span class="num">3</span>
+    
+    <span class="kw">def</span> <span class="fn">duracion_sesion</span>(<span class="kw">self</span>) -> <span class="fn">str</span>:
+        delta = datetime.now() - <span class="kw">self</span>.inicio
+        minutos = <span class="fn">int</span>(delta.total_seconds() // <span class="num">60</span>)
+        segundos = <span class="fn">int</span>(delta.total_seconds() % <span class="num">60</span>)
+        <span class="kw">return</span> <span class="str">f"{minutos}m {segundos}s"</span>
+    
+    <span class="kw">def</span> <span class="fn">resumen</span>(<span class="kw">self</span>) -> <span class="fn">dict</span>:
+        <span class="kw">return</span> {
+            <span class="str">'turnos'</span>: <span class="fn">len</span>(<span class="kw">self</span>.historial),
+            <span class="str">'duracion'</span>: <span class="kw">self</span>.duracion_sesion(),
+            <span class="str">'fallbacks'</span>: <span class="kw">self</span>.conteo_fallbacks,
+            <span class="str">'datos_usuario'</span>: <span class="kw">self</span>.datos_usuario
+        }</pre>
+        </div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 6.A</div>
+          <ol>
+            <li>¿Por qué limitamos el historial con <code>deque(maxlen=10)</code> en lugar de guardar toda la conversación?</li>
+            <li>¿Qué otros criterios (además de 3 fallbacks) indicarían que el usuario necesita atención humana?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 7 -->
+    <div class="step-block" id="p2s3">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p2-num">07</div>
+        <div class="step-info">
+          <h3>Personaliza para tu servicio real</h3>
+          <p>Adapta el chatbot al dominio que elegiste en el Paso 2</p>
+        </div>
+        <div class="step-duration">~30 min</div>
+      </div>
+      <div class="step-body">
+        <h4>7.1 · Intenciones específicas del servicio</h4>
+        <p>Regresa a tu <code>intents.json</code> y verifica que tienes al menos las siguientes categorías adaptadas a tu servicio:</p>
+
+        <ul class="checklist">
+          <li>Saludo y bienvenida</li>
+          <li>Información del servicio (precios, menú, disponibilidad)</li>
+          <li>Proceso de compra/reserva/cita</li>
+          <li>Estado de pedido/solicitud</li>
+          <li>Cancelaciones y devoluciones</li>
+          <li>Ubicación y horarios</li>
+          <li>Quejas y escalación a humano</li>
+          <li>Despedida</li>
+          <li>Fallback (no entendido)</li>
+          <li>Al menos 2 intenciones específicas únicas de tu servicio</li>
+        </ul>
+
+        <div class="callout info">
+          <div class="callout-icon">📖</div>
+          <div class="callout-body">
+            <strong>Recurso de apoyo: Dialogflow Best Practices</strong>
+            <p>Consulta <a href="https://cloud.google.com/dialogflow/es/docs/best-practices" target="_blank">cloud.google.com/dialogflow/es/docs/best-practices</a> para aprender cómo empresas reales estructuran sus intenciones.</p>
+          </div>
+        </div>
+
+        <h4>7.2 · Re-entrena el modelo con tus nuevas intenciones</h4>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">bash</span> Terminal</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre>python utils/trainer.py</pre>
+        </div>
+        <div class="annot">Compara las métricas antes y después de agregar más patrones. Documenta la mejora.</div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 7.A — Diseño del servicio</div>
+          <ol>
+            <li>¿Qué intención fue más difícil de definir y por qué?</li>
+            <li>¿Cómo evitarías que usuarios malintencionados abusen del chatbot de un banco o clínica?</li>
+            <li>¿Qué información sensible <em>nunca</em> debería manejar tu chatbot sin autenticación?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 8 -->
+    <div class="step-block" id="p2s4">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num p2-num">08</div>
+        <div class="step-info">
+          <h3>Integración final — chatbot funcional</h3>
+          <p>Ensambla todos los módulos en el archivo principal</p>
+        </div>
+        <div class="step-duration">~45 min</div>
+      </div>
+      <div class="step-body">
+        <h4>8.1 · main.py — punto de entrada del chatbot</h4>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> main.py — Chatbot de consola completo</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">from</span> colorama <span class="kw">import</span> init, <span class="cls">Fore</span>, <span class="cls">Style</span>
+<span class="kw">from</span> utils.responder <span class="kw">import</span> <span class="cls">ChatbotResponder</span>
+<span class="kw">from</span> utils.contexto <span class="kw">import</span> <span class="cls">ContextoConversacion</span>
+
+init(autoreset=<span class="kw">True</span>)  <span class="cm"># Inicializa colorama para colores en terminal</span>
+
+<span class="cm"># ── Configura el nombre y servicio de tu chatbot ──────────</span>
+NOMBRE_BOT = <span class="str">"Asistente"</span>       <span class="cm"># ← CAMBIA ESTO a algo creativo</span>
+SERVICIO   = <span class="str">"Tu Empresa S.A."</span>  <span class="cm"># ← CAMBIA ESTO a tu servicio elegido</span>
+<span class="cm"># ──────────────────────────────────────────────────────────</span>
+
+
+<span class="kw">def</span> <span class="fn">imprimir_bienvenida</span>():
+    <span class="fn">print</span>(<span class="str">"\n"</span> + <span class="str">"═"</span> * <span class="num">55</span>)
+    <span class="fn">print</span>(<span class="cls">Fore</span>.CYAN + <span class="str">f"  🤖  {NOMBRE_BOT} — {SERVICIO}"</span>)
+    <span class="fn">print</span>(<span class="cls">Fore</span>.WHITE + <span class="str">"  Escribe 'salir' para terminar la sesión"</span>)
+    <span class="fn">print</span>(<span class="cls">Fore</span>.WHITE + <span class="str">"  Escribe 'historial' para ver la conversación"</span>)
+    <span class="fn">print</span>(<span class="str">"═"</span> * <span class="num">55</span> + <span class="str">"\n"</span>)
+
+
+<span class="kw">def</span> <span class="fn">imprimir_bot</span>(texto: <span class="fn">str</span>, confianza: <span class="fn">float</span> = <span class="num">None</span>):
+    <span class="fn">print</span>(<span class="cls">Fore</span>.CYAN + <span class="str">f"  🤖 {NOMBRE_BOT}: "</span> + <span class="cls">Style</span>.RESET_ALL + texto)
+    <span class="kw">if</span> confianza <span class="kw">is not None</span>:
+        color = <span class="cls">Fore</span>.GREEN <span class="kw">if</span> confianza > <span class="num">0.7</span> <span class="kw">else</span> <span class="cls">Fore</span>.YELLOW
+        <span class="fn">print</span>(color + <span class="str">f"      [confianza: {confianza:.1%}]"</span>)
+
+
+<span class="kw">def</span> <span class="fn">imprimir_usuario</span>(texto: <span class="fn">str</span>):
+    <span class="fn">print</span>(<span class="cls">Fore</span>.WHITE + <span class="str">f"  👤 Tú: "</span> + <span class="cls">Style</span>.BRIGHT + texto)
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    <span class="fn">imprimir_bienvenida</span>()
+    
+    <span class="cm"># Cargar el chatbot (modelo + respuestas)</span>
+    responder = <span class="cls">ChatbotResponder</span>()
+    contexto = <span class="cls">ContextoConversacion</span>()
+    
+    <span class="cm"># Mensaje inicial del bot</span>
+    <span class="fn">imprimir_bot</span>(<span class="str">f"¡Hola! Soy el asistente virtual de {SERVICIO}. ¿En qué puedo ayudarte?"</span>)
+    
+    <span class="kw">while True</span>:
+        <span class="kw">try</span>:
+            entrada = <span class="fn">input</span>(<span class="cls">Fore</span>.YELLOW + <span class="str">"\n  ▶ "</span> + <span class="cls">Style</span>.RESET_ALL).strip()
+        <span class="kw">except</span> (<span class="cls">KeyboardInterrupt</span>, <span class="cls">EOFError</span>):
+            <span class="kw">break</span>
+        
+        <span class="kw">if not</span> entrada:
+            <span class="kw">continue</span>
+        
+        <span class="fn">imprimir_usuario</span>(entrada)
+        
+        <span class="cm"># Comandos especiales</span>
+        <span class="kw">if</span> entrada.lower() <span class="kw">in</span> [<span class="str">'salir'</span>, <span class="str">'exit'</span>, <span class="str">'quit'</span>]:
+            resumen = contexto.resumen()
+            <span class="fn">imprimir_bot</span>(<span class="str">f"Sesión terminada. Duración: {resumen['duracion']} | Turnos: {resumen['turnos']}"</span>)
+            <span class="kw">break</span>
+        
+        <span class="kw">if</span> entrada.lower() == <span class="str">'historial'</span>:
+            <span class="fn">print</span>(<span class="cls">Fore</span>.MAGENTA + <span class="str">"\n  📜 Historial de conversación:"</span>)
+            <span class="kw">for</span> t <span class="kw">in</span> contexto.historial:
+                <span class="fn">print</span>(<span class="str">f"    [{t['tiempo']}] 👤 {t['usuario'][:40]}"</span>)
+                <span class="fn">print</span>(<span class="str">f"              🤖 {t['bot'][:60]}"</span>)
+            <span class="kw">continue</span>
+        
+        <span class="cm"># Obtener respuesta del chatbot</span>
+        resultado = responder.obtener_respuesta(entrada)
+        
+        <span class="cm"># Verificar si necesita escalación a humano</span>
+        contexto.agregar_turno(entrada, resultado[<span class="str">'respuesta'</span>], resultado[<span class="str">'intencion'</span>])
+        
+        <span class="kw">if</span> contexto.necesita_escalacion():
+            <span class="fn">imprimir_bot</span>(<span class="str">"Noto que no he podido ayudarte bien. Te transfiero con un agente humano. 🙋"</span>)
+            <span class="fn">print</span>(<span class="cls">Fore</span>.RED + <span class="str">"  [Simulación: conexión con agente humano...]"</span>)
+            <span class="kw">break</span>
+        
+        <span class="fn">imprimir_bot</span>(resultado[<span class="str">'respuesta'</span>], resultado[<span class="str">'confianza'</span>])
+    
+    <span class="fn">print</span>(<span class="str">"\n  ¡Hasta pronto! 👋\n"</span>)
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    <span class="fn">main</span>()</pre>
+        </div>
+        <div class="annot">▶ Ejecuta: <strong>python main.py</strong> — ¡Tu chatbot ya funciona! Prueba al menos 15 preguntas diferentes de tu servicio.</div>
+
+        <div class="callout tip">
+          <div class="callout-icon">📋</div>
+          <div class="callout-body">
+            <strong>Documentación recomendada</strong>
+            <p>Consulta <a href="https://www.nltk.org/book/" target="_blank">nltk.org/book</a> para profundizar en NLP y <a href="https://scikit-learn.org/stable/modules/ensemble.html#forests-of-randomized-trees" target="_blank">scikit-learn — Random Forests</a> para entender mejor el clasificador.</p>
+          </div>
+        </div>
+
+        <div class="reflect-box">
+          <div class="rb-title">🧠 Reflexión 8.A — Evaluación del chatbot completo</div>
+          <ol>
+            <li>Haz 10 pruebas de conversación real. Anota cuáles fallaron y por qué.</li>
+            <li>¿En qué casos el chatbot respondió bien aunque la confianza era baja?</li>
+            <li>¿Cómo mejorarías el sistema de escalación para que no interrumpa conversaciones válidas?</li>
+            <li>Compara tu chatbot con uno comercial (Tidio, Intercom). ¿Qué tiene el comercial que el tuyo no?</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     RETO EXTRA
+═════════════════════════════════════ -->
+<section id="reto">
+  <div class="container">
+    <div class="phase-divider">
+      <div class="phase-label reto">⚡ RETO EXTRA · Puntos adicionales · 1 hora</div>
+    </div>
+
+    <div class="reto-header">
+      <div class="points-badge">⚡ PUNTOS EXTRA — OPCIONAL</div>
+      <h2>Sube el nivel de tu chatbot</h2>
+      <p>Elige al menos <strong>uno</strong> de los siguientes desafíos e integra la funcionalidad a tu chatbot base. Cada reto tiene instrucciones de arranque — tú decides cómo terminarlo.</p>
+    </div>
+
+    <!-- RETO A -->
+    <div class="step-block" id="reto-a">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num reto-num">R1</div>
+        <div class="step-info">
+          <h3>Interfaz web con Flask</h3>
+          <p>Conecta tu chatbot a un navegador web con chat en tiempo real</p>
+        </div>
+        <div class="step-duration">+15 pts</div>
+      </div>
+      <div class="step-body">
+        <p>Crea <code>app.py</code> para servir el chatbot como API REST que pueda consumirse desde un HTML:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> app.py — Servidor Flask</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">from</span> flask <span class="kw">import</span> <span class="cls">Flask</span>, request, jsonify, render_template_string
+<span class="kw">from</span> utils.responder <span class="kw">import</span> <span class="cls">ChatbotResponder</span>
+<span class="kw">from</span> utils.contexto <span class="kw">import</span> <span class="cls">ContextoConversacion</span>
+
+app = <span class="cls">Flask</span>(__name__)
+responder = <span class="cls">ChatbotResponder</span>()
+contextos = {}  <span class="cm"># sesión_id → ContextoConversacion</span>
+
+HTML_CHAT = <span class="str">"""
+&lt;!DOCTYPE html&gt;&lt;html lang="es"&gt;
+&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;title&gt;Chatbot&lt;/title&gt;
+&lt;style&gt;
+  body{font-family:sans-serif;background:#1a1a2e;color:#eee;display:flex;
+       flex-direction:column;align-items:center;padding:20px}
+  #chat{width:500px;height:400px;overflow-y:auto;background:#16213e;
+        border-radius:12px;padding:16px;margin-bottom:12px}
+  .msg{margin:8px 0;padding:10px 14px;border-radius:8px;max-width:80%}
+  .user{background:#0f3460;margin-left:auto;text-align:right}
+  .bot{background:#533483}
+  #inp{display:flex;gap:8px;width:500px}
+  input{flex:1;padding:10px;border-radius:8px;border:none;background:#16213e;
+        color:#eee;font-size:15px}
+  button{padding:10px 20px;background:#e94560;border:none;border-radius:8px;
+         color:#fff;cursor:pointer;font-weight:700}
+&lt;/style&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;🤖 Mi Chatbot de Atención al Cliente&lt;/h2&gt;
+&lt;div id="chat"&gt;&lt;/div&gt;
+&lt;div id="inp"&gt;
+  &lt;input id="txt" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter')enviar()"&gt;
+  &lt;button onclick="enviar()"&gt;Enviar&lt;/button&gt;
+&lt;/div&gt;
+&lt;script&gt;
+const chat=document.getElementById('chat');
+const txt=document.getElementById('txt');
+function agregar(t,cls){const d=document.createElement('div');
+  d.className='msg '+cls;d.textContent=t;chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight}
+agregar('¡Hola! ¿En qué puedo ayudarte hoy?','bot');
+async function enviar(){
+  const m=txt.value.trim();if(!m)return;
+  agregar(m,'user');txt.value='';
+  const r=await fetch('/chat',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mensaje:m,sesion:'web1'})});
+  const d=await r.json();agregar(d.respuesta,'bot')}
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+"""</span>
+
+@app.route(<span class="str">'/'</span>)
+<span class="kw">def</span> <span class="fn">index</span>():
+    <span class="kw">return</span> render_template_string(HTML_CHAT)
+
+@app.route(<span class="str">'/chat'</span>, methods=[<span class="str">'POST'</span>])
+<span class="kw">def</span> <span class="fn">chat</span>():
+    datos = request.get_json()
+    mensaje = datos.get(<span class="str">'mensaje'</span>, <span class="str">''</span>)
+    sesion  = datos.get(<span class="str">'sesion'</span>, <span class="str">'default'</span>)
+    
+    <span class="kw">if</span> sesion <span class="kw">not in</span> contextos:
+        contextos[sesion] = <span class="cls">ContextoConversacion</span>()
+    
+    resultado = responder.obtener_respuesta(mensaje)
+    contextos[sesion].agregar_turno(mensaje, resultado[<span class="str">'respuesta'</span>], resultado[<span class="str">'intencion'</span>])
+    
+    <span class="kw">return</span> jsonify(resultado)
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    app.run(debug=<span class="kw">True</span>, port=<span class="num">5000</span>)
+    <span class="fn">print</span>(<span class="str">"🌐 Abre http://localhost:5000 en tu navegador"</span>)</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <strong>Tu desafío en este reto</strong>
+            <p>① Ejecuta el servidor y prueba el chat en el navegador. ② Mejora el diseño HTML/CSS del chat para que refleje la identidad visual de tu servicio. ③ Agrega un indicador de "escribiendo…" mientras se procesa la respuesta.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETO B -->
+    <div class="step-block" id="reto-b">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num reto-num">R2</div>
+        <div class="step-info">
+          <h3>Entidades y extracción de datos</h3>
+          <p>El chatbot extrae fechas, nombres y cantidades del texto</p>
+        </div>
+        <div class="step-duration">+15 pts</div>
+      </div>
+      <div class="step-body">
+        <p>Agrega a <code>utils/nlp.py</code> las siguientes funciones para extraer entidades:</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> Añadir a utils/nlp.py — Extractor de entidades</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> re
+
+<span class="kw">def</span> <span class="fn">extraer_entidades</span>(texto: <span class="fn">str</span>) -> <span class="fn">dict</span>:
+    <span class="str">"""
+    Extrae entidades relevantes del texto mediante expresiones regulares.
+    Retorna un dict con las entidades encontradas.
+    
+    Tu tarea: ampliar este extractor para las entidades de tu servicio.
+    """</span>
+    entidades = {}
+    
+    <span class="cm"># Números y cantidades</span>
+    nums = re.findall(<span class="str">r'\b\d+\b'</span>, texto)
+    <span class="kw">if</span> nums:
+        entidades[<span class="str">'numeros'</span>] = nums
+    
+    <span class="cm"># Fechas simples (dd/mm, dd-mm-yyyy, "el lunes", "mañana")</span>
+    fechas = re.findall(<span class="str">r'\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b'</span>, texto)
+    dias_semana = re.findall(
+        <span class="str">r'\b(lunes|martes|miércoles|jueves|viernes|sábado|domingo|mañana|hoy|pasado)\b'</span>,
+        texto.lower()
+    )
+    <span class="kw">if</span> fechas: entidades[<span class="str">'fechas'</span>] = fechas
+    <span class="kw">if</span> dias_semana: entidades[<span class="str">'dias'</span>] = dias_semana
+    
+    <span class="cm"># Emails</span>
+    emails = re.findall(<span class="str">r'[\w.-]+@[\w.-]+\.\w+'</span>, texto)
+    <span class="kw">if</span> emails: entidades[<span class="str">'emails'</span>] = emails
+    
+    <span class="cm"># Teléfonos (formato MX: 10 dígitos)</span>
+    telefonos = re.findall(<span class="str">r'\b\d{10}\b'</span>, texto)
+    <span class="kw">if</span> telefonos: entidades[<span class="str">'telefonos'</span>] = telefonos
+    
+    <span class="cm"># ↓ AGREGA AQUÍ ENTIDADES PROPIAS DE TU SERVICIO ↓</span>
+    <span class="cm"># Ejemplo restaurante: tamaños, ingredientes, métodos de pago</span>
+    <span class="cm"># Ejemplo clínica: síntomas, especialidades médicas</span>
+    
+    <span class="kw">return</span> entidades</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <strong>Tu desafío</strong>
+            <p>Agrega al menos 3 entidades propias de tu servicio. Usa las entidades extraídas para personalizar las respuestas (ej: "Tu cita es el <em>martes</em> a las <em>15:00</em>"  en lugar de una respuesta genérica).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETO C -->
+    <div class="step-block" id="reto-c">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num reto-num">R3</div>
+        <div class="step-info">
+          <h3>Análisis de sentimiento del usuario</h3>
+          <p>Detecta si el cliente está frustrado, neutral o satisfecho</p>
+        </div>
+        <div class="step-duration">+15 pts</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/sentimiento.py</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">from</span> nltk.sentiment <span class="kw">import</span> <span class="cls">SentimentIntensityAnalyzer</span>
+<span class="kw">import</span> nltk
+nltk.download(<span class="str">'vader_lexicon'</span>, quiet=<span class="kw">True</span>)
+
+<span class="cm"># Nota: VADER fue diseñado para inglés. Para tu implementación,</span>
+<span class="cm"># crea tu propio lexicón de palabras positivas/negativas en español</span>
+<span class="cm"># o usa la API de transformers con un modelo multilingüe.</span>
+
+PALABRAS_NEGATIVAS = [
+    <span class="str">'terrible'</span>, <span class="str">'pésimo'</span>, <span class="str">'horrible'</span>, <span class="str">'decepcionante'</span>,
+    <span class="str">'molesto'</span>, <span class="str">'enojado'</span>, <span class="str">'frustrado'</span>, <span class="str">'mal'</span>, <span class="str">'nunca'</span>,
+    <span class="str">'no funciona'</span>, <span class="str">'mentira'</span>, <span class="str">'estafa'</span>, <span class="str">'queja'</span>
+]
+
+PALABRAS_POSITIVAS = [
+    <span class="str">'excelente'</span>, <span class="str">'perfecto'</span>, <span class="str">'gracias'</span>, <span class="str">'genial'</span>, <span class="str">'bueno'</span>,
+    <span class="str">'rápido'</span>, <span class="str">'satisfecho'</span>, <span class="str">'feliz'</span>, <span class="str">'bien'</span>, <span class="str">'increíble'</span>
+]
+
+
+<span class="kw">def</span> <span class="fn">analizar_sentimiento</span>(texto: <span class="fn">str</span>) -> <span class="fn">dict</span>:
+    <span class="str">"""
+    Clasifica el sentimiento del texto como: positivo, negativo o neutro.
+    Retorna: {'sentimiento': str, 'puntaje': float, 'escalacion': bool}
+    
+    Tu desafío: ampliar el lexicón con palabras específicas de tu servicio
+    y conectarlo al contexto para ajustar el tono de las respuestas.
+    """</span>
+    texto_lower = texto.lower()
+    puntaje = <span class="num">0</span>
+    
+    <span class="kw">for</span> p <span class="kw">in</span> PALABRAS_NEGATIVAS:
+        <span class="kw">if</span> p <span class="kw">in</span> texto_lower:
+            puntaje -= <span class="num">1</span>
+    
+    <span class="kw">for</span> p <span class="kw">in</span> PALABRAS_POSITIVAS:
+        <span class="kw">if</span> p <span class="kw">in</span> texto_lower:
+            puntaje += <span class="num">1</span>
+    
+    <span class="kw">if</span> puntaje > <span class="num">0</span>:
+        sentimiento = <span class="str">'positivo'</span>
+    <span class="kw">elif</span> puntaje < <span class="num">0</span>:
+        sentimiento = <span class="str">'negativo'</span>
+    <span class="kw">else</span>:
+        sentimiento = <span class="str">'neutro'</span>
+    
+    <span class="kw">return</span> {
+        <span class="str">'sentimiento'</span>: sentimiento,
+        <span class="str">'puntaje'</span>: puntaje,
+        <span class="str">'escalacion'</span>: puntaje <= -<span class="num">2</span>  <span class="cm"># Muy negativo → escalar</span>
+    }</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <strong>Tu desafío</strong>
+            <p>Integra el análisis de sentimiento en <code>main.py</code>: cuando el usuario exprese frustración, el bot debe responder con más empatía o escalar automáticamente. Amplía el lexicón con al menos 20 palabras de tu dominio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETO D -->
+    <div class="step-block" id="reto-d">
+      <div class="step-header" onclick="toggleStep(this)">
+        <div class="step-num reto-num">R4</div>
+        <div class="step-info">
+          <h3>Dashboard de métricas con CSV</h3>
+          <p>Registra y visualiza las estadísticas de uso del chatbot</p>
+        </div>
+        <div class="step-duration">+10 pts</div>
+      </div>
+      <div class="step-body">
+        <div class="code-wrap">
+          <div class="code-header">
+            <div class="code-label"><span class="ext">py</span> utils/metricas.py — Logger de conversaciones</div>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><span class="kw">import</span> csv
+<span class="kw">import</span> os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+LOG_FILE = <span class="str">'data/conversaciones.csv'</span>
+
+
+<span class="kw">def</span> <span class="fn">registrar_turno</span>(usuario: <span class="fn">str</span>, bot: <span class="fn">str</span>,
+                    intencion: <span class="fn">str</span>, confianza: <span class="fn">float</span>):
+    <span class="str">"""Guarda cada turno de conversación en un CSV para análisis posterior."""</span>
+    existe = os.path.exists(LOG_FILE)
+    
+    <span class="kw">with</span> <span class="fn">open</span>(LOG_FILE, <span class="str">'a'</span>, newline=<span class="str">''</span>, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+        writer = csv.writer(f)
+        
+        <span class="kw">if not</span> existe:
+            writer.writerow([<span class="str">'timestamp'</span>, <span class="str">'usuario'</span>, <span class="str">'bot'</span>,
+                             <span class="str">'intencion'</span>, <span class="str">'confianza'</span>])
+        
+        writer.writerow([
+            datetime.now().isoformat(),
+            usuario[:100],
+            bot[:150],
+            intencion,
+            confianza
+        ])
+
+
+<span class="kw">def</span> <span class="fn">generar_reporte</span>():
+    <span class="str">"""
+    Lee el CSV y genera estadísticas básicas.
+    Tu desafío: usar matplotlib para graficar las intenciones más frecuentes.
+    """</span>
+    <span class="kw">if not</span> os.path.exists(LOG_FILE):
+        <span class="fn">print</span>(<span class="str">"No hay datos todavía."</span>)
+        <span class="kw">return</span>
+    
+    intenciones = {}
+    confianzas = []
+    
+    <span class="kw">with</span> <span class="fn">open</span>(LOG_FILE, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+        reader = csv.DictReader(f)
+        <span class="kw">for</span> row <span class="kw">in</span> reader:
+            i = row[<span class="str">'intencion'</span>]
+            intenciones[i] = intenciones.get(i, <span class="num">0</span>) + <span class="num">1</span>
+            <span class="kw">try</span>:
+                confianzas.append(<span class="fn">float</span>(row[<span class="str">'confianza'</span>]))
+            <span class="kw">except</span>:
+                <span class="kw">pass</span>
+    
+    <span class="fn">print</span>(<span class="str">"\n📊 Intenciones más frecuentes:"</span>)
+    <span class="kw">for</span> k, v <span class="kw">in</span> <span class="fn">sorted</span>(intenciones.items(), key=<span class="kw">lambda</span> x: -x[<span class="num">1</span>]):
+        barra = <span class="str">'█'</span> * v
+        <span class="fn">print</span>(<span class="str">f"  {k:<span class="num">20</span>} {barra} ({v})"</span>)
+    
+    <span class="kw">if</span> confianzas:
+        avg = <span class="fn">sum</span>(confianzas) / <span class="fn">len</span>(confianzas)
+        <span class="fn">print</span>(<span class="str">f"\n  Confianza promedio: {avg:.1%}"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    <span class="fn">generar_reporte</span>()</pre>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">🎯</div>
+          <div class="callout-body">
+            <strong>Tu desafío</strong>
+            <p>Integra <code>registrar_turno</code> en <code>main.py</code>. Después de 20 interacciones ejecuta <code>generar_reporte()</code>. Extiéndelo usando <code>matplotlib</code> para graficar las intenciones en un diagrama de barras.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Criterios -->
+    <div class="entrega-card">
+      <h3>📦 Entregables y criterios de evaluación</h3>
+      <p style="color:var(--text-dim);font-size:14px;margin-bottom:8px">Sube un ZIP a la plataforma con tu código completo, el archivo <code>intents.json</code> final y tu documento de reflexiones.</p>
+
+      <div class="criteria-grid">
+        <div class="crit-item">
+          <div class="crit-pts">20</div>
+          <p>Entorno funcional y código documentado</p>
+        </div>
+        <div class="crit-item">
+          <div class="crit-pts">20</div>
+          <p>intents.json con ≥10 intenciones del servicio</p>
+        </div>
+        <div class="crit-item">
+          <div class="crit-pts">20</div>
+          <p>Modelo entrenado con F1 ≥ 0.70</p>
+        </div>
+        <div class="crit-item">
+          <div class="crit-pts">20</div>
+          <p>Chatbot funcional con contexto y escalación</p>
+        </div>
+        <div class="crit-item">
+          <div class="crit-pts">20</div>
+          <p>Documento de reflexiones completo</p>
+        </div>
+        <div class="crit-item" style="border-color:rgba(245,158,11,0.3)">
+          <div class="crit-pts" style="color:var(--reto)">+15</div>
+          <p>Por cada reto extra completado</p>
+        </div>
+      </div>
+
+      <div style="margin-top:20px" class="callout warn">
+        <div class="callout-icon">📝</div>
+        <div class="callout-body">
+          <strong>Recuerda incluir en tu documento de reflexiones</strong>
+          <p>Respuestas a <em>todas</em> las preguntas de reflexión de cada paso, capturas de pantalla del chatbot funcionando y una sección de "¿Qué mejorarías con más tiempo?".</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p>ML-601 · Chatbots de Atención al Cliente · Ingeniería en Computación 6° · 
+     <a href="https://nltk.org" target="_blank">NLTK</a> · 
+     <a href="https://scikit-learn.org" target="_blank">scikit-learn</a> · 
+     <a href="https://flask.palletsprojects.com" target="_blank">Flask</a>
+  </p>
+  <p style="margin-top:6px;opacity:.5">Actividad diseñada con fines educativos · 6 horas · Python 3.10+</p>
+</footer>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+// Toggle step bodies
+function toggleStep(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// Copy code
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

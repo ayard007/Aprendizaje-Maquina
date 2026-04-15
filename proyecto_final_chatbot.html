@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PF-ML601 · Chatbot Avanzado — Proyecto Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f2ed;
+  --ink:#1a1714;
+  --ink2:#4a4540;
+  --ink3:#8a837a;
+  --cream:#faf8f4;
+  --border:#e0d9d0;
+  --border2:#c8bfb4;
+  --l1:#1d4ed8;--l1b:#dbeafe;--l1t:#1e3a8a;
+  --l2:#7c3aed;--l2b:#ede9fe;--l2t:#4c1d95;
+  --l3:#b45309;--l3b:#fef3c7;--l3t:#78350f;
+  --l4:#0f766e;--l4b:#ccfbf1;--l4t:#134e4a;
+  --reto:#dc2626;--retob:#fee2e2;--retot:#7f1d1d;
+  --code:#1c1917;
+  --accent:#e07b39;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden}
+
+/* ── PROGRESS ── */
+#pbar{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:999;transition:width .1s}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:grid;place-items:center;text-align:center;padding:80px 24px;position:relative;overflow:hidden;background:var(--ink)}
+
+.hero-noise{position:absolute;inset:0;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none}
+
+.hero-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hero-lines span{position:absolute;width:1px;height:100%;background:rgba(255,255,255,.04);animation:rise 8s ease infinite}
+.hero-lines span:nth-child(1){left:15%;animation-delay:0s}
+.hero-lines span:nth-child(2){left:35%;animation-delay:1.5s}
+.hero-lines span:nth-child(3){left:55%;animation-delay:3s}
+.hero-lines span:nth-child(4){left:75%;animation-delay:4.5s}
+.hero-lines span:nth-child(5){left:90%;animation-delay:6s}
+
+@keyframes rise{0%{transform:scaleY(0);transform-origin:bottom}40%{transform:scaleY(1);transform-origin:bottom}60%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(0);transform-origin:top}}
+
+.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;animation:fd .6s ease both}
+
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(3rem,7vw,6rem);font-weight:400;line-height:1.05;color:#f5f2ed;margin-bottom:20px;animation:fd .7s .1s ease both}
+.hero h1 em{font-style:italic;color:var(--accent)}
+
+.hero-sub{font-size:1.1rem;color:#a89e95;max-width:560px;margin:0 auto 48px;font-weight:300;animation:fd .7s .2s ease both}
+
+.hero-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:52px;animation:fd .7s .3s ease both}
+.pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 16px;font-size:12.5px;color:#c8bfb4}
+.pill b{font-weight:500;color:#f0ebe4}
+
+.hero-cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;font-family:'Outfit',sans-serif;font-weight:600;font-size:15px;padding:14px 32px;border-radius:4px;text-decoration:none;letter-spacing:.03em;transition:all .2s;animation:fd .7s .4s ease both}
+.hero-cta:hover{background:#c96a28;transform:translateY(-2px)}
+
+@keyframes fd{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── NAV ── */
+.snav{position:sticky;top:0;z-index:100;background:rgba(245,242,237,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.snav-inner{max-width:1060px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;padding-top:10px;padding-bottom:10px}
+.snav-inner::-webkit-scrollbar{display:none}
+.nl{white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 12px;border-radius:4px;color:var(--ink3);text-decoration:none;transition:all .15s;letter-spacing:.04em}
+.nl:hover{background:var(--border);color:var(--ink)}
+.nl.c1{color:var(--l1)}
+.nl.c2{color:var(--l2)}
+.nl.c3{color:var(--l3)}
+.nl.c4{color:var(--l4)}
+.nl.cr{color:var(--reto)}
+
+/* ── LAYOUT ── */
+.wrap{max-width:860px;margin:0 auto;padding:0 24px}
+section{padding:80px 0}
+
+/* ── SECTION HEADERS ── */
+.stag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.stag::before{content:'';display:inline-block;width:28px;height:1.5px;border-radius:2px}
+
+.stag-1{color:var(--l1)}.stag-1::before{background:var(--l1)}
+.stag-2{color:var(--l2)}.stag-2::before{background:var(--l2)}
+.stag-3{color:var(--l3)}.stag-3::before{background:var(--l3)}
+.stag-4{color:var(--l4)}.stag-4::before{background:var(--l4)}
+.stag-r{color:var(--reto)}.stag-r::before{background:var(--reto)}
+.stag-0{color:var(--ink3)}.stag-0::before{background:var(--ink3)}
+
+.sh{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4.5vw,3.2rem);font-weight:400;line-height:1.1;margin-bottom:14px}
+.sd{color:var(--ink2);font-size:1.05rem;max-width:620px;font-weight:300;margin-bottom:48px}
+
+/* ── OVERVIEW CARDS ── */
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:48px}
+.ov-card{background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:20px;position:relative;overflow:hidden}
+.ov-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.ov-c1::after{background:var(--l1)}.ov-c2::after{background:var(--l2)}.ov-c3::after{background:var(--l3)}.ov-c4::after{background:var(--l4)}.ov-cr::after{background:var(--reto)}
+.ov-time{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;margin-bottom:6px}
+.ov-c1 .ov-time{color:var(--l1)}.ov-c2 .ov-time{color:var(--l2)}.ov-c3 .ov-time{color:var(--l3)}.ov-c4 .ov-time{color:var(--l4)}.ov-cr .ov-time{color:var(--reto)}
+.ov-card h4{font-family:'Outfit',sans-serif;font-weight:600;font-size:14.5px;margin-bottom:5px}
+.ov-card p{font-size:12.5px;color:var(--ink3);font-weight:300}
+
+/* ── DIVIDERS ── */
+.phase-div{display:flex;align-items:center;gap:16px;margin:64px 0 40px}
+.phase-div::before,.phase-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.phase-lbl{display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;white-space:nowrap;padding:7px 16px;border-radius:999px;border:1.5px solid}
+.pl-1{color:var(--l1);border-color:var(--l1);background:var(--l1b)}
+.pl-2{color:var(--l2);border-color:var(--l2);background:var(--l2b)}
+.pl-3{color:var(--l3);border-color:var(--l3);background:var(--l3b)}
+.pl-4{color:var(--l4);border-color:var(--l4);background:var(--l4b)}
+.pl-r{color:var(--reto);border-color:var(--reto);background:var(--retob)}
+
+/* ── STEP BLOCKS ── */
+.step{border:1px solid var(--border);border-radius:12px;background:var(--cream);margin-bottom:24px;overflow:hidden;transition:border-color .2s}
+.step:hover{border-color:var(--border2)}
+.step-hd{display:flex;align-items:flex-start;gap:16px;padding:22px 26px;cursor:pointer;user-select:none}
+.snum{width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0;margin-top:2px}
+.n1{background:var(--l1b);color:var(--l1t);border:1px solid rgba(29,78,216,.2)}
+.n2{background:var(--l2b);color:var(--l2t);border:1px solid rgba(124,58,237,.2)}
+.n3{background:var(--l3b);color:var(--l3t);border:1px solid rgba(180,83,9,.2)}
+.n4{background:var(--l4b);color:var(--l4t);border:1px solid rgba(15,118,110,.2)}
+.nr{background:var(--retob);color:var(--retot);border:1px solid rgba(220,38,38,.2)}
+.si{flex:1}
+.si h3{font-family:'Outfit',sans-serif;font-weight:600;font-size:17px;margin-bottom:3px}
+.si p{font-size:13.5px;color:var(--ink3);font-weight:300}
+.sdur{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink3);flex-shrink:0;margin-top:5px;background:var(--bg);padding:4px 10px;border-radius:4px;border:1px solid var(--border)}
+.step-bd{padding:0 26px 26px;border-top:1px solid var(--border);display:none}
+.step-bd.open{display:block}
+
+/* ── CONTENT ── */
+.step-bd h4{font-family:'Outfit',sans-serif;font-weight:600;font-size:14.5px;margin:22px 0 9px;color:var(--ink)}
+.step-bd p{margin-bottom:12px;color:var(--ink2);font-size:14.5px;font-weight:300}
+.step-bd ul,.step-bd ol{margin:8px 0 16px 20px;color:var(--ink2);font-size:14.5px;font-weight:300}
+.step-bd li{margin-bottom:5px}
+.step-bd a{color:var(--l1);text-decoration:none;border-bottom:1px solid rgba(29,78,216,.3)}
+.step-bd a:hover{border-color:var(--l1)}
+
+/* ── CODE ── */
+.cw{background:var(--code);border-radius:8px;margin:14px 0;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06)}
+.cl{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#6b7280;display:flex;align-items:center;gap:8px}
+.cl .ext{background:rgba(224,123,57,.15);color:#e07b39;padding:2px 8px;border-radius:3px;font-size:9.5px;letter-spacing:.08em}
+.cpbtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#6b7280;font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 10px;border-radius:3px;cursor:pointer;transition:all .15s}
+.cpbtn:hover{background:rgba(255,255,255,.12);color:#d1d5db}
+.cpbtn.ok{color:#34d399;border-color:rgba(52,211,153,.4)}
+pre{padding:18px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.8;color:#d1d5db}
+.kw{color:#c084fc}.fn{color:#60a5fa}.str{color:#86efac}.cm{color:#4b5563;font-style:italic}.num{color:#fb923c}.cls{color:#fde68a}.dec{color:#f9a8d4}
+
+/* ── CALLOUTS ── */
+.note{border-radius:8px;padding:14px 18px;margin:14px 0;font-size:13.5px;display:flex;gap:11px;align-items:flex-start;border:1px solid}
+.ni{font-size:16px;flex-shrink:0;margin-top:1px}
+.nb{flex:1}
+.nb strong{display:block;font-size:12.5px;font-weight:600;margin-bottom:3px}
+.nb p{margin:0;font-size:13px;font-weight:300}
+.note.inf{background:var(--l1b);border-color:rgba(29,78,216,.2);color:var(--l1t)}
+.note.war{background:var(--l3b);border-color:rgba(180,83,9,.2);color:var(--l3t)}
+.note.tip{background:var(--l4b);border-color:rgba(15,118,110,.2);color:var(--l4t)}
+.note.ref{background:var(--l2b);border-color:rgba(124,58,237,.2);color:var(--l2t)}
+.note.dng{background:var(--retob);border-color:rgba(220,38,38,.2);color:var(--retot)}
+
+/* ── REFLECT ── */
+.rbox{background:var(--l2b);border-left:3px solid var(--l2);border-radius:0 8px 8px 0;padding:18px 22px;margin:18px 0}
+.rbox-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--l2);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.rbox ol{margin:0 0 0 16px}
+.rbox li{color:var(--l2t);font-size:13.5px;font-style:italic;margin-bottom:9px;font-weight:300}
+
+/* ── ANNOT ── */
+.an{background:rgba(52,211,153,.06);border-left:2px solid #34d399;padding:9px 13px;margin:2px 0 14px;font-size:12.5px;color:#047857;font-family:'IBM Plex Mono',monospace;border-radius:0 0 6px 6px}
+
+/* ── LINKS ── */
+.lnk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0}
+.extl{display:flex;align-items:center;gap:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-decoration:none;transition:all .15s;color:var(--ink)}
+.extl:hover{border-color:var(--border2);transform:translateY(-2px)}
+.eico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.etxt strong{display:block;font-size:13px;font-weight:600;line-height:1.3}
+.etxt span{font-size:11.5px;color:var(--ink3)}
+
+/* ── ARCHITECTURE ── */
+.arch{margin:24px 0}
+.arch-layer{border-radius:10px;padding:16px 20px;margin-bottom:8px;border:1px solid}
+.arch-layer .al-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin-bottom:10px}
+.arch-layer .al-chips{display:flex;flex-wrap:wrap;gap:6px}
+.al-chip{font-size:11.5px;padding:4px 10px;border-radius:4px;font-family:'IBM Plex Mono',monospace}
+.a-pres{background:var(--l1b);border-color:rgba(29,78,216,.2)}.a-pres .al-label{color:var(--l1t)}.a-pres .al-chip{background:#fff;color:var(--l1t);border:1px solid rgba(29,78,216,.15)}
+.a-api{background:var(--l4b);border-color:rgba(15,118,110,.2)}.a-api .al-label{color:var(--l4t)}.a-api .al-chip{background:#fff;color:var(--l4t);border:1px solid rgba(15,118,110,.15)}
+.a-nlp{background:var(--l2b);border-color:rgba(124,58,237,.2)}.a-nlp .al-label{color:var(--l2t)}.a-nlp .al-chip{background:#fff;color:var(--l2t);border:1px solid rgba(124,58,237,.15)}
+.a-per{background:var(--bg);border-color:var(--border)}.a-per .al-label{color:var(--ink3)}.a-per .al-chip{background:var(--cream);color:var(--ink2);border:1px solid var(--border)}
+.arch-arrow{text-align:center;font-size:18px;color:var(--border2);margin:2px 0}
+
+/* ── CHECKLIST ── */
+.ck{list-style:none;margin:10px 0 18px;padding:0}
+.ck li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:14px;color:var(--ink2);font-weight:300}
+.ck li::before{content:'○';font-size:13px;color:var(--border2);flex-shrink:0;margin-top:2px}
+
+/* ── RUBRIC ── */
+.rubric-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px}
+.rubric-table th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:8px 12px;text-align:left;border-bottom:2px solid var(--border);background:var(--bg)}
+.rubric-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:300}
+.rubric-table tr:last-child td{border:none}
+.rubric-table .pts{font-family:'IBM Plex Mono',monospace;font-weight:500;text-align:right;white-space:nowrap}
+.rubric-table .extra td{color:var(--retot);background:var(--retob)}
+.rubric-table .extra .pts{color:var(--reto)}
+.pts-total{display:flex;align-items:center;justify-content:space-between;background:var(--ink);color:#f5f2ed;padding:14px 20px;border-radius:8px;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:14px}
+.pts-total span:last-child{font-size:22px;font-weight:500;color:var(--accent)}
+
+/* ── ENTREGA ── */
+.entrega{background:var(--ink);color:#f5f2ed;border-radius:12px;padding:32px;margin-top:64px}
+.entrega h3{font-family:'Instrument Serif',serif;font-size:1.8rem;font-weight:400;margin-bottom:18px}
+.entrega .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:20px 0}
+.level-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:18px}
+.level-card .lc-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.level-card h5{font-size:15px;font-weight:600;margin-bottom:6px;font-family:'Outfit',sans-serif}
+.level-card p{font-size:12.5px;color:#a89e95;font-weight:300}
+.lc1 .lc-tag{color:#60a5fa}
+.lc2 .lc-tag{color:#a78bfa}
+.lc3 .lc-tag{color:var(--accent)}
+
+/* ── RETO HEADER ── */
+.reto-hero{background:linear-gradient(135deg,var(--retob) 0%,#fff0f0 100%);border:1.5px solid rgba(220,38,38,.25);border-radius:12px;padding:28px;margin-bottom:28px;position:relative;overflow:hidden}
+.reto-hero::after{content:'★';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:100px;opacity:.04;color:var(--reto)}
+.reto-hero h2{font-family:'Instrument Serif',serif;font-size:2.2rem;font-weight:400;color:var(--reto);margin-bottom:8px}
+.reto-hero p{color:var(--retot);font-size:15px;font-weight:300;margin:0}
+.reto-badge{display:inline-flex;align-items:center;gap:5px;background:var(--retob);border:1px solid rgba(220,38,38,.3);border-radius:999px;padding:4px 12px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--reto);margin-bottom:14px}
+
+footer{background:var(--ink);color:#6b7280;padding:28px 24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em}
+footer a{color:var(--accent);text-decoration:none}
+
+@media(max-width:640px){.step-hd{flex-wrap:wrap}.sdur{width:100%}.lnk-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="pbar" style="width:0"></div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-lines"><span></span><span></span><span></span><span></span><span></span></div>
+  <div>
+    <div class="hero-eyebrow">Ingeniería en Computación · 6° Semestre · PF-ML601</div>
+    <h1>Proyecto Final<br><em>Chatbot Avanzado</em><br>de Atención al Cliente</h1>
+    <p class="hero-sub">Evoluciona tu chatbot de la actividad guiada hasta un sistema multicapa con NLP semántico, API REST, base de conocimiento dinámica y análisis de sentimiento.</p>
+    <div class="hero-pills">
+      <div class="pill"><b>Módulo 1</b> NLP Semántico</div>
+      <div class="pill"><b>Módulo 2</b> Base de Datos</div>
+      <div class="pill"><b>Módulo 3</b> API REST</div>
+      <div class="pill"><b>Módulo 4</b> Frontend Web</div>
+      <div class="pill"><b>Módulo 5</b> Sentimiento</div>
+      <div class="pill"><b>Módulo 6</b> Entidades</div>
+      <div class="pill"><b>Módulo 7</b> Memoria</div>
+    </div>
+    <a href="#inicio" class="hero-cta">Comenzar proyecto →</a>
+  </div>
+</section>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="snav"><div class="snav-inner">
+  <a href="#inicio" class="nl">Inicio</a>
+  <a href="#arquitectura" class="nl">Arquitectura</a>
+  <a href="#m1" class="nl c1">M1·NLP</a>
+  <a href="#m2" class="nl c1">M2·KB</a>
+  <a href="#m3" class="nl c2">M3·API</a>
+  <a href="#m4" class="nl c2">M4·Frontend</a>
+  <a href="#m5" class="nl c3">M5·Sentimiento</a>
+  <a href="#m6" class="nl c3">M6·Entidades</a>
+  <a href="#m7" class="nl c4">M7·Memoria</a>
+  <a href="#reto" class="nl cr">★ Reto</a>
+  <a href="#rubrica" class="nl">Rúbrica</a>
+</div></nav>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<section id="inicio">
+<div class="wrap">
+  <div class="stag stag-0">Contexto del proyecto</div>
+  <h2 class="sh">De actividad a producto</h2>
+  <p class="sd">Este proyecto extiende el chatbot de la actividad guiada. El código que ya escribiste es el punto de partida — cada módulo lo transforma en una pieza más robusta, hasta tener un sistema que podría desplegarse en producción.</p>
+
+  <div class="ov-grid">
+    <div class="ov-card ov-c1"><div class="ov-time">MÓDULOS 1–2 · SEMANA 1</div><h4>Fundamentos mejorados</h4><p>NLP semántico y base de conocimiento dinámica. Sin estos, los demás módulos no tienen sentido.</p></div>
+    <div class="ov-card ov-c2"><div class="ov-time">MÓDULOS 3–4 · SEMANA 2</div><h4>Arquitectura de sistema</h4><p>API REST + frontend web. El chatbot deja de ser un script de consola y se convierte en un servicio.</p></div>
+    <div class="ov-card ov-c3"><div class="ov-time">MÓDULOS 5–6 · SEMANA 3</div><h4>Inteligencia contextual</h4><p>Sentimiento acumulado y extracción de entidades. El bot entiende más allá de la intención literal.</p></div>
+    <div class="ov-card ov-c4"><div class="ov-time">MÓDULO 7 · SEMANA 4</div><h4>Persistencia y memoria</h4><p>Sesiones en SQLite. El chatbot recuerda a sus usuarios entre conversaciones.</p></div>
+    <div class="ov-card ov-cr"><div class="ov-time">RETOS EXTRA · SEMANA 4</div><h4>LLM fallback + Dashboard</h4><p>Nivel avanzado opcional: integración con LLM como red de seguridad y métricas en tiempo real.</p></div>
+  </div>
+
+  <div class="note inf"><div class="ni">📋</div><div class="nb"><strong>Individualmente</strong><p>Se debe de declarar desde la Semana 1 a qué nivel apunta: Suficiente (70), Notable (100) o Sobresaliente (+extra). El nivel declarado define la rúbrica aplicada.</p></div></div>
+  <div class="note war"><div class="ni">⚠️</div><div class="nb"><strong>Requisito de partida</strong><p>Se asume que la actividad guiada está completa: tienes <code>intents.json</code>, <code>utils/nlp.py</code>, <code>utils/trainer.py</code>, <code>utils/responder.py</code> y <code>main.py</code> funcionando.</p></div></div>
+</div>
+</section>
+
+<!-- ═══════════ ARQUITECTURA ═══════════ -->
+<section id="arquitectura">
+<div class="wrap">
+  <div class="stag stag-0">Diseño del sistema</div>
+  <h2 class="sh">Arquitectura en capas</h2>
+  <p class="sd">Antes de escribir una línea de código del proyecto, cada equipo debe diseñar y documentar su arquitectura. El diagrama que entreguen debe reflejar su sistema real, no este modelo genérico.</p>
+
+  <div class="arch">
+    <div class="arch-layer a-pres">
+      <div class="al-label">Capa 1 — Presentación</div>
+      <div class="al-chips">
+        <span class="al-chip">chat_widget.html</span>
+        <span class="al-chip">dashboard.html</span>
+        <span class="al-chip">JS fetch API</span>
+        <span class="al-chip">CSS temático al servicio</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer a-api">
+      <div class="al-label">Capa 2 — API REST</div>
+      <div class="al-chips">
+        <span class="al-chip">FastAPI / Flask</span>
+        <span class="al-chip">POST /chat</span>
+        <span class="al-chip">GET /historial/{id}</span>
+        <span class="al-chip">GET /metricas</span>
+        <span class="al-chip">Pydantic models</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer a-nlp">
+      <div class="al-label">Capa 3 — Núcleo NLP</div>
+      <div class="al-chips">
+        <span class="al-chip">sentence-transformers</span>
+        <span class="al-chip">Clasificador SVM/RF</span>
+        <span class="al-chip">spaCy NER</span>
+        <span class="al-chip">Análisis de sentimiento</span>
+        <span class="al-chip">Gestor de contexto</span>
+      </div>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer a-per">
+      <div class="al-label">Capa 4 — Persistencia y servicios externos</div>
+      <div class="al-chips">
+        <span class="al-chip">SQLite (sesiones)</span>
+        <span class="al-chip">SQLite (knowledge base)</span>
+        <span class="al-chip">LLM API (fallback)</span>
+        <span class="al-chip">Logs / métricas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note tip"><div class="ni">📐</div><div class="nb"><strong>Entregable 0 — diagrama de arquitectura propio</strong><p>Haz tu propio diagrama con draw.io, Lucidchart, Mermaid o a mano. Debe mostrar los módulos que <em>tu equipo</em> implementará, no una copia de este. Vale 10 puntos en la rúbrica.</p></div></div>
+
+  <div class="rbox">
+    <div class="rbox-title">🧠 Reflexión 0 — antes de empezar</div>
+    <ol>
+      <li>¿En qué se diferencia una arquitectura de capas de tener todo en un solo archivo? ¿Qué ventajas operativas tiene?</li>
+      <li>¿Cuál de los 7 módulos tiene mayor impacto en la experiencia del usuario final de tu servicio? Justifica.</li>
+      <li>Si el servidor de la API cae, ¿qué partes del sistema seguirían funcionando? ¿Cuáles no?</li>
+    </ol>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     MÓDULOS 1–2: NLP + KB
+══════════════════════════════ -->
+<section id="m1">
+<div class="wrap">
+  <div class="phase-divider" style="display:flex;align-items:center;gap:16px;margin:0 0 40px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <div class="phase-lbl pl-1">🔵 MÓDULOS 1–2 · NLP semántico y base de conocimiento</div>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div class="stag stag-1">Módulo 1</div>
+  <h2 class="sh">NLP con embeddings semánticos</h2>
+  <p class="sd">Reemplaza el clasificador Bag-of-Words por representaciones vectoriales densas. Frases con el mismo significado pero distintas palabras ahora quedan cerca en el espacio vectorial.</p>
+
+  <!-- PASO M1-1 -->
+  <div class="step" id="m1s1">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n1">M1.1</div>
+      <div class="si"><h3>Instala sentence-transformers</h3><p>El modelo multilingüe convierte texto a vectores densos de 384 dimensiones</p></div>
+      <div class="sdur">~20 min</div>
+    </div>
+    <div class="step-bd open">
+      <h4>Instalación de dependencias nuevas</h4>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">bash</span> Terminal</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre>pip install sentence-transformers spacy fastapi uvicorn pydantic
+python -m spacy download es_core_news_sm</pre></div>
+
+      <div class="note inf"><div class="ni">ℹ️</div><div class="nb"><strong>¿Por qué sentence-transformers?</strong><p>El modelo <code>paraphrase-multilingual-MiniLM-L12-v2</code> fue entrenado en 50+ idiomas. Entiende que "¿cuándo abren?" y "¿cuál es el horario de atención?" son la misma pregunta, algo que Bag-of-Words nunca logra.</p></div></div>
+
+      <h4>Crea utils/embeddings.py</h4>
+      <p>Este módulo reemplaza las funciones de <code>utils/nlp.py</code> para la vectorización:</p>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/embeddings.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">from</span> sentence_transformers <span class="kw">import</span> <span class="cls">SentenceTransformer</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> json
+<span class="kw">import</span> pickle
+<span class="kw">from</span> sklearn.svm <span class="kw">import</span> <span class="cls">SVC</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> classification_report
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> <span class="cls">LabelEncoder</span>
+
+<span class="cm"># Modelo multilingüe — ~117 MB, se descarga la primera vez</span>
+<span class="cm"># Alternativa más ligera: 'paraphrase-multilingual-MiniLM-L12-v2'</span>
+MODEL_NAME = <span class="str">'paraphrase-multilingual-MiniLM-L12-v2'</span>
+
+
+<span class="kw">class</span> <span class="cls">EmbeddingClassifier</span>:
+    <span class="str">"""
+    Clasificador de intenciones basado en embeddings semánticos.
+    
+    Flujo:
+        texto → SentenceTransformer → vector 384-dim → SVM → intención
+    
+    Ventaja sobre Bag-of-Words:
+        - Captura significado, no solo palabras compartidas
+        - Funciona bien con pocos ejemplos por clase (few-shot)
+        - Robusto a paráfrasis y variaciones ortográficas
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="fn">print</span>(<span class="str">"⏳ Cargando modelo de embeddings (primera vez tarda ~30s)..."</span>)
+        <span class="kw">self</span>.encoder = <span class="cls">SentenceTransformer</span>(MODEL_NAME)
+        <span class="kw">self</span>.svm = <span class="kw">None</span>
+        <span class="kw">self</span>.le = <span class="cls">LabelEncoder</span>()
+        <span class="kw">self</span>.clases = []
+        <span class="fn">print</span>(<span class="str">"✅ Modelo cargado."</span>)
+    
+    <span class="kw">def</span> <span class="fn">entrenar</span>(<span class="kw">self</span>, intents_path: <span class="fn">str</span> = <span class="str">'intents.json'</span>):
+        <span class="kw">with</span> <span class="fn">open</span>(intents_path, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+            datos = json.load(f)
+        
+        textos, etiquetas = [], []
+        <span class="kw">for</span> intent <span class="kw">in</span> datos[<span class="str">'intents'</span>]:
+            <span class="kw">for</span> patron <span class="kw">in</span> intent[<span class="str">'patterns'</span>]:
+                textos.append(patron)
+                etiquetas.append(intent[<span class="str">'tag'</span>])
+        
+        <span class="fn">print</span>(<span class="str">f"🔢 Generando embeddings para {len(textos)} patrones..."</span>)
+        X = <span class="kw">self</span>.encoder.encode(textos, show_progress_bar=<span class="kw">True</span>)
+        y = <span class="kw">self</span>.le.fit_transform(etiquetas)
+        <span class="kw">self</span>.clases = <span class="fn">list</span>(<span class="kw">self</span>.le.classes_)
+        
+        X_tr, X_te, y_tr, y_te = train_test_split(
+            X, y, test_size=<span class="num">0.2</span>, random_state=<span class="num">42</span>, stratify=y
+        )
+        
+        <span class="cm"># SVM con kernel RBF: ideal para espacios de alta dimensión (384-dim)</span>
+        <span class="kw">self</span>.svm = <span class="cls">SVC</span>(kernel=<span class="str">'rbf'</span>, C=<span class="num">10</span>, probability=<span class="kw">True</span>, random_state=<span class="num">42</span>)
+        <span class="kw">self</span>.svm.fit(X_tr, y_tr)
+        
+        <span class="fn">print</span>(<span class="str">"\n📊 Reporte de clasificación:"</span>)
+        y_pred = <span class="kw">self</span>.svm.predict(X_te)
+        nombres = [<span class="kw">self</span>.clases[i] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">sorted</span>(<span class="fn">set</span>(y_te))]
+        <span class="fn">print</span>(classification_report(y_te, y_pred, target_names=nombres, zero_division=<span class="num">0</span>))
+        
+        <span class="kw">self</span>.<span class="fn">_guardar</span>()
+    
+    <span class="kw">def</span> <span class="fn">_guardar</span>(<span class="kw">self</span>):
+        <span class="kw">with</span> <span class="fn">open</span>(<span class="str">'models/embed_model.pkl'</span>, <span class="str">'wb'</span>) <span class="kw">as</span> f:
+            pickle.dump({
+                <span class="str">'svm'</span>: <span class="kw">self</span>.svm,
+                <span class="str">'le'</span>: <span class="kw">self</span>.le,
+                <span class="str">'clases'</span>: <span class="kw">self</span>.clases,
+                <span class="str">'model_name'</span>: MODEL_NAME
+            }, f)
+        <span class="fn">print</span>(<span class="str">"✅ Modelo guardado en models/embed_model.pkl"</span>)
+    
+    <span class="kw">def</span> <span class="fn">cargar</span>(<span class="kw">self</span>):
+        <span class="kw">with</span> <span class="fn">open</span>(<span class="str">'models/embed_model.pkl'</span>, <span class="str">'rb'</span>) <span class="kw">as</span> f:
+            d = pickle.load(f)
+        <span class="kw">self</span>.svm  = d[<span class="str">'svm'</span>]
+        <span class="kw">self</span>.le   = d[<span class="str">'le'</span>]
+        <span class="kw">self</span>.clases = d[<span class="str">'clases'</span>]
+        <span class="kw">return self</span>
+    
+    <span class="kw">def</span> <span class="fn">predecir</span>(<span class="kw">self</span>, texto: <span class="fn">str</span>) -> <span class="fn">tuple</span>[<span class="fn">str</span>, <span class="fn">float</span>]:
+        vec = <span class="kw">self</span>.encoder.encode([texto])
+        probs = <span class="kw">self</span>.svm.predict_proba(vec)[<span class="num">0</span>]
+        idx = np.argmax(probs)
+        <span class="kw">return</span> <span class="kw">self</span>.clases[idx], <span class="fn">float</span>(probs[idx])
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    clf = <span class="cls">EmbeddingClassifier</span>()
+    clf.entrenar()</pre></div>
+      <div class="an">▶ Ejecuta: <strong>python utils/embeddings.py</strong> — compara el F1 con el modelo anterior. Documenta la diferencia.</div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M1</div>
+        <ol>
+          <li>Ejecuta ambos modelos con la frase "Quisiera saber a qué hora puedo llamarles" (que no está en tus patrones). ¿Cuál clasifica mejor? ¿Por qué?</li>
+          <li>¿Por qué usamos SVM con kernel RBF y no Random Forest para los embeddings? Investiga la "maldición de la dimensionalidad".</li>
+          <li>¿Qué pasa con el F1 si agregas pocas intenciones muy similares (ej: "consulta_precio_producto_A" y "consulta_precio_producto_B")? ¿Cómo lo resolverías?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 2 -->
+  <div class="stag stag-1" id="m2" style="margin-top:40px">Módulo 2</div>
+  <h2 class="sh" style="font-size:clamp(1.6rem,3.5vw,2.4rem)">Base de conocimiento dinámica</h2>
+  <p class="sd" style="margin-bottom:28px">Saca las respuestas del JSON estático y ponlas en SQLite con plantillas parametrizadas.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n1">M2.1</div>
+      <div class="si"><h3>Diseña el esquema de la base de datos</h3><p>Tablas: intents, responses, variables de contexto</p></div>
+      <div class="sdur">~35 min</div>
+    </div>
+    <div class="step-bd">
+      <h4>Crea utils/knowledge_base.py</h4>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/knowledge_base.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> sqlite3
+<span class="kw">import</span> json
+<span class="kw">import</span> random
+<span class="kw">from</span> pathlib <span class="kw">import</span> <span class="cls">Path</span>
+
+DB_PATH = <span class="str">'data/knowledge_base.db'</span>
+
+
+<span class="kw">def</span> <span class="fn">init_db</span>():
+    <span class="str">"""
+    Crea las tablas si no existen.
+    
+    Esquema:
+        intents(tag, descripcion)
+        responses(id, intent_tag, template, activa)
+        context_vars(clave, valor, descripcion)
+    
+    'template' usa placeholders {{variable}} que se reemplazan
+    en tiempo de ejecución con datos del contexto de sesión.
+    """</span>
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    c.executescript(<span class="str">"""
+        CREATE TABLE IF NOT EXISTS intents (
+            tag        TEXT PRIMARY KEY,
+            descripcion TEXT NOT NULL
+        );
+        
+        CREATE TABLE IF NOT EXISTS responses (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            intent_tag TEXT NOT NULL,
+            template   TEXT NOT NULL,
+            activa     INTEGER DEFAULT 1,
+            FOREIGN KEY (intent_tag) REFERENCES intents(tag)
+        );
+        
+        CREATE TABLE IF NOT EXISTS context_vars (
+            clave      TEXT PRIMARY KEY,
+            valor      TEXT NOT NULL,
+            descripcion TEXT
+        );
+    """</span>)
+    conn.commit()
+    conn.close()
+    <span class="fn">print</span>(<span class="str">"✅ Base de datos inicializada en data/knowledge_base.db"</span>)
+
+
+<span class="kw">def</span> <span class="fn">importar_desde_json</span>(intents_path: <span class="fn">str</span> = <span class="str">'intents.json'</span>):
+    <span class="str">"""Migra las respuestas actuales de intents.json a SQLite."""</span>
+    <span class="kw">with</span> <span class="fn">open</span>(intents_path, encoding=<span class="str">'utf-8'</span>) <span class="kw">as</span> f:
+        datos = json.load(f)
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    <span class="kw">for</span> intent <span class="kw">in</span> datos[<span class="str">'intents'</span>]:
+        c.execute(<span class="str">"INSERT OR IGNORE INTO intents VALUES (?, ?)"</span>,
+                  (intent[<span class="str">'tag'</span>], intent.get(<span class="str">'descripcion'</span>, intent[<span class="str">'tag'</span>])))
+        <span class="kw">for</span> r <span class="kw">in</span> intent.get(<span class="str">'responses'</span>, []):
+            c.execute(<span class="str">"INSERT INTO responses (intent_tag, template) VALUES (?, ?)"</span>,
+                      (intent[<span class="str">'tag'</span>], r))
+    
+    conn.commit()
+    conn.close()
+    <span class="fn">print</span>(<span class="str">f"✅ Importadas {len(datos['intents'])} intenciones."</span>)
+
+
+<span class="kw">def</span> <span class="fn">get_respuesta</span>(tag: <span class="fn">str</span>, contexto: <span class="fn">dict</span> = <span class="kw">None</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Obtiene una respuesta aleatoria para el tag dado y
+    reemplaza los placeholders con el contexto de sesión.
+    
+    Ejemplo: template = "Hola {{nombre}}, tu pedido {{pedido_id}} está en camino."
+    contexto = {'nombre': 'Ana', 'pedido_id': '12345'}
+    resultado = "Hola Ana, tu pedido 12345 está en camino."
+    """</span>
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(<span class="str">"""SELECT template FROM responses
+               WHERE intent_tag = ? AND activa = 1
+               ORDER BY RANDOM() LIMIT 1"""</span>, (tag,))
+    row = c.fetchone()
+    conn.close()
+    
+    <span class="kw">if not</span> row:
+        <span class="kw">return</span> <span class="str">"Lo siento, no tengo información sobre eso."</span>
+    
+    template = row[<span class="num">0</span>]
+    
+    <span class="cm"># Reemplazar {{variable}} con valores del contexto</span>
+    <span class="kw">if</span> contexto:
+        <span class="kw">for</span> clave, valor <span class="kw">in</span> contexto.items():
+            template = template.replace(<span class="str">f"{{{{</span>{clave}<span class="str">}}}}"</span>, <span class="fn">str</span>(valor))
+    
+    <span class="kw">return</span> template
+
+
+<span class="kw">def</span> <span class="fn">agregar_respuesta</span>(tag: <span class="fn">str</span>, template: <span class="fn">str</span>):
+    <span class="str">"""Agrega una nueva respuesta a una intención existente."""</span>
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(<span class="str">"INSERT INTO responses (intent_tag, template) VALUES (?, ?)"</span>, (tag, template))
+    conn.commit()
+    conn.close()
+    <span class="fn">print</span>(<span class="str">f"✅ Respuesta agregada a '{tag}'"</span>)
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    init_db()
+    importar_desde_json()
+    
+    <span class="cm"># Agrega una respuesta con variable dinámica a tu servicio</span>
+    agregar_respuesta(
+        <span class="str">'horario'</span>,
+        <span class="str">"Hola {{nombre}}, nuestro horario es lunes a viernes 9-21h. Hoy es {{dia_semana}}."</span>
+    )</pre></div>
+      <div class="an">▶ Ejecuta: <strong>python utils/knowledge_base.py</strong> — crea la DB y migra tus respuestas existentes.</div>
+
+      <div class="note war"><div class="ni">✏️</div><div class="nb"><strong>Tu tarea obligatoria</strong><p>Agrega al menos <strong>5 respuestas con variables dinámicas</strong> usando la sintaxis <code>{{variable}}</code>. Las variables deben ser relevantes para tu servicio (nombre del cliente, número de pedido, fecha, precio, etc.).</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M2</div>
+        <ol>
+          <li>¿Qué ventajas tiene guardar las respuestas en SQLite en lugar de JSON para un equipo de atención al cliente real? ¿Quién podría actualizar las respuestas sin conocer Python?</li>
+          <li>¿Qué es la "inyección SQL"? ¿Cómo previene el código anterior este ataque?</li>
+          <li>Diseña una tabla adicional para almacenar "respuestas rechazadas" — respuestas que el bot dio y el usuario calificó negativamente. ¿Qué columnas necesitaría?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     MÓDULOS 3–4: API + FRONTEND
+══════════════════════════════ -->
+<section id="m3">
+<div class="wrap">
+  <div class="phase-divider" style="display:flex;align-items:center;gap:16px;margin:0 0 40px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <div class="phase-lbl pl-2">🟣 MÓDULOS 3–4 · API REST y Frontend Web</div>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div class="stag stag-2">Módulo 3</div>
+  <h2 class="sh">API REST con FastAPI</h2>
+  <p class="sd">El chatbot deja de ser un script de terminal y se convierte en un servicio HTTP que cualquier cliente puede consumir.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n2">M3.1</div>
+      <div class="si"><h3>Crea el servidor FastAPI</h3><p>3 endpoints: /chat, /historial, /metricas</p></div>
+      <div class="sdur">~50 min</div>
+    </div>
+    <div class="step-bd">
+      <h4>Crea api.py en la raíz del proyecto</h4>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> api.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">from</span> fastapi <span class="kw">import</span> <span class="cls">FastAPI</span>, <span class="cls">HTTPException</span>
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> <span class="cls">CORSMiddleware</span>
+<span class="kw">from</span> fastapi.staticfiles <span class="kw">import</span> <span class="cls">StaticFiles</span>
+<span class="kw">from</span> pydantic <span class="kw">import</span> <span class="cls">BaseModel</span>
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+<span class="kw">import</span> uuid
+<span class="kw">from</span> utils.embeddings <span class="kw">import</span> <span class="cls">EmbeddingClassifier</span>
+<span class="kw">from</span> utils.knowledge_base <span class="kw">import</span> get_respuesta
+<span class="kw">from</span> utils.contexto <span class="kw">import</span> <span class="cls">ContextoConversacion</span>
+
+<span class="cm"># ── Modelos Pydantic (contrato de la API) ──────────────────</span>
+
+<span class="kw">class</span> <span class="cls">ChatRequest</span>(<span class="cls">BaseModel</span>):
+    mensaje: <span class="fn">str</span>
+    sesion_id: Optional[<span class="fn">str</span>] = <span class="kw">None</span>
+    nombre_usuario: Optional[<span class="fn">str</span>] = <span class="str">"Cliente"</span>
+
+<span class="kw">class</span> <span class="cls">ChatResponse</span>(<span class="cls">BaseModel</span>):
+    respuesta: <span class="fn">str</span>
+    intencion: <span class="fn">str</span>
+    confianza: <span class="fn">float</span>
+    sesion_id: <span class="fn">str</span>
+    fallback: <span class="fn">bool</span>
+    escalacion: <span class="fn">bool</span>
+
+<span class="cm"># ── App ───────────────────────────────────────────────────</span>
+
+app = <span class="cls">FastAPI</span>(
+    title=<span class="str">"Chatbot API"</span>,
+    description=<span class="str">"API REST para el chatbot de atención al cliente"</span>,
+    version=<span class="str">"2.0.0"</span>
+)
+
+<span class="cm"># Permite que el frontend (diferente origen) consuma la API</span>
+app.add_middleware(
+    <span class="cls">CORSMiddleware</span>,
+    allow_origins=[<span class="str">"*"</span>],
+    allow_methods=[<span class="str">"*"</span>],
+    allow_headers=[<span class="str">"*"</span>]
+)
+
+<span class="cm"># ── Estado global ─────────────────────────────────────────</span>
+clf = <span class="cls">EmbeddingClassifier</span>().cargar()
+sesiones: <span class="fn">dict</span>[<span class="fn">str</span>, <span class="cls">ContextoConversacion</span>] = {}
+UMBRAL = <span class="num">0.50</span>
+
+<span class="cm"># ── Endpoints ─────────────────────────────────────────────</span>
+
+@app.post(<span class="str">"/chat"</span>, response_model=<span class="cls">ChatResponse</span>)
+<span class="kw">async def</span> <span class="fn">chat</span>(req: <span class="cls">ChatRequest</span>):
+    <span class="str">"""
+    Recibe un mensaje del usuario y devuelve la respuesta del chatbot.
+    Si no se envía sesion_id se genera uno nuevo.
+    """</span>
+    <span class="cm"># Obtener o crear contexto de sesión</span>
+    sid = req.sesion_id <span class="kw">or</span> <span class="fn">str</span>(uuid.uuid4())
+    <span class="kw">if</span> sid <span class="kw">not in</span> sesiones:
+        sesiones[sid] = <span class="cls">ContextoConversacion</span>()
+        sesiones[sid].guardar_dato(<span class="str">'nombre'</span>, req.nombre_usuario)
+    
+    ctx = sesiones[sid]
+    
+    <span class="cm"># Clasificar intención</span>
+    tag, confianza = clf.predecir(req.mensaje)
+    fallback = confianza < UMBRAL
+    <span class="kw">if</span> fallback:
+        tag = <span class="str">'no_entiendo'</span>
+    
+    <span class="cm"># Obtener respuesta de la KB con contexto dinámico</span>
+    respuesta = get_respuesta(tag, ctx.datos_usuario)
+    
+    <span class="cm"># Actualizar contexto</span>
+    ctx.agregar_turno(req.mensaje, respuesta, tag)
+    escalacion = ctx.necesita_escalacion()
+    
+    <span class="kw">return</span> <span class="cls">ChatResponse</span>(
+        respuesta=respuesta,
+        intencion=tag,
+        confianza=<span class="fn">round</span>(confianza, <span class="num">3</span>),
+        sesion_id=sid,
+        fallback=fallback,
+        escalacion=escalacion
+    )
+
+@app.get(<span class="str">"/historial/{sesion_id}"</span>)
+<span class="kw">async def</span> <span class="fn">historial</span>(sesion_id: <span class="fn">str</span>):
+    <span class="str">"""Devuelve el historial de una sesión."""</span>
+    <span class="kw">if</span> sesion_id <span class="kw">not in</span> sesiones:
+        <span class="kw">raise</span> <span class="cls">HTTPException</span>(status_code=<span class="num">404</span>, detail=<span class="str">"Sesión no encontrada"</span>)
+    ctx = sesiones[sesion_id]
+    <span class="kw">return</span> {<span class="str">"sesion_id"</span>: sesion_id, <span class="str">"historial"</span>: <span class="fn">list</span>(ctx.historial), <span class="str">"resumen"</span>: ctx.resumen()}
+
+@app.get(<span class="str">"/metricas"</span>)
+<span class="kw">async def</span> <span class="fn">metricas</span>():
+    <span class="str">"""Estadísticas de uso actuales en memoria."""</span>
+    total_sesiones = <span class="fn">len</span>(sesiones)
+    total_turnos = <span class="fn">sum</span>(<span class="fn">len</span>(s.historial) <span class="kw">for</span> s <span class="kw">in</span> sesiones.values())
+    total_fallbacks = <span class="fn">sum</span>(s.conteo_fallbacks <span class="kw">for</span> s <span class="kw">in</span> sesiones.values())
+    
+    distribuciones: <span class="fn">dict</span>[<span class="fn">str</span>, <span class="fn">int</span>] = {}
+    <span class="kw">for</span> s <span class="kw">in</span> sesiones.values():
+        <span class="kw">for</span> t <span class="kw">in</span> s.historial:
+            k = t[<span class="str">'intencion'</span>]
+            distribuciones[k] = distribuciones.get(k, <span class="num">0</span>) + <span class="num">1</span>
+    
+    <span class="kw">return</span> {
+        <span class="str">"sesiones_activas"</span>: total_sesiones,
+        <span class="str">"total_turnos"</span>: total_turnos,
+        <span class="str">"total_fallbacks"</span>: total_fallbacks,
+        <span class="str">"tasa_fallback"</span>: <span class="fn">round</span>(total_fallbacks / max(total_turnos, <span class="num">1</span>), <span class="num">3</span>),
+        <span class="str">"distribuciones"</span>: distribuciones
+    }
+
+<span class="cm"># ── Arrancar el servidor ──────────────────────────────────</span>
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    <span class="kw">import</span> uvicorn
+    uvicorn.run(<span class="str">"api:app"</span>, host=<span class="str">"0.0.0.0"</span>, port=<span class="num">8000</span>, reload=<span class="kw">True</span>)</pre></div>
+      <div class="an">▶ Inicia el servidor: <strong>python api.py</strong> · Abre: <strong>http://localhost:8000/docs</strong> — Swagger UI generado automáticamente.</div>
+
+      <div class="note tip"><div class="ni">🧪</div><div class="nb"><strong>Prueba la API con curl</strong><p>En otra terminal ejecuta: <code>curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d '{"mensaje":"Hola, ¿cuál es su horario?","nombre_usuario":"María"}'</code></p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M3</div>
+        <ol>
+          <li>¿Qué es CORS y por qué tuvimos que habilitarlo? ¿Qué riesgo de seguridad existe al poner <code>allow_origins=["*"]</code>?</li>
+          <li>¿Qué ventaja tiene Pydantic para validar las peticiones de la API? ¿Qué pasa si el cliente manda un mensaje con 10,000 caracteres?</li>
+          <li>El estado de las sesiones está en memoria (<code>dict</code>). ¿Qué pasa si el servidor se reinicia? ¿Cómo lo resolverías en producción?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 4 -->
+  <div class="stag stag-2" id="m4" style="margin-top:40px">Módulo 4</div>
+  <h2 class="sh" style="font-size:clamp(1.6rem,3.5vw,2.4rem)">Frontend web</h2>
+  <p class="sd" style="margin-bottom:28px">Una interfaz de chat en HTML/CSS/JS que consuma la API. El diseño debe reflejar la identidad visual del servicio que elegiste.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n2">M4.1</div>
+      <div class="si"><h3>Interfaz de chat completa</h3><p>Frontend desacoplado del backend, consumiendo la API REST</p></div>
+      <div class="sdur">~55 min</div>
+    </div>
+    <div class="step-bd">
+      <p>Crea <code>frontend/index.html</code>. Esta es la estructura base — el equipo <strong>debe personalizar</strong> colores, tipografía y estilo para su servicio:</p>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">html</span> frontend/index.html — estructura base</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="dec">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> lang=<span class="str">"es"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;head&gt;</span>
+  <span class="kw">&lt;meta</span> charset=<span class="str">"UTF-8"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;meta</span> name=<span class="str">"viewport"</span> content=<span class="str">"width=device-width, initial-scale=1.0"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;title&gt;</span>Chatbot — Tu Servicio<span class="kw">&lt;/title&gt;</span>
+  <span class="cm">&lt;!-- TODO: cambia los colores y tipografía según tu servicio --&gt;</span>
+<span class="kw">&lt;style&gt;</span>
+  :root{
+    --primary: #1d4ed8;  <span class="cm">/* ← CAMBIA a los colores de tu marca */</span>
+    --bg: #f8fafc;
+    --bubble-bot: #e0e7ff;
+    --bubble-user: var(--primary);
+    --text: #1e293b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:sans-serif;background:var(--bg);display:flex;
+       flex-direction:column;height:100vh;color:var(--text)}
+  header{background:var(--primary);color:#fff;padding:16px 20px;
+         display:flex;align-items:center;gap:12px}
+  .avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);
+           display:flex;align-items:center;justify-content:center;font-size:20px}
+  header h1{font-size:17px;font-weight:600}
+  header p{font-size:12px;opacity:.8}
+  #chat{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:78%;padding:11px 15px;border-radius:16px;font-size:14.5px;
+       line-height:1.55;animation:pop .2s ease}
+  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+  .bot-msg{background:var(--bubble-bot);align-self:flex-start;border-bottom-left-radius:4px}
+  .user-msg{background:var(--bubble-user);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .typing{display:none;align-self:flex-start;padding:10px 15px;background:var(--bubble-bot);
+           border-radius:16px 16px 16px 4px}
+  .typing.show{display:flex;gap:4px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:#94a3b8;
+       animation:bounce .8s ease infinite}
+  .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,80%,100%{transform:scale(1);opacity:.4}40%{transform:scale(1.3);opacity:1}}
+  .conf{font-size:10px;margin-top:4px;opacity:.55;font-family:monospace}
+  footer-bar{background:#fff;border-top:1px solid #e2e8f0;padding:14px 16px;
+              display:flex;gap:10px}
+  #inp{flex:1;padding:11px 16px;border:1.5px solid #e2e8f0;border-radius:24px;
+       font-size:14px;outline:none;transition:border .2s}
+  #inp:focus{border-color:var(--primary)}
+  #send{background:var(--primary);color:#fff;border:none;padding:11px 22px;
+        border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+  #send:hover{opacity:.88;transform:scale(.98)}
+  .escalacion{background:#fef3c7;border:1px solid #fbbf24;border-radius:10px;
+               padding:12px 15px;font-size:13px;color:#92400e;text-align:center}
+<span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/head&gt;</span>
+<span class="kw">&lt;body&gt;</span>
+
+<span class="kw">&lt;header&gt;</span>
+  <span class="kw">&lt;div</span> class=<span class="str">"avatar"</span><span class="kw">&gt;</span>🤖<span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;div&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>Asistente Virtual<span class="kw">&lt;/h1&gt;</span> <span class="cm">&lt;!-- ← CAMBIA --&gt;</span>
+    <span class="kw">&lt;p&gt;</span>🟢 En línea · Tu Servicio<span class="kw">&lt;/p&gt;</span> <span class="cm">&lt;!-- ← CAMBIA --&gt;</span>
+  <span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/header&gt;</span>
+
+<span class="kw">&lt;div</span> id=<span class="str">"chat"</span><span class="kw">&gt;&lt;/div&gt;</span>
+<span class="kw">&lt;div</span> class=<span class="str">"typing"</span> id=<span class="str">"typing"</span><span class="kw">&gt;&lt;span</span> class=<span class="str">"dot"</span><span class="kw">&gt;&lt;/span&gt;&lt;span</span> class=<span class="str">"dot"</span><span class="kw">&gt;&lt;/span&gt;&lt;span</span> class=<span class="str">"dot"</span><span class="kw">&gt;&lt;/span&gt;&lt;/div&gt;</span>
+
+<span class="kw">&lt;footer-bar&gt;</span>
+  <span class="kw">&lt;input</span> id=<span class="str">"inp"</span> placeholder=<span class="str">"Escribe tu mensaje..."</span>
+         onkeydown=<span class="str">"if(event.key==='Enter')enviar()"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;button</span> id=<span class="str">"send"</span> onclick=<span class="str">"enviar()"</span><span class="kw">&gt;</span>Enviar<span class="kw">&lt;/button&gt;</span>
+<span class="kw">&lt;/footer-bar&gt;</span>
+
+<span class="kw">&lt;script&gt;</span>
+<span class="cm">// ── Configuración ─────────────────────────────────────────</span>
+<span class="kw">const</span> API = <span class="str">'http://localhost:8000'</span>;
+<span class="kw">let</span> SESSION_ID = <span class="kw">null</span>;
+<span class="kw">const</span> NOMBRE = <span class="kw">prompt</span>(<span class="str">'¿Cómo te llamas?'</span>) || <span class="str">'Visitante'</span>;
+
+<span class="cm">// ── Helpers ──────────────────────────────────────────────</span>
+<span class="kw">const</span> chat = <span class="fn">document</span>.getElementById(<span class="str">'chat'</span>);
+<span class="kw">const</span> typing = <span class="fn">document</span>.getElementById(<span class="str">'typing'</span>);
+
+<span class="kw">function</span> <span class="fn">addMsg</span>(texto, esBot, meta) {
+  <span class="kw">const</span> d = <span class="fn">document</span>.createElement(<span class="str">'div'</span>);
+  d.className = <span class="str">'msg '</span> + (esBot ? <span class="str">'bot-msg'</span> : <span class="str">'user-msg'</span>);
+  d.textContent = texto;
+  <span class="kw">if</span> (meta && esBot) {
+    <span class="kw">const</span> m = <span class="fn">document</span>.createElement(<span class="str">'div'</span>);
+    m.className = <span class="str">'conf'</span>;
+    m.textContent = `intent: ${meta.intencion} | conf: ${(meta.confianza*100).toFixed(0)}%`;
+    d.appendChild(m);
+  }
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+<span class="kw">async function</span> <span class="fn">enviar</span>() {
+  <span class="kw">const</span> inp = <span class="fn">document</span>.getElementById(<span class="str">'inp'</span>);
+  <span class="kw">const</span> msg = inp.value.trim();
+  <span class="kw">if</span> (!msg) <span class="kw">return</span>;
+  <span class="fn">addMsg</span>(msg, <span class="kw">false</span>);
+  inp.value = <span class="str">''</span>;
+  typing.classList.add(<span class="str">'show'</span>);
+  
+  <span class="kw">try</span> {
+    <span class="kw">const</span> res = <span class="kw">await</span> fetch(`${API}/chat`, {
+      method: <span class="str">'POST'</span>,
+      headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+      body: <span class="fn">JSON</span>.stringify({ mensaje: msg, sesion_id: SESSION_ID, nombre_usuario: NOMBRE })
+    });
+    <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+    SESSION_ID = data.sesion_id;
+    typing.classList.remove(<span class="str">'show'</span>);
+    
+    <span class="kw">if</span> (data.escalacion) {
+      <span class="kw">const</span> e = <span class="fn">document</span>.createElement(<span class="str">'div'</span>);
+      e.className = <span class="str">'escalacion'</span>;
+      e.textContent = <span class="str">'⚠️ Te conectamos con un agente humano. Un momento...'</span>;
+      chat.appendChild(e);
+      inp.disabled = <span class="kw">true</span>;
+    } <span class="kw">else</span> {
+      <span class="fn">addMsg</span>(data.respuesta, <span class="kw">true</span>, data);
+    }
+  } <span class="kw">catch</span> (err) {
+    typing.classList.remove(<span class="str">'show'</span>);
+    <span class="fn">addMsg</span>(<span class="str">'Error de conexión. ¿Está el servidor activo?'</span>, <span class="kw">true</span>);
+  }
+}
+
+<span class="cm">// Mensaje inicial del bot al cargar la página</span>
+<span class="fn">addMsg</span>(`¡Hola ${NOMBRE}! ¿En qué puedo ayudarte hoy?`, <span class="kw">true</span>);
+<span class="kw">&lt;/script&gt;</span>
+<span class="kw">&lt;/body&gt;&lt;/html&gt;</span></pre></div>
+
+      <div class="note inf"><div class="ni">🎨</div><div class="nb"><strong>Personalización obligatoria</strong><p>El equipo debe modificar: colores CSS (<code>--primary</code>, <code>--bg</code>), logo/avatar del servicio, tipografía (Google Fonts), y el texto de bienvenida. El diseño debe ser reconocible como el servicio que eligieron.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M4</div>
+        <ol>
+          <li>¿Por qué mostramos el <code>typing indicator</code> mientras esperamos la respuesta de la API? ¿Qué experiencia de usuario crea esto?</li>
+          <li>El frontend guarda el <code>SESSION_ID</code> en una variable JavaScript. ¿Qué pasa si el usuario abre una segunda pestaña? ¿Es un problema?</li>
+          <li>¿Qué mecanismo de accesibilidad (para personas con discapacidad visual) debería tener este chat? Menciona al menos dos.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     MÓDULOS 5–6: SENTIMIENTO + ENTIDADES
+══════════════════════════════ -->
+<section id="m5">
+<div class="wrap">
+  <div class="phase-divider" style="display:flex;align-items:center;gap:16px;margin:0 0 40px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <div class="phase-lbl pl-3">🟡 MÓDULOS 5–6 · Inteligencia contextual</div>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div class="stag stag-3">Módulo 5</div>
+  <h2 class="sh">Análisis de sentimiento acumulado</h2>
+  <p class="sd">El bot detecta si el usuario se frustra con el tiempo y adapta su tono en tres niveles: normal, empático y escalación automática.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n3">M5.1</div>
+      <div class="si"><h3>Analizador de sentimiento con score acumulado</h3><p>Lexicón en español propio del dominio + evolución por sesión</p></div>
+      <div class="sdur">~45 min</div>
+    </div>
+    <div class="step-bd">
+      <div class="note war"><div class="ni">📚</div><div class="nb"><strong>Investiga antes de codificar</strong><p>Antes de escribir el código, visita <a href="https://github.com/sentiment140/BETO-sentiment-analysis" target="_blank">BETO para análisis de sentimiento en español</a> y <a href="https://www.kaggle.com/datasets/rtatman/sentiment-lexicons-for-81-languages" target="_blank">Kaggle: lexicones de sentimiento</a>. Anota 3 ideas que incorporarás a tu lexicón.</p></div></div>
+
+      <h4>Crea utils/sentimiento.py</h4>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/sentimiento.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">from</span> typing <span class="kw">import</span> Literal
+
+<span class="cm"># ── Lexicón base — AMPLÍA CON PALABRAS DE TU SERVICIO ─────</span>
+NEGATIVAS = {
+    <span class="cm"># Emociones negativas generales</span>
+    <span class="str">'terrible'</span>: <span class="num">-3</span>, <span class="str">'pésimo'</span>: <span class="num">-3</span>, <span class="str">'horrible'</span>: <span class="num">-3</span>,
+    <span class="str">'enojado'</span>: <span class="num">-2</span>, <span class="str">'frustrado'</span>: <span class="num">-2</span>, <span class="str">'decepcionado'</span>: <span class="num">-2</span>,
+    <span class="str">'molesto'</span>: <span class="num">-2</span>, <span class="str">'mal'</span>: <span class="num">-1</span>, <span class="str">'lento'</span>: <span class="num">-1</span>, <span class="str">'tardó'</span>: <span class="num">-1</span>,
+    <span class="str">'mentira'</span>: <span class="num">-3</span>, <span class="str">'estafa'</span>: <span class="num">-3</span>, <span class="str">'queja'</span>: <span class="num">-2</span>,
+    <span class="str">'no funciona'</span>: <span class="num">-2</span>, <span class="str">'no sirve'</span>: <span class="num">-2</span>, <span class="str">'nunca'</span>: <span class="num">-1</span>,
+    <span class="cm"># ↓ AÑADE aquí palabras negativas específicas de tu servicio</span>
+    <span class="cm"># ej restaurante: 'frío', 'crudo', 'equivocado', 'tarde'</span>
+    <span class="cm"># ej clínica: 'esperando', 'cancelaron', 'incorrecto'</span>
+}
+
+POSITIVAS = {
+    <span class="str">'excelente'</span>: <span class="num">3</span>, <span class="str">'perfecto'</span>: <span class="num">3</span>, <span class="str">'increíble'</span>: <span class="num">3</span>,
+    <span class="str">'genial'</span>: <span class="num">2</span>, <span class="str">'gracias'</span>: <span class="num">2</span>, <span class="str">'satisfecho'</span>: <span class="num">2</span>,
+    <span class="str">'rápido'</span>: <span class="num">1</span>, <span class="str">'bien'</span>: <span class="num">1</span>, <span class="str">'bueno'</span>: <span class="num">1</span>, <span class="str">'fácil'</span>: <span class="num">1</span>,
+    <span class="cm"># ↓ AÑADE aquí palabras positivas específicas de tu servicio</span>
+}
+
+<span class="dec">@dataclass</span>
+<span class="kw">class</span> <span class="cls">EstadoSentimiento</span>:
+    <span class="str">"""
+    Mantiene el score acumulado de sentimiento por sesión.
+    
+    El score va de -∞ a +∞ pero usamos umbrales:
+        score ≥ 2      → positivo
+        -3 < score < 2 → neutro
+        score ≤ -3     → negativo
+        score ≤ -6     → escalación urgente
+    """</span>
+    score: <span class="fn">float</span> = <span class="num">0.0</span>
+    historial_scores: <span class="fn">list</span> = field(default_factory=<span class="fn">list</span>)
+    
+    <span class="kw">def</span> <span class="fn">analizar_turno</span>(<span class="kw">self</span>, texto: <span class="fn">str</span>) -> <span class="fn">dict</span>:
+        texto_l = texto.lower()
+        delta = <span class="num">0.0</span>
+        
+        <span class="kw">for</span> palabra, peso <span class="kw">in</span> NEGATIVAS.items():
+            <span class="kw">if</span> palabra <span class="kw">in</span> texto_l:
+                delta += peso
+        
+        <span class="kw">for</span> palabra, peso <span class="kw">in</span> POSITIVAS.items():
+            <span class="kw">if</span> palabra <span class="kw">in</span> texto_l:
+                delta += peso
+        
+        <span class="cm"># Decaimiento: el score pasado pesa menos con el tiempo</span>
+        <span class="kw">self</span>.score = <span class="kw">self</span>.score * <span class="num">0.8</span> + delta
+        <span class="kw">self</span>.historial_scores.append(<span class="fn">round</span>(<span class="kw">self</span>.score, <span class="num">2</span>))
+        
+        estado = <span class="kw">self</span>.<span class="fn">_estado_actual</span>()
+        <span class="kw">return</span> {
+            <span class="str">'score'</span>: <span class="fn">round</span>(<span class="kw">self</span>.score, <span class="num">2</span>),
+            <span class="str">'delta'</span>: delta,
+            <span class="str">'estado'</span>: estado,
+            <span class="str">'escalacion_urgente'</span>: <span class="kw">self</span>.score <= -<span class="num">6</span>
+        }
+    
+    <span class="kw">def</span> <span class="fn">_estado_actual</span>(<span class="kw">self</span>) -> Literal[<span class="str">'positivo'</span>, <span class="str">'neutro'</span>, <span class="str">'negativo'</span>]:
+        <span class="kw">if</span> <span class="kw">self</span>.score >= <span class="num">2</span>: <span class="kw">return</span> <span class="str">'positivo'</span>
+        <span class="kw">if</span> <span class="kw">self</span>.score <= -<span class="num">3</span>: <span class="kw">return</span> <span class="str">'negativo'</span>
+        <span class="kw">return</span> <span class="str">'neutro'</span>
+    
+    <span class="kw">def</span> <span class="fn">tono_respuesta</span>(<span class="kw">self</span>) -> <span class="fn">str</span>:
+        <span class="str">"""
+        Devuelve el prefijo de tono que el bot debe usar en su respuesta.
+        El motor de respuestas puede anteponer esto al template.
+        """</span>
+        estado = <span class="kw">self</span>.<span class="fn">_estado_actual</span>()
+        tonos = {
+            <span class="str">'positivo'</span>: <span class="str">""</span>,
+            <span class="str">'neutro'</span>: <span class="str">""</span>,
+            <span class="str">'negativo'</span>: <span class="str">"Entiendo tu molestia y me disculpo por los inconvenientes. "</span>
+        }
+        <span class="kw">return</span> tonos[estado]</pre></div>
+
+      <div class="note tip"><div class="ni">📝</div><div class="nb"><strong>Tu tarea</strong><p>Amplía el lexicón con al menos <strong>25 palabras negativas y 20 positivas</strong> específicas de tu servicio. Integra <code>EstadoSentimiento</code> en el endpoint <code>/chat</code> de la API: el resultado de <code>analizar_turno()</code> debe ir en la respuesta JSON.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M5</div>
+        <ol>
+          <li>El score aplica un factor de decaimiento de 0.8. ¿Qué efecto tiene esto en conversaciones largas? ¿Por qué es mejor que acumular infinitamente?</li>
+          <li>¿Puede el análisis de sentimiento confundirse con frases negativas que en realidad son positivas? Da un ejemplo concreto de tu servicio.</li>
+          <li>Diseña las 3 respuestas de tono diferente para una misma intención (ej: "preguntar_precio" con tono neutro, empático y escalación).</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- MÓDULO 6 -->
+  <div class="stag stag-3" id="m6" style="margin-top:40px">Módulo 6</div>
+  <h2 class="sh" style="font-size:clamp(1.6rem,3.5vw,2.4rem)">Extracción de entidades con spaCy</h2>
+  <p class="sd" style="margin-bottom:28px">El chatbot reconoce automáticamente fechas, nombres y datos específicos del servicio para generar respuestas personalizadas.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n3">M6.1</div>
+      <div class="si"><h3>Extractor de entidades multidominio</h3><p>spaCy NER + regex + entidades del dominio propio</p></div>
+      <div class="sdur">~45 min</div>
+    </div>
+    <div class="step-bd">
+      <div class="note inf"><div class="ni">🔗</div><div class="nb"><strong>Recurso clave antes de codificar</strong><p>Lee la documentación de spaCy sobre entidades nombradas: <a href="https://spacy.io/usage/linguistic-features#named-entities" target="_blank">spacy.io/usage/linguistic-features#named-entities</a>. Identifica qué entidades reconoce el modelo <code>es_core_news_sm</code> por defecto.</p></div></div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/entidades.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> spacy
+<span class="kw">import</span> re
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+
+<span class="cm"># Carga el modelo de español (requiere: python -m spacy download es_core_news_sm)</span>
+nlp = spacy.load(<span class="str">'es_core_news_sm'</span>)
+
+<span class="cm"># ── Patrones de dominio (regex) ────────────────────────────</span>
+<span class="cm"># AÑADE los patrones de tu servicio aquí</span>
+PATRONES_DOMINIO = {
+    <span class="str">'email'</span>:    <span class="kw">re</span>.compile(<span class="str">r'[\w.-]+@[\w.-]+\.\w+'</span>),
+    <span class="str">'telefono'</span>: <span class="kw">re</span>.compile(<span class="str">r'\b\d{10}\b'</span>),
+    <span class="str">'pedido_id'</span>:<span class="kw">re</span>.compile(<span class="str">r'\b[A-Z]{2,3}-\d{4,8}\b'</span>),  <span class="cm"># ej: PED-123456</span>
+    <span class="str">'hora'</span>:     <span class="kw">re</span>.compile(<span class="str">r'\b\d{1,2}:\d{2}(?:\s*[ap]m)?\b'</span>, <span class="kw">re</span>.IGNORECASE),
+    <span class="cm"># ↓ AÑADE los patrones específicos de TU servicio</span>
+    <span class="cm"># ej restaurante: número de mesa, tamaño (grande/mediano/chico)</span>
+    <span class="cm"># ej clínica: número de expediente, especialidad médica</span>
+    <span class="cm"># ej banco: número de cuenta (patrón numérico), tipo de tarjeta</span>
+}
+
+DIAS_ES = [
+    <span class="str">'lunes'</span>, <span class="str">'martes'</span>, <span class="str">'miércoles'</span>, <span class="str">'jueves'</span>,
+    <span class="str">'viernes'</span>, <span class="str">'sábado'</span>, <span class="str">'domingo'</span>, <span class="str">'hoy'</span>, <span class="str">'mañana'</span>, <span class="str">'pasado mañana'</span>
+]
+
+
+<span class="dec">@dataclass</span>
+<span class="kw">class</span> <span class="cls">EntidadesExtraidas</span>:
+    <span class="str">"""Contenedor tipado de todas las entidades reconocidas en un texto."""</span>
+    personas: <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    fechas:   <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    dias:     <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    horas:    <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    emails:   <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    telefonos:<span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    pedidos:  <span class="fn">list</span>[<span class="fn">str</span>]   = field(default_factory=<span class="fn">list</span>)
+    dominio:  <span class="fn">dict</span>         = field(default_factory=<span class="fn">dict</span>)
+    
+    <span class="kw">def</span> <span class="fn">a_contexto</span>(<span class="kw">self</span>) -> <span class="fn">dict</span>:
+        <span class="str">"""Convierte las entidades al formato del contexto de sesión."""</span>
+        ctx = {}
+        <span class="kw">if</span> <span class="kw">self</span>.personas: ctx[<span class="str">'nombre_mencionado'</span>] = <span class="kw">self</span>.personas[<span class="num">0</span>]
+        <span class="kw">if</span> <span class="kw">self</span>.fechas:   ctx[<span class="str">'fecha'</span>]   = <span class="kw">self</span>.fechas[<span class="num">0</span>]
+        <span class="kw">if</span> <span class="kw">self</span>.dias:     ctx[<span class="str">'dia'</span>]     = <span class="kw">self</span>.dias[<span class="num">0</span>]
+        <span class="kw">if</span> <span class="kw">self</span>.horas:    ctx[<span class="str">'hora'</span>]    = <span class="kw">self</span>.horas[<span class="num">0</span>]
+        <span class="kw">if</span> <span class="kw">self</span>.pedidos:  ctx[<span class="str">'pedido_id'</span>] = <span class="kw">self</span>.pedidos[<span class="num">0</span>]
+        ctx.update(<span class="kw">self</span>.dominio)
+        <span class="kw">return</span> ctx
+
+
+<span class="kw">def</span> <span class="fn">extraer</span>(texto: <span class="fn">str</span>) -> <span class="cls">EntidadesExtraidas</span>:
+    <span class="str">"""Extrae todas las entidades reconocibles del texto."""</span>
+    doc = nlp(texto)
+    ent = <span class="cls">EntidadesExtraidas</span>()
+    
+    <span class="cm"># Entidades de spaCy (NER estadístico)</span>
+    <span class="kw">for</span> e <span class="kw">in</span> doc.ents:
+        <span class="kw">if</span> e.label_ == <span class="str">'PER'</span>:  ent.personas.append(e.text)
+        <span class="kw">if</span> e.label_ == <span class="str">'DATE'</span>: ent.fechas.append(e.text)
+    
+    <span class="cm"># Días de la semana (regex)</span>
+    texto_l = texto.lower()
+    ent.dias = [d <span class="kw">for</span> d <span class="kw">in</span> DIAS_ES <span class="kw">if</span> d <span class="kw">in</span> texto_l]
+    
+    <span class="cm"># Patrones de dominio (regex)</span>
+    <span class="kw">for</span> nombre, patron <span class="kw">in</span> PATRONES_DOMINIO.items():
+        matches = patron.findall(texto)
+        <span class="kw">if</span> matches:
+            <span class="kw">if</span>   nombre == <span class="str">'email'</span>:    ent.emails    = matches
+            <span class="kw">elif</span> nombre == <span class="str">'telefono'</span>: ent.telefonos = matches
+            <span class="kw">elif</span> nombre == <span class="str">'pedido_id'</span>: ent.pedidos  = matches
+            <span class="kw">elif</span> nombre == <span class="str">'hora'</span>:     ent.horas     = matches
+            <span class="kw">else</span>: ent.dominio[nombre] = matches
+    
+    <span class="kw">return</span> ent
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    textos_prueba = [
+        <span class="str">"Quiero reservar para el viernes a las 8:00 pm para 4 personas"</span>,
+        <span class="str">"Mi pedido PED-123456 no ha llegado, mi tel es 3311234567"</span>,
+        <span class="str">"Soy María López y quiero cancelar mi cita del lunes"</span>,
+    ]
+    <span class="kw">for</span> t <span class="kw">in</span> textos_prueba:
+        e = <span class="fn">extraer</span>(t)
+        <span class="fn">print</span>(<span class="str">f"\nTexto: {t}"</span>)
+        <span class="fn">print</span>(<span class="str">f"Contexto: {e.a_contexto()}"</span>)</pre></div>
+      <div class="an">▶ Prueba: <strong>python utils/entidades.py</strong> — verifica que extrae correctamente de los textos de prueba.</div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M6</div>
+        <ol>
+          <li>¿Qué diferencia hay entre NER (Named Entity Recognition) y extracción por regex? ¿Cuándo es mejor cada uno?</li>
+          <li>¿Qué pasa si el usuario menciona dos fechas distintas en el mismo mensaje? ¿Cómo debe manejar esto el chatbot?</li>
+          <li>Integra las entidades en el endpoint <code>/chat</code>: las entidades del mensaje deben guardarse en el contexto de sesión para personalizar respuestas futuras. ¿Qué cambios hace eso necesarios en <code>api.py</code>?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     MÓDULO 7: MEMORIA
+══════════════════════════════ -->
+<section id="m7">
+<div class="wrap">
+  <div class="phase-divider" style="display:flex;align-items:center;gap:16px;margin:0 0 40px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <div class="phase-lbl pl-4">🟢 MÓDULO 7 · Memoria de sesión persistente</div>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+  <div class="stag stag-4">Módulo 7</div>
+  <h2 class="sh">Sesiones persistentes en SQLite</h2>
+  <p class="sd">El chatbot recuerda a sus usuarios entre conversaciones. Diseña el esquema de datos y argumenta cómo proteges la privacidad.</p>
+
+  <div class="step">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum n4">M7.1</div>
+      <div class="si"><h3>Persistencia de conversaciones</h3><p>Esquema de tablas, CRUD de sesiones y carga de contexto previo</p></div>
+      <div class="sdur">~50 min</div>
+    </div>
+    <div class="step-bd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/memoria.py</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> sqlite3
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> pathlib <span class="kw">import</span> <span class="cls">Path</span>
+
+DB_PATH = <span class="str">'data/sesiones.db'</span>
+
+
+<span class="kw">def</span> <span class="fn">init_memoria</span>():
+    <span class="str">"""
+    Crea las tablas de sesiones y turnos.
+    
+    sessions: una fila por conversación (puede haber varias por usuario)
+    turns:    un fila por mensaje intercambiado
+    
+    Reflexión: ¿Qué datos deberías NOT guardar por privacidad?
+    """</span>
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(<span class="str">"""
+        CREATE TABLE IF NOT EXISTS sessions (
+            id          TEXT PRIMARY KEY,
+            nombre      TEXT,
+            servicio    TEXT,
+            created_at  TEXT,
+            ended_at    TEXT,
+            n_turnos    INTEGER DEFAULT 0,
+            n_fallbacks INTEGER DEFAULT 0,
+            sent_final  REAL DEFAULT 0.0
+        )
+    """</span>)
+    conn.execute(<span class="str">"""
+        CREATE TABLE IF NOT EXISTS turns (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id  TEXT NOT NULL,
+            timestamp   TEXT NOT NULL,
+            rol         TEXT NOT NULL,     -- 'user' o 'bot'
+            texto       TEXT NOT NULL,
+            intencion   TEXT,
+            confianza   REAL,
+            FOREIGN KEY (session_id) REFERENCES sessions(id)
+        )
+    """</span>)
+    conn.commit()
+    conn.close()
+
+
+<span class="kw">def</span> <span class="fn">crear_sesion</span>(session_id: <span class="fn">str</span>, nombre: <span class="fn">str</span>, servicio: <span class="fn">str</span> = <span class="str">'general'</span>):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(<span class="str">"""INSERT OR IGNORE INTO sessions
+                   (id, nombre, servicio, created_at)
+                   VALUES (?, ?, ?, ?)"""</span>,
+                 (session_id, nombre, servicio, datetime.now().isoformat()))
+    conn.commit()
+    conn.close()
+
+
+<span class="kw">def</span> <span class="fn">guardar_turno</span>(session_id: <span class="fn">str</span>, rol: <span class="fn">str</span>, texto: <span class="fn">str</span>,
+                   intencion: <span class="fn">str</span> = <span class="kw">None</span>, confianza: <span class="fn">float</span> = <span class="kw">None</span>):
+    <span class="cm"># Sanitización: no guardar datos potencialmente sensibles</span>
+    texto_seguro = texto[:<span class="num">500</span>]  <span class="cm"># Límite de 500 chars</span>
+    
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(<span class="str">"""INSERT INTO turns
+                   (session_id, timestamp, rol, texto, intencion, confianza)
+                   VALUES (?, ?, ?, ?, ?, ?)"""</span>,
+                 (session_id, datetime.now().isoformat(),
+                  rol, texto_seguro, intencion, confianza))
+    conn.execute(<span class="str">"""UPDATE sessions SET n_turnos = n_turnos + 1
+                   WHERE id = ?"""</span>, (session_id,))
+    conn.commit()
+    conn.close()
+
+
+<span class="kw">def</span> <span class="fn">cargar_perfil</span>(nombre: <span class="fn">str</span>) -> <span class="fn">dict</span>:
+    <span class="str">"""
+    Recupera el contexto de conversaciones anteriores de un usuario.
+    Devuelve: últimas intenciones más frecuentes y sentimiento previo.
+    
+    Esto permite personalizar el saludo: 
+    'Hola María, la última vez preguntaste sobre cancelaciones. ¿Puedo ayudarte?'
+    """</span>
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    <span class="cm"># Sesiones anteriores del usuario</span>
+    c.execute(<span class="str">"""SELECT id, created_at, n_turnos FROM sessions
+               WHERE nombre = ? ORDER BY created_at DESC LIMIT 5"""</span>, (nombre,))
+    sesiones = c.fetchall()
+    
+    <span class="kw">if not</span> sesiones:
+        conn.close()
+        <span class="kw">return</span> {<span class="str">'es_nuevo'</span>: <span class="kw">True</span>}
+    
+    <span class="cm"># Intenciones más frecuentes del usuario</span>
+    c.execute(<span class="str">"""SELECT intencion, COUNT(*) as n
+               FROM turns t JOIN sessions s ON t.session_id = s.id
+               WHERE s.nombre = ? AND t.rol = 'bot' AND t.intencion IS NOT NULL
+               GROUP BY intencion ORDER BY n DESC LIMIT 3"""</span>, (nombre,))
+    intenciones = [row[<span class="num">0</span>] <span class="kw">for</span> row <span class="kw">in</span> c.fetchall()]
+    conn.close()
+    
+    <span class="kw">return</span> {
+        <span class="str">'es_nuevo'</span>: <span class="kw">False</span>,
+        <span class="str">'visitas_previas'</span>: <span class="fn">len</span>(sesiones),
+        <span class="str">'intenciones_frecuentes'</span>: intenciones,
+        <span class="str">'ultima_visita'</span>: sesiones[<span class="num">0</span>][<span class="num">1</span>][:<span class="num">10</span>]
+    }
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    init_memoria()
+    <span class="cm"># Prueba: crea una sesión de ejemplo</span>
+    crear_sesion(<span class="str">'test-001'</span>, <span class="str">'María'</span>)
+    guardar_turno(<span class="str">'test-001'</span>, <span class="str">'user'</span>, <span class="str">'Hola, ¿cuánto cuesta el servicio?'</span>, <span class="str">'consulta_precio'</span>, <span class="num">0.87</span>)
+    guardar_turno(<span class="str">'test-001'</span>, <span class="str">'bot'</span>, <span class="str">'El precio base es $299 al mes.'</span>, <span class="str">'consulta_precio'</span>)
+    perfil = cargar_perfil(<span class="str">'María'</span>)
+    <span class="fn">print</span>(<span class="str">f"Perfil de María: {perfil}"</span>)</pre></div>
+
+      <div class="note dng"><div class="ni">🔐</div><div class="nb"><strong>Privacidad — punto obligatorio en el reporte</strong><p>El equipo debe documentar: ① qué datos se guardan, ② qué datos NO se guardan y por qué, ③ cómo un usuario podría solicitar la eliminación de sus datos (simulación del derecho de "olvido" del GDPR/LFPDPPP).</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión M7</div>
+        <ol>
+          <li>¿Por qué limitamos el texto guardado a 500 caracteres? ¿Qué problemas evita esto?</li>
+          <li>¿Qué columnas agregarías a la tabla <code>sessions</code> para cumplir con la Ley Federal de Protección de Datos Personales en México?</li>
+          <li>Diseña la función <code>eliminar_usuario(nombre)</code> que borra todos los datos de un usuario de ambas tablas. ¿Qué precauciones tomarías?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     RETO EXTRA
+══════════════════════════════ -->
+<section id="reto">
+<div class="wrap">
+  <div class="phase-divider" style="display:flex;align-items:center;gap:16px;margin:0 0 40px">
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+    <div class="phase-lbl pl-r">★ RETOS EXTRA — puntos adicionales</div>
+    <div style="flex:1;height:1px;background:var(--border)"></div>
+  </div>
+
+  <div class="reto-hero">
+    <div class="reto-badge">★ NIVEL SOBRESALIENTE</div>
+    <h2>Integración avanzada</h2>
+    <p>Elige al menos uno. Cada reto exige que el equipo diseñe la solución completa — el código de arranque es solo el punto de partida.</p>
+  </div>
+
+  <!-- RETO A -->
+  <div class="step" id="ra">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum nr">R1</div>
+      <div class="si"><h3>LLM como fallback inteligente</h3><p>Cuando el clasificador falla, un LLM responde en contexto y el resultado puede reentrenar el modelo</p></div>
+      <div class="sdur">+15 pts</div>
+    </div>
+    <div class="step-bd">
+      <div class="lnk-grid">
+        <a href="https://console.groq.com/docs/openai" target="_blank" class="extl"><div class="eico" style="background:#f0fdf4">🚀</div><div class="etxt"><strong>Groq API</strong><span>LLM gratuito y muy rápido</span></div></a>
+        <a href="https://ollama.com/library" target="_blank" class="extl"><div class="eico" style="background:#eff6ff">🦙</div><div class="etxt"><strong>Ollama (local)</strong><span>Sin API key, corre en tu máquina</span></div></a>
+        <a href="https://platform.openai.com/docs/guides/text-generation" target="_blank" class="extl"><div class="eico" style="background:#fff7ed">🤖</div><div class="etxt"><strong>OpenAI API</strong><span>Documentación oficial</span></div></a>
+      </div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> utils/llm_fallback.py — estructura base</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> os
+<span class="kw">from</span> groq <span class="kw">import</span> <span class="cls">Groq</span>  <span class="cm"># pip install groq</span>
+<span class="cm"># ALTERNATIVA LOCAL: from ollama import chat as ollama_chat</span>
+
+<span class="cm"># Sistema de dominio — PERSONALIZA ESTO COMPLETAMENTE para tu servicio</span>
+SYSTEM_PROMPT = <span class="str">"""
+Eres el asistente virtual de [NOMBRE DE TU EMPRESA].
+Tu función es responder consultas sobre [DESCRIBE EL SERVICIO].
+
+REGLAS ESTRICTAS:
+- Solo responde preguntas relacionadas con [TU SERVICIO]
+- Si te preguntan algo fuera del dominio, di: "Eso está fuera de mi área de atención"
+- Responde siempre en español, de forma amable y concisa (máximo 2 oraciones)
+- NO inventes precios, horarios ni información específica que no conozcas
+- Si el usuario tiene una queja grave, di: "Voy a conectarte con un agente humano"
+
+INFORMACIÓN DEL SERVICIO:
+[PEGA AQUÍ la información clave de tu servicio: horarios, precios, políticas]
+"""</span>
+
+client = <span class="cls">Groq</span>(api_key=os.environ.get(<span class="str">'GROQ_API_KEY'</span>))
+
+
+<span class="kw">def</span> <span class="fn">responder_con_llm</span>(mensaje: <span class="fn">str</span>, historial: <span class="fn">list</span> = <span class="kw">None</span>) -> <span class="fn">dict</span>:
+    <span class="str">"""
+    Llama al LLM con el mensaje y devuelve la respuesta.
+    
+    El historial (últimos N turnos) da contexto al LLM
+    para que no trate cada mensaje como independiente.
+    
+    Tu desafío:
+    1. Implementa un mecanismo para que el usuario/admin pueda
+       APROBAR o RECHAZAR la respuesta generada.
+    2. Las respuestas aprobadas se convierten en nuevos patrones
+       en intents.json para reentrenar el modelo.
+    3. Analiza: ¿cuándo el LLM mejora la experiencia? ¿cuándo la empeora?
+    """</span>
+    mensajes = [{<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: SYSTEM_PROMPT}]
+    
+    <span class="cm"># Añadir historial de conversación para contexto</span>
+    <span class="kw">if</span> historial:
+        <span class="kw">for</span> t <span class="kw">in</span> historial[-<span class="num">4</span>:]:  <span class="cm"># Últimos 4 turnos</span>
+            mensajes.append({<span class="str">"role"</span>: <span class="str">"user"</span>,      <span class="str">"content"</span>: t[<span class="str">'usuario'</span>]})
+            mensajes.append({<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: t[<span class="str">'bot'</span>]})
+    
+    mensajes.append({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: mensaje})
+    
+    response = client.chat.completions.create(
+        model=<span class="str">"llama3-8b-8192"</span>,   <span class="cm"># o "llama3-70b-8192" para mayor calidad</span>
+        messages=mensajes,
+        max_tokens=<span class="num">200</span>,
+        temperature=<span class="num">0.3</span>          <span class="cm"># Baja temperatura = respuestas más conservadoras</span>
+    )
+    
+    texto = response.choices[<span class="num">0</span>].message.content
+    
+    <span class="kw">return</span> {
+        <span class="str">'respuesta'</span>: texto,
+        <span class="str">'modelo'</span>: <span class="str">'llm_fallback'</span>,
+        <span class="str">'tokens_usados'</span>: response.usage.total_tokens
+    }</pre></div>
+
+      <div class="note war"><div class="ni">⚠️</div><div class="nb"><strong>Tu desafío completo</strong><p>① Guarda la API key en una variable de entorno (nunca en el código). ② Implementa el loop de aprobación: cuando el LLM responde, guarda la respuesta como "pendiente" en SQLite. ③ Crea un endpoint <code>GET /pendientes</code> que muestre respuestas del LLM no aprobadas y <code>POST /aprobar/{id}</code> para convertirlas en patrones. ④ En tu reporte: analiza 20 conversaciones donde entró el fallback y determina el % de mejora real vs. el clasificador.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-title">🧠 Reflexión R1</div>
+        <ol>
+          <li>¿Qué es el "prompt injection"? ¿Cómo podría un usuario malicioso manipular el system prompt? Menciona una mitigación.</li>
+          <li>¿Por qué ponemos <code>temperature=0.3</code> para un chatbot de atención al cliente? ¿Qué pasa con temperatura alta?</li>
+          <li>El loop de "aprobación → reentrenamiento" se llama <em>active learning</em>. ¿Cuántos ejemplos aprobados necesitarías para que valga la pena reentrenar el modelo?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETO B -->
+  <div class="step" id="rb">
+    <div class="step-hd" onclick="tog(this)">
+      <div class="snum nr">R2</div>
+      <div class="si"><h3>Dashboard de métricas en tiempo real</h3><p>Visualización web de intenciones, confianza y sentimiento con Chart.js</p></div>
+      <div class="sdur">+15 pts</div>
+    </div>
+    <div class="step-bd">
+      <p>Crea <code>frontend/dashboard.html</code> que consuma el endpoint <code>/metricas</code> cada 5 segundos y visualice las estadísticas:</p>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">html</span> frontend/dashboard.html — estructura base</div><button class="cpbtn" onclick="cp(this)">Copiar</button></div>
+<pre><span class="cm">&lt;!-- Importa Chart.js desde CDN --&gt;</span>
+<span class="kw">&lt;script</span> src=<span class="str">"https://cdn.jsdelivr.net/npm/chart.js"</span><span class="kw">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- Estructura básica del dashboard --&gt;</span>
+<span class="dec">&lt;div</span> id=<span class="str">"stats"</span><span class="dec">&gt;</span>
+  <span class="kw">&lt;div</span> class=<span class="str">"stat"</span><span class="kw">&gt;&lt;span</span> id=<span class="str">"s-sesiones"</span><span class="kw">&gt;</span>0<span class="kw">&lt;/span&gt;</span> sesiones activas<span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;div</span> class=<span class="str">"stat"</span><span class="kw">&gt;&lt;span</span> id=<span class="str">"s-turnos"</span><span class="kw">&gt;</span>0<span class="kw">&lt;/span&gt;</span> mensajes totales<span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;div</span> class=<span class="str">"stat"</span><span class="kw">&gt;&lt;span</span> id=<span class="str">"s-fallback"</span><span class="kw">&gt;</span>0%<span class="kw">&lt;/span&gt;</span> tasa de fallback<span class="kw">&lt;/div&gt;</span>
+<span class="dec">&lt;/div&gt;</span>
+<span class="kw">&lt;canvas</span> id=<span class="str">"chart-intents"</span> height=<span class="str">"300"</span><span class="kw">&gt;&lt;/canvas&gt;</span>
+
+<span class="kw">&lt;script&gt;</span>
+<span class="cm">// Tu desafío: implementar la visualización completa</span>
+<span class="cm">// 1. Crear un gráfico de barras horizontales con Chart.js</span>
+<span class="cm">// 2. Actualizar los datos cada 5 segundos con setInterval</span>
+<span class="cm">// 3. Agregar indicador visual de "salud" (verde/amarillo/rojo según tasa fallback)</span>
+<span class="cm">// 4. OPCIONAL: tabla de sesiones recientes con duración y resolución</span>
+
+<span class="kw">async function</span> <span class="fn">actualizarMetricas</span>() {
+  <span class="kw">const</span> data = <span class="kw">await</span> fetch(<span class="str">'http://localhost:8000/metricas'</span>).then(r => r.json());
+  
+  document.getElementById(<span class="str">'s-sesiones'</span>).textContent = data.sesiones_activas;
+  document.getElementById(<span class="str">'s-turnos'</span>).textContent = data.total_turnos;
+  document.getElementById(<span class="str">'s-fallback'</span>).textContent =
+    (data.tasa_fallback * <span class="num">100</span>).toFixed(<span class="num">1</span>) + <span class="str">'%'</span>;
+  
+  <span class="cm">// TODO: actualizar el gráfico con data.distribuciones</span>
+  <span class="cm">// Pista: Object.entries(data.distribuciones) te da los pares [intent, count]</span>
+}
+
+setInterval(actualizarMetricas, <span class="num">5000</span>);
+actualizarMetricas();
+<span class="kw">&lt;/script&gt;</span></pre></div>
+
+      <div class="note tip"><div class="ni">📊</div><div class="nb"><strong>Tu desafío</strong><p>Completa el dashboard con: ① Gráfica de barras de intenciones (Chart.js), ② Indicador de "salud" basado en tasa de fallback, ③ Tabla de últimas 10 sesiones con duración y si terminaron en escalación, ④ Exportar reporte en CSV.</p></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════
+     RÚBRICA Y ENTREGA
+══════════════════════════════ -->
+<section id="rubrica">
+<div class="wrap">
+  <div class="stag stag-0">Evaluación</div>
+  <h2 class="sh">Rúbrica y entregables</h2>
+  <p class="sd">El puntaje base es 100. Los retos extra pueden sumar hasta 30 puntos adicionales.</p>
+
+  <table class="rubric-table">
+    <thead><tr><th>Criterio</th><th>Descripción</th><th>Pts</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Arquitectura</strong></td><td>Diagrama propio documentado, capas bien definidas</td><td class="pts">10</td></tr>
+      <tr><td><strong>M1 NLP</strong></td><td>sentence-transformers + SVM con F1 ≥ 0.82 documentado</td><td class="pts">15</td></tr>
+      <tr><td><strong>M2 KB</strong></td><td>SQLite + ≥5 respuestas con variables dinámicas</td><td class="pts">10</td></tr>
+      <tr><td><strong>M3 API</strong></td><td>FastAPI funcional, 3 endpoints, documentación Swagger</td><td class="pts">15</td></tr>
+      <tr><td><strong>M4 Frontend</strong></td><td>Chat web operativo, diseño de marca, manejo de errores</td><td class="pts">10</td></tr>
+      <tr><td><strong>M5 Sentimiento</strong></td><td>Score acumulado, 3 tonos de respuesta, ≥45 palabras dominio</td><td class="pts">10</td></tr>
+      <tr><td><strong>M6 Entidades</strong></td><td>spaCy + regex + integración en API + respuestas dinámicas</td><td class="pts">10</td></tr>
+      <tr><td><strong>M7 Memoria</strong></td><td>SQLite persistente + carga de perfil + análisis de privacidad</td><td class="pts">10</td></tr>
+      <tr><td><strong>Reporte técnico</strong></td><td>Reflexiones completas + pruebas + mejoras propuestas</td><td class="pts">10</td></tr>
+      <tr class="extra"><td><strong>★ Reto R1 — LLM</strong></td><td>Fallback funcional + loop de aprobación + análisis</td><td class="pts">+15</td></tr>
+      <tr class="extra"><td><strong>★ Reto R2 — Dashboard</strong></td><td>Métricas en tiempo real + Chart.js + exportar CSV</td><td class="pts">+15</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pts-total"><span>Puntaje máximo (con retos)</span><span>130 pts</span></div>
+
+  <div class="entrega">
+    <h3>Niveles de entrega</h3>
+    <p style="color:#a89e95;font-size:14px;font-weight:300;margin-bottom:4px">Declara tu nivel al inicio del proyecto. El nivel define la rúbrica aplicada y las expectativas de la retroalimentación intermedia.</p>
+    <div class="levels">
+      <div class="level-card">
+        <div class="lc-tag lc1">Nivel 1 · Suficiente</div>
+        <h5>Chatbot funcional mejorado</h5>
+        <p>Módulos 1, 2, 3 y 4. Arquitectura documentada. Calificación máxima: 70 pts.</p>
+      </div>
+      <div class="level-card">
+        <div class="lc-tag lc2">Nivel 2 · Notable</div>
+        <h5>Sistema con inteligencia contextual</h5>
+        <p>Todos los módulos (1–7). Arquitectura + reporte completo. Hasta 100 pts.</p>
+      </div>
+      <div class="level-card">
+        <div class="lc-tag lc3">Nivel 3 · Sobresaliente</div>
+        <h5>Producto desplegable</h5>
+        <p>Nivel 2 + al menos un reto extra + README profesional. Hasta 130 pts.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <h4 style="font-family:'Instrument Serif',serif;font-size:1.2rem;font-weight:400;margin-bottom:12px;color:#f5f2ed">Estructura del ZIP de entrega</h4>
+      <div class="cw" style="margin:0"><div class="ch"><div class="cl"><span class="ext">bash</span> Estructura mínima esperada</div></div>
+<pre>equipo_XX_chatbot/
+├── README.md              ← descripción del servicio, instrucciones de instalación
+├── intents.json           ← ≥15 intenciones finales
+├── api.py
+├── utils/
+│   ├── embeddings.py
+│   ├── knowledge_base.py
+│   ├── sentimiento.py
+│   ├── entidades.py
+│   ├── memoria.py
+│   └── contexto.py
+├── frontend/
+│   ├── index.html
+│   └── dashboard.html     ← si aplica
+├── models/
+│   └── embed_model.pkl
+├── data/
+│   ├── knowledge_base.db
+│   └── sesiones.db
+├── docs/
+│   ├── arquitectura.png   ← diagrama propio
+│   └── reporte_reflexiones.pdf
+└── requirements.txt</pre></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>PF-ML601 · Proyecto Final · Chatbot Avanzado de Atención al Cliente · Ingeniería en Computación 6°</p>
+  <p style="margin-top:6px;opacity:.5">
+    <a href="https://sbert.net">sentence-transformers</a> ·
+    <a href="https://spacy.io">spaCy</a> ·
+    <a href="https://fastapi.tiangolo.com">FastAPI</a> ·
+    <a href="https://www.sqlite.org">SQLite</a>
+  </p>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  document.getElementById('pbar').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'
+});
+function tog(hd){hd.nextElementSibling.classList.toggle('open')}
+function cp(btn){
+  const txt=btn.closest('.cw').querySelector('pre').innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('ok')},2000)
+  })
+}
+</script>
+</body>
+</html>

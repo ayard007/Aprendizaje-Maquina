@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG-ML601 · Agente IA Personal — Proyecto Global Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c;
+  --s1:#0f1117;
+  --s2:#161920;
+  --border:#1e2230;
+  --border2:#2a2f42;
+  --text:#e8eaf0;
+  --muted:#6b7494;
+  --dim:#9aa0b8;
+  --accent:#e8ff47;
+  --a2:#3b82f6;
+  --a3:#a855f7;
+  --a4:#10b981;
+  --a5:#f59e0b;
+  --danger:#ef4444;
+  --f1-c:#3b82f6; --f1-bg:rgba(59,130,246,.1); --f1-bd:rgba(59,130,246,.25);
+  --f2-c:#a855f7; --f2-bg:rgba(168,85,247,.1); --f2-bd:rgba(168,85,247,.25);
+  --f3-c:#10b981; --f3-bg:rgba(16,185,129,.1); --f3-bd:rgba(16,185,129,.25);
+  --f4-c:#f59e0b; --f4-bg:rgba(245,158,11,.1);  --f4-bd:rgba(245,158,11,.25);
+  --reto-c:#ef4444; --reto-bg:rgba(239,68,68,.08); --reto-bd:rgba(239,68,68,.3);
+  --code:#0d0f14;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.7;overflow-x:hidden}
+
+/* ── PROGRESS ── */
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:9999;transition:width .1s;box-shadow:0 0 8px var(--accent)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px;position:relative;overflow:hidden}
+
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(232,255,71,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,71,.03) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
+
+.hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:pulse-glow 4s ease infinite}
+@keyframes pulse-glow{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
+
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(232,255,71,.08);border:1px solid rgba(232,255,71,.2);border-radius:999px;padding:7px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:32px;animation:fadeUp .6s ease both}
+
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;line-height:1.05;margin-bottom:20px;animation:fadeUp .7s .1s ease both}
+.hero h1 .line2{font-style:italic;color:var(--accent)}
+.hero h1 .line3{font-size:.55em;font-weight:700;color:var(--dim);display:block;margin-top:4px}
+
+.hero-sub{font-size:1.1rem;color:var(--dim);max-width:580px;margin:0 auto 44px;font-weight:300;animation:fadeUp .7s .2s ease both}
+
+.hero-phases{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:48px;animation:fadeUp .7s .3s ease both}
+.ph-pill{display:flex;align-items:center;gap:7px;border:1px solid;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:500}
+.ph1{color:var(--f1-c);border-color:var(--f1-bd);background:var(--f1-bg)}
+.ph2{color:var(--f2-c);border-color:var(--f2-bd);background:var(--f2-bg)}
+.ph3{color:var(--f3-c);border-color:var(--f3-bd);background:var(--f3-bg)}
+.ph4{color:var(--f4-c);border-color:var(--f4-bd);background:var(--f4-bg)}
+
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#08090c;font-weight:700;font-size:15px;padding:14px 34px;border-radius:8px;text-decoration:none;transition:all .2s;animation:fadeUp .7s .4s ease both;letter-spacing:.02em}
+.cta:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(232,255,71,.3)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── FLOATING PARTICLES ── */
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.p{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--accent);animation:float linear infinite}
+@keyframes float{0%{transform:translateY(100vh);opacity:0}10%{opacity:.6}90%{opacity:.6}100%{transform:translateY(-10vh);opacity:0}}
+
+/* ── NAV ── */
+.snav{position:sticky;top:0;z-index:100;background:rgba(8,9,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.snav-in{max-width:1100px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:3px;overflow-x:auto;scrollbar-width:none}
+.snav-in::-webkit-scrollbar{display:none}
+.nl{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 12px;border-radius:5px;color:var(--muted);text-decoration:none;transition:all .15s;letter-spacing:.04em;border:1px solid transparent}
+.nl:hover{color:var(--text);background:var(--s2)}
+.nl.f1{color:var(--f1-c)}.nl.f2{color:var(--f2-c)}.nl.f3{color:var(--f3-c)}.nl.f4{color:var(--f4-c)}.nl.fr{color:var(--reto-c)}
+
+/* ── LAYOUT ── */
+.wrap{max-width:900px;margin:0 auto;padding:0 24px}
+section{padding:80px 0}
+
+/* ── SECTION HEADERS ── */
+.stag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.stag::before{content:'';width:28px;height:1.5px;border-radius:2px;display:inline-block}
+.t0{color:var(--muted)}.t0::before{background:var(--muted)}
+.t1{color:var(--f1-c)}.t1::before{background:var(--f1-c)}
+.t2{color:var(--f2-c)}.t2::before{background:var(--f2-c)}
+.t3{color:var(--f3-c)}.t3::before{background:var(--f3-c)}
+.t4{color:var(--f4-c)}.t4::before{background:var(--f4-c)}
+.tr{color:var(--reto-c)}.tr::before{background:var(--reto-c)}
+
+.sh{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4.5vw,3rem);font-weight:700;line-height:1.1;margin-bottom:14px}
+.sd{color:var(--dim);font-size:1.05rem;max-width:640px;font-weight:300;margin-bottom:48px}
+
+/* ── OVERVIEW GRID ── */
+.ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:14px;margin-bottom:48px}
+.ov-c{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:20px;position:relative;overflow:hidden;transition:border-color .2s}
+.ov-c:hover{border-color:var(--border2)}
+.ov-c::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.oc1::after{background:var(--f1-c)}.oc2::after{background:var(--f2-c)}.oc3::after{background:var(--f3-c)}.oc4::after{background:var(--f4-c)}.ocr::after{background:var(--reto-c)}
+.ov-time{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;margin-bottom:6px}
+.oc1 .ov-time{color:var(--f1-c)}.oc2 .ov-time{color:var(--f2-c)}.oc3 .ov-time{color:var(--f3-c)}.oc4 .ov-time{color:var(--f4-c)}.ocr .ov-time{color:var(--reto-c)}
+.ov-c h4{font-size:14px;font-weight:600;margin-bottom:5px}
+.ov-c p{font-size:12.5px;color:var(--muted);font-weight:300}
+
+/* ── PHASE DIVIDERS ── */
+.pdiv{display:flex;align-items:center;gap:16px;margin:64px 0 44px}
+.pdiv::before,.pdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+.plbl{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;white-space:nowrap;padding:8px 18px;border-radius:999px;border:1px solid}
+.pl1{color:var(--f1-c);border-color:var(--f1-bd);background:var(--f1-bg)}
+.pl2{color:var(--f2-c);border-color:var(--f2-bd);background:var(--f2-bg)}
+.pl3{color:var(--f3-c);border-color:var(--f3-bd);background:var(--f3-bg)}
+.pl4{color:var(--f4-c);border-color:var(--f4-bd);background:var(--f4-bg)}
+.plr{color:var(--reto-c);border-color:var(--reto-bd);background:var(--reto-bg)}
+
+/* ── STEP BLOCKS ── */
+.step{border:1px solid var(--border);border-radius:14px;background:var(--s1);margin-bottom:24px;overflow:hidden;transition:border-color .2s}
+.step:hover{border-color:var(--border2)}
+.shd{display:flex;align-items:flex-start;gap:16px;padding:22px 26px;cursor:pointer;user-select:none}
+.sno{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
+.n1{background:var(--f1-bg);color:var(--f1-c);border:1px solid var(--f1-bd)}
+.n2{background:var(--f2-bg);color:var(--f2-c);border:1px solid var(--f2-bd)}
+.n3{background:var(--f3-bg);color:var(--f3-c);border:1px solid var(--f3-bd)}
+.n4{background:var(--f4-bg);color:var(--f4-c);border:1px solid var(--f4-bd)}
+.nr{background:var(--reto-bg);color:var(--reto-c);border:1px solid var(--reto-bd)}
+.si{flex:1}.si h3{font-size:17px;font-weight:600;margin-bottom:3px}.si p{font-size:13.5px;color:var(--muted);font-weight:300}
+.sdur{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);flex-shrink:0;margin-top:5px;background:var(--s2);padding:4px 10px;border-radius:5px;border:1px solid var(--border)}
+.sbd{padding:0 26px 26px;border-top:1px solid var(--border);display:none}
+.sbd.open{display:block}
+
+/* ── STEP CONTENT ── */
+.sbd h4{font-size:14.5px;font-weight:600;margin:22px 0 9px;color:var(--text)}
+.sbd p{margin-bottom:12px;color:var(--dim);font-size:14.5px;font-weight:300}
+.sbd ul,.sbd ol{margin:8px 0 16px 20px;color:var(--dim);font-size:14.5px;font-weight:300}
+.sbd li{margin-bottom:5px}
+.sbd a{color:var(--a2);text-decoration:none;border-bottom:1px solid rgba(59,130,246,.3)}
+.sbd a:hover{border-color:var(--a2)}
+
+/* ── CODE ── */
+.cw{background:var(--code);border:1px solid var(--border);border-radius:10px;margin:14px 0;overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.cl{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.ext{background:rgba(232,255,71,.1);color:var(--accent);padding:2px 8px;border-radius:3px;font-size:9.5px;letter-spacing:.08em}
+.cpb{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:3px 10px;border-radius:4px;cursor:pointer;transition:all .15s}
+.cpb:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.cpb.ok{color:var(--a4);border-color:rgba(16,185,129,.4)}
+pre{padding:20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8;color:#c9d1d9}
+.kw{color:#ff79c6}.fn{color:#61afef}.str{color:#98c379}.cm{color:#5c6370;font-style:italic}.num{color:#d19a66}.cls{color:#e5c07b}.dec{color:#56b6c2}.op{color:#abb2bf}
+
+/* ── CALLOUTS ── */
+.note{border-radius:9px;padding:14px 18px;margin:14px 0;font-size:13.5px;display:flex;gap:11px;align-items:flex-start;border:1px solid}
+.ni{font-size:17px;flex-shrink:0;margin-top:1px}.nb{flex:1}
+.nb strong{display:block;font-size:12.5px;font-weight:600;margin-bottom:3px}
+.nb p{margin:0;font-size:13px;font-weight:300}
+.note.inf{background:var(--f1-bg);border-color:var(--f1-bd);color:#93c5fd}
+.note.war{background:var(--f4-bg);border-color:var(--f4-bd);color:#fcd34d}
+.note.tip{background:var(--f3-bg);border-color:var(--f3-bd);color:#6ee7b7}
+.note.ref{background:var(--f2-bg);border-color:var(--f2-bd);color:#c4b5fd}
+.note.dng{background:var(--reto-bg);border-color:var(--reto-bd);color:#fca5a5}
+
+/* ── REFLECT ── */
+.rbox{background:rgba(168,85,247,.06);border-left:3px solid var(--a3);border-radius:0 9px 9px 0;padding:18px 22px;margin:18px 0}
+.rbox-t{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--a3);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.rbox ol{margin:0 0 0 16px}
+.rbox li{color:#d8b4fe;font-size:13.5px;font-style:italic;margin-bottom:9px;font-weight:300}
+
+/* ── ANNOT ── */
+.an{background:rgba(16,185,129,.05);border-left:2px solid var(--a4);padding:9px 13px;margin:2px 0 14px;font-size:12.5px;color:#6ee7b7;font-family:'JetBrains Mono',monospace;border-radius:0 0 7px 7px}
+
+/* ── LINKS ── */
+.lg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0}
+.el{display:flex;align-items:center;gap:11px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;text-decoration:none;transition:all .15s;color:var(--text)}
+.el:hover{border-color:var(--border2);transform:translateY(-2px)}
+.eico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.etx strong{display:block;font-size:13px;font-weight:600;line-height:1.3}
+.etx span{font-size:11.5px;color:var(--muted)}
+
+/* ── ARCH ── */
+.arch{margin:24px 0}
+.al{border-radius:10px;padding:16px 20px;margin-bottom:8px;border:1px solid}
+.al .all{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.al .alc{display:flex;flex-wrap:wrap;gap:6px}
+.ac{font-size:11.5px;padding:4px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace}
+.a-ui{background:var(--f1-bg);border:var(--f1-bd) 1px solid}.a-ui .all{color:var(--f1-c)}.a-ui .ac{background:rgba(0,0,0,.3);color:#93c5fd;border:1px solid var(--f1-bd)}
+.a-ag{background:var(--f2-bg);border:var(--f2-bd) 1px solid}.a-ag .all{color:var(--f2-c)}.a-ag .ac{background:rgba(0,0,0,.3);color:#c4b5fd;border:1px solid var(--f2-bd)}
+.a-to{background:var(--f3-bg);border:var(--f3-bd) 1px solid}.a-to .all{color:var(--f3-c)}.a-to .ac{background:rgba(0,0,0,.3);color:#6ee7b7;border:1px solid var(--f3-bd)}
+.a-me{background:var(--f4-bg);border:var(--f4-bd) 1px solid}.a-me .all{color:var(--f4-c)}.a-me .ac{background:rgba(0,0,0,.3);color:#fcd34d;border:1px solid var(--f4-bd)}
+.aarr{text-align:center;font-size:20px;color:var(--border2);margin:2px 0}
+
+/* ── RETO HERO ── */
+.reto-h{background:linear-gradient(135deg,rgba(239,68,68,.08) 0%,rgba(245,158,11,.05) 100%);border:1px solid var(--reto-bd);border-radius:14px;padding:30px;margin-bottom:28px;position:relative;overflow:hidden}
+.reto-h::after{content:'⚡';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:100px;opacity:.04}
+.reto-h h2{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--reto-c);margin-bottom:8px}
+.reto-h p{color:#fca5a5;font-size:15px;font-weight:300}
+.rb{display:inline-flex;align-items:center;gap:5px;background:var(--reto-bg);border:1px solid var(--reto-bd);border-radius:999px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--reto-c);margin-bottom:14px}
+
+/* ── RUBRIC ── */
+.rtbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
+.rtbl th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);background:var(--s1)}
+.rtbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:300;color:var(--dim)}
+.rtbl tr:last-child td{border:none}
+.rtbl .pts{font-family:'JetBrains Mono',monospace;font-weight:700;text-align:right;color:var(--text)}
+.rtbl .extra td{color:#fca5a5;background:var(--reto-bg)}
+.rtbl .extra .pts{color:var(--reto-c)}
+.tot{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--border);padding:14px 20px;border-radius:9px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:14px}
+.tot span:last-child{font-size:22px;font-weight:700;color:var(--accent)}
+
+/* ── ENTREGA ── */
+.entrega{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:32px;margin-top:60px}
+.entrega h3{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;margin-bottom:18px}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:20px 0}
+.lc{background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:18px}
+.lc .lt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.lc h5{font-size:15px;font-weight:600;margin-bottom:6px}
+.lc p{font-size:12.5px;color:var(--muted);font-weight:300}
+.l1 .lt{color:var(--f1-c)}.l2 .lt{color:var(--f2-c)}.l3 .lt{color:var(--f3-c)}.l4 .lt{color:var(--accent)}
+
+footer{background:var(--s1);border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+footer a{color:var(--accent);text-decoration:none}
+
+@media(max-width:640px){.shd{flex-wrap:wrap}.sdur{width:100%}.lg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="pbar" style="width:0"></div>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="particles" id="pts"></div>
+  <div>
+    <div class="hero-badge">Aprendizaje Máquina · AG-ML601 · Proyecto Global Final</div>
+    <h1>Construye tu<br><span class="line2">Agente IA Personal</span><span class="line3">que vive en tu computadora</span></h1>
+    <p class="hero-sub">4 fases de 2.5 horas. Al finalizar tendrás un agente autónomo que organiza archivos, responde correos, controla el escritorio y aprende de ti.</p>
+    <div class="hero-phases">
+      <div class="ph-pill ph1">F1 · Fundamentos y entorno</div>
+      <div class="ph-pill ph2">F2 · Herramientas del SO</div>
+      <div class="ph-pill ph3">F3 · Correo y comunicación</div>
+      <div class="ph-pill ph4">F4 · Aprendizaje y autonomía</div>
+    </div>
+    <a href="#inicio" class="cta">Iniciar Fase 1 →</a>
+  </div>
+</section>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="snav"><div class="snav-in">
+  <a href="#inicio" class="nl">Inicio</a>
+  <a href="#arquitectura" class="nl">Arquitectura</a>
+  <a href="#f1" class="nl f1">FASE 1</a>
+  <a href="#f1s1" class="nl f1">1·Entorno</a>
+  <a href="#f1s2" class="nl f1">2·LLM core</a>
+  <a href="#f1s3" class="nl f1">3·Memoria</a>
+  <a href="#f2" class="nl f2">FASE 2</a>
+  <a href="#f2s1" class="nl f2">4·Archivos</a>
+  <a href="#f2s2" class="nl f2">5·Escritorio</a>
+  <a href="#f2s3" class="nl f2">6·Tareas</a>
+  <a href="#f3" class="nl f3">FASE 3</a>
+  <a href="#f3s1" class="nl f3">7·Correo</a>
+  <a href="#f3s2" class="nl f3">8·Redacción</a>
+  <a href="#f4" class="nl f4">FASE 4</a>
+  <a href="#f4s1" class="nl f4">9·Aprendizaje</a>
+  <a href="#f4s2" class="nl f4">10·Integración</a>
+  <a href="#reto" class="nl fr">⚡ RETO</a>
+  <a href="#rubrica" class="nl">Rúbrica</a>
+</div></nav>
+
+<!-- ═══════ INTRO ═══════ -->
+<section id="inicio">
+<div class="wrap">
+  <div class="stag t0">¿Qué es un agente IA?</div>
+  <h2 class="sh">Un programa que actúa, no solo responde</h2>
+  <p class="sd">A diferencia de un chatbot, un agente IA percibe su entorno (archivos, correos, pantalla), decide qué hacer y ejecuta acciones reales en tu computadora. Esta actividad te lleva desde cero hasta un agente funcional.</p>
+
+  <div class="ov">
+    <div class="ov-c oc1"><div class="ov-time">FASE 1 · 0:00–2:30h</div><h4>Cerebro del agente</h4><p>LLM local con Ollama, memoria persistente y sistema de decisiones.</p></div>
+    <div class="ov-c oc2"><div class="ov-time">FASE 2 · 2:30–5:00h</div><h4>Control del sistema</h4><p>Organización de archivos, control de escritorio, mouse y ventanas.</p></div>
+    <div class="ov-c oc3"><div class="ov-time">FASE 3 · 5:00–7:30h</div><h4>Comunicación</h4><p>Acceso a correo IMAP, lectura, clasificación y redacción automática.</p></div>
+    <div class="ov-c oc4"><div class="ov-time">FASE 4 · 7:30–10:00h</div><h4>Aprendizaje</h4><p>El agente aprende de tus patrones, ejecuta tareas largas y notifica.</p></div>
+    <div class="ov-c ocr"><div class="ov-time">RETO EXTRA</div><h4>Niveles avanzados</h4><p>Voz, browser, multiagente, UI gráfica o integración con APIs externas.</p></div>
+  </div>
+
+  <div class="note war"><div class="ni">⚠️</div><div class="nb"><strong>Requisitos de hardware</strong><p>RAM ≥ 8 GB para ejecutar Ollama con llama3. Alternativa con 4 GB: usar groq API (gratis). Windows 10/11, macOS 12+ o Ubuntu 20+. Python 3.11+.</p></div></div>
+  <div class="note dng"><div class="ni">🔐</div><div class="nb"><strong>Privacidad y seguridad</strong><p>El agente tendrá acceso real a tus archivos y correo. Usa una cuenta de correo de prueba, no tu cuenta personal principal. Nunca ejecutes el agente con permisos de administrador.</p></div></div>
+
+  <div class="rbox">
+    <div class="rbox-t">🧠 Reflexión inicial — antes de escribir código</div>
+    <ol>
+      <li>¿Qué diferencia fundamental existe entre un chatbot y un agente IA? Busca el concepto de "bucle percepcíon–decisión–acción".</li>
+      <li>¿Qué tipo de tareas cotidianas en tu computadora son repetitivas y podrían automatizarse sin riesgo?</li>
+      <li>¿Qué riesgos éticos y de seguridad implica dar a un programa acceso a tus archivos y correo?</li>
+    </ol>
+  </div>
+</div>
+</section>
+
+<!-- ═══════ ARQUITECTURA ═══════ -->
+<section id="arquitectura">
+<div class="wrap">
+  <div class="stag t0">Diseño del sistema</div>
+  <h2 class="sh">Arquitectura del agente</h2>
+  <p class="sd">El agente se estructura en 4 capas. Antes de programar, tu equipo debe diseñar su propio diagrama y definir qué herramientas implementará.</p>
+  <div class="arch">
+    <div class="al a-ui"><div class="all">Capa 1 — Interfaz de usuario</div><div class="alc"><span class="ac">CLI (terminal)</span><span class="ac">agent_ui.py</span><span class="ac">Notificaciones del SO</span><span class="ac">Sistema de logs</span></div></div>
+    <div class="aarr">↕</div>
+    <div class="al a-ag"><div class="all">Capa 2 — Núcleo del agente (LLM)</div><div class="alc"><span class="ac">Ollama / Groq API</span><span class="ac">ReAct loop</span><span class="ac">Planificador de tareas</span><span class="ac">Memoria contextual</span></div></div>
+    <div class="aarr">↕</div>
+    <div class="al a-to"><div class="all">Capa 3 — Herramientas (Tools)</div><div class="alc"><span class="ac">file_tools.py</span><span class="ac">desktop_tools.py</span><span class="ac">email_tools.py</span><span class="ac">web_tools.py</span></div></div>
+    <div class="aarr">↕</div>
+    <div class="al a-me"><div class="all">Capa 4 — Memoria y aprendizaje</div><div class="alc"><span class="ac">SQLite (episodios)</span><span class="ac">Perfil de usuario</span><span class="ac">Patrones aprendidos</span><span class="ac">Cola de tareas</span></div></div>
+  </div>
+  <div class="note tip"><div class="ni">📐</div><div class="nb"><strong>Entregable 0</strong><p>Dibuja tu propio diagrama con draw.io o en papel. Debe mostrar cómo fluye la información desde que das una orden hasta que el agente la ejecuta. Vale 10 pts en la rúbrica.</p></div></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════
+     FASE 1: FUNDAMENTOS Y LLM
+═══════════════════════════════ -->
+<section id="f1">
+<div class="wrap">
+  <div class="pdiv"><div class="plbl pl1">🔵 FASE 1 · Fundamentos del Agente · 2.5 horas</div></div>
+  <div class="stag t1">Fase 1 · Pasos 1–3</div>
+  <h2 class="sh">El cerebro del agente</h2>
+  <p class="sd">Configura el entorno completo, instala el LLM local con Ollama e implementa el bucle ReAct (Reasoning + Acting) que es el corazón de cualquier agente IA moderno.</p>
+
+  <!-- PASO 1 -->
+  <div class="step" id="f1s1">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n1">01</div>
+      <div class="si"><h3>Configura el entorno y el LLM local</h3><p>Ollama + Python + estructura de proyecto + primer contacto con el modelo</p></div>
+      <div class="sdur">~40 min</div>
+    </div>
+    <div class="sbd open">
+      <h4>1.1 · Instala Ollama (LLM local gratuito)</h4>
+      <p>Ollama permite correr modelos de lenguaje directamente en tu computadora sin enviar datos a la nube.</p>
+
+      <div class="lg">
+        <a href="https://ollama.com/download" target="_blank" class="el"><div class="eico" style="background:rgba(59,130,246,.15)">🦙</div><div class="etx"><strong>Ollama — Descarga</strong><span>Windows / macOS / Linux</span></div></a>
+        <a href="https://github.com/ollama/ollama/blob/main/docs/api.md" target="_blank" class="el"><div class="eico" style="background:rgba(232,255,71,.08)">📖</div><div class="etx"><strong>Ollama API Docs</strong><span>Referencia completa</span></div></a>
+        <a href="https://console.groq.com" target="_blank" class="el"><div class="eico" style="background:rgba(168,85,247,.1)">⚡</div><div class="etx"><strong>Groq (alternativa)</strong><span>LLM gratis en la nube</span></div></a>
+      </div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">bash</span> Terminal — Descarga el modelo (llama3 8B ≈ 4.7 GB)</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="cm"># Después de instalar Ollama, descarga el modelo</span>
+ollama pull llama3
+
+<span class="cm"># Verifica que funciona</span>
+ollama run llama3 "Responde en español: ¿qué puedes hacer?"
+
+<span class="cm"># Si tienes menos de 8GB RAM, usa el modelo pequeño</span>
+ollama pull llama3:latest   <span class="cm"># 4.7 GB</span>
+<span class="cm"># Alternativa ligera:</span>
+ollama pull phi3             <span class="cm"># 2.3 GB — menos potente pero funciona</span></pre></div>
+
+      <h4>1.2 · Crea la estructura del proyecto</h4>
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">bash</span> Terminal</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre>mkdir agente_ia_personal
+cd agente_ia_personal
+mkdir tools memory logs data
+touch agent.py config.py
+touch tools/file_tools.py tools/desktop_tools.py
+touch tools/email_tools.py tools/web_tools.py
+touch memory/episodic.py memory/profile.py
+code .</pre></div>
+
+      <h4>1.3 · Instala las dependencias</h4>
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">bash</span> Terminal</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre>pip install ollama pyautogui psutil watchdog \
+            imaplib2 smtplib colorama schedule \
+            python-dotenv pydantic rich</pre></div>
+      <div class="an">📦 ollama→LLM local | pyautogui→control ratón/teclado | psutil→procesos del SO | watchdog→vigilar carpetas | rich→terminal bonita</div>
+
+      <h4>1.4 · Crea config.py</h4>
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> config.py</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> os
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+load_dotenv()
+
+<span class="cm"># ── Modelo LLM ──────────────────────────────────────────</span>
+LLM_PROVIDER = <span class="str">"ollama"</span>      <span class="cm"># "ollama" o "groq"</span>
+LLM_MODEL    = <span class="str">"llama3"</span>      <span class="cm"># nombre del modelo</span>
+LLM_TEMP     = <span class="num">0.3</span>           <span class="cm"># creatividad (0=conservador, 1=creativo)</span>
+GROQ_API_KEY = os.getenv(<span class="str">"GROQ_API_KEY"</span>, <span class="str">""</span>)
+
+<span class="cm"># ── Rutas del agente ────────────────────────────────────</span>
+BASE_DIR     = Path(<span class="fn">__file__</span>).parent
+DATA_DIR     = BASE_DIR / <span class="str">"data"</span>
+LOG_DIR      = BASE_DIR / <span class="str">"logs"</span>
+MEMORY_DB    = DATA_DIR / <span class="str">"memoria.db"</span>
+
+<span class="cm"># ── Carpetas que el agente puede administrar ─────────────</span>
+<span class="cm"># CAMBIA ESTO a las carpetas de TU computadora que quieres organizar</span>
+CARPETAS_GESTIONADAS = [
+    Path.home() / <span class="str">"Downloads"</span>,   <span class="cm"># Descargas</span>
+    Path.home() / <span class="str">"Documents"</span> / <span class="str">"agente_workspace"</span>,
+    DATA_DIR,
+]
+
+<span class="cm"># ── Correo (usa cuenta de PRUEBA) ────────────────────────</span>
+EMAIL_ADDRESS  = os.getenv(<span class="str">"EMAIL_ADDRESS"</span>, <span class="str">""</span>)
+EMAIL_PASSWORD = os.getenv(<span class="str">"EMAIL_PASSWORD"</span>, <span class="str">""</span>)
+IMAP_SERVER    = os.getenv(<span class="str">"IMAP_SERVER"</span>, <span class="str">"imap.gmail.com"</span>)
+SMTP_SERVER    = os.getenv(<span class="str">"SMTP_SERVER"</span>, <span class="str">"smtp.gmail.com"</span>)
+
+<span class="cm"># ── Seguridad ────────────────────────────────────────────</span>
+MAX_ARCHIVOS_POR_OP = <span class="num">50</span>   <span class="cm"># Límite de archivos por operación</span>
+CONFIRMAR_BORRADO  = <span class="kw">True</span>  <span class="cm"># Siempre pedir confirmación antes de borrar</span>
+MODO_SEGURO        = <span class="kw">True</span>  <span class="cm"># En True: describe acciones pero no las ejecuta</span>
+
+<span class="cm"># Crear directorios si no existen</span>
+<span class="kw">for</span> d <span class="kw">in</span> [DATA_DIR, LOG_DIR]:
+    d.mkdir(exist_ok=<span class="kw">True</span>)</pre></div>
+
+      <div class="note war"><div class="ni">🔑</div><div class="nb"><strong>Archivo .env para credenciales</strong><p>Crea un archivo <code>.env</code> en la raíz del proyecto con: <code>EMAIL_ADDRESS=tu@prueba.com</code>, <code>EMAIL_PASSWORD=tu_password</code>. Agrega <code>.env</code> a tu <code>.gitignore</code>. NUNCA subas credenciales a GitHub.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 1.A</div>
+        <ol>
+          <li>¿Por qué usamos un LLM local (Ollama) en lugar de enviar todo a ChatGPT o Claude? ¿Qué ventajas y desventajas tiene?</li>
+          <li>¿Qué es el parámetro <code>temperature</code> en un LLM? ¿Por qué ponemos 0.3 para un agente que ejecuta acciones reales?</li>
+          <li>¿Por qué el <code>MODO_SEGURO = True</code> es importante al comenzar? ¿Qué podría pasar si el agente ejecuta directamente sin confirmación?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="step" id="f1s2">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n1">02</div>
+      <div class="si"><h3>El bucle ReAct — el corazón del agente</h3><p>Reason + Act: el agente piensa qué hacer, llama herramientas y observa el resultado</p></div>
+      <div class="sdur">~55 min</div>
+    </div>
+    <div class="sbd">
+      <div class="lg">
+        <a href="https://react-lm.github.io/" target="_blank" class="el"><div class="eico" style="background:rgba(59,130,246,.15)">📄</div><div class="etx"><strong>ReAct Paper (original)</strong><span>Synergizing Reasoning and Acting</span></div></a>
+        <a href="https://python.langchain.com/docs/modules/agents/" target="_blank" class="el"><div class="eico" style="background:rgba(16,185,129,.1)">🔗</div><div class="etx"><strong>LangChain Agents</strong><span>Conceptos de agentes</span></div></a>
+        <a href="https://ollama.com/blog/tool-support" target="_blank" class="el"><div class="eico" style="background:rgba(232,255,71,.08)">🛠️</div><div class="etx"><strong>Ollama Tool Support</strong><span>Function calling local</span></div></a>
+      </div>
+
+      <h4>Crea agent.py — el núcleo del agente</h4>
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> agent.py — Motor principal ReAct</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> ollama
+<span class="kw">import</span> json
+<span class="kw">import</span> re
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> rich.console <span class="kw">import</span> <span class="cls">Console</span>
+<span class="kw">from</span> rich.panel <span class="kw">import</span> <span class="cls">Panel</span>
+<span class="kw">from</span> rich.text <span class="kw">import</span> <span class="cls">Text</span>
+<span class="kw">from</span> config <span class="kw">import</span> LLM_MODEL, LLM_TEMP, MODO_SEGURO
+<span class="kw">from</span> memory.episodic <span class="kw">import</span> <span class="cls">MemoriaEpisodica</span>
+
+console = <span class="cls">Console</span>()
+
+<span class="cm"># ── Prompt del sistema — define la personalidad del agente ──</span>
+<span class="cm"># PERSONALIZA ESTO: cambia el nombre, especialidad y reglas</span>
+SYSTEM_PROMPT = <span class="str">"""
+Eres ARIA (Autonomous Reasoning Intelligence Agent), un agente IA personal
+que corre en la computadora del usuario. Tu objetivo es ayudar a organizar
+archivos, gestionar correo y automatizar tareas repetitivas.
+
+HERRAMIENTAS DISPONIBLES:
+Puedes usar las siguientes herramientas escribiendo exactamente este formato:
+
+HERRAMIENTA: nombre_herramienta
+PARAMETROS: {"param1": "valor1", "param2": "valor2"}
+RAZON: por qué usas esta herramienta
+
+Herramientas disponibles:
+- listar_archivos: lista archivos de una carpeta. Params: {"ruta": "path"}
+- organizar_carpeta: organiza archivos por tipo. Params: {"ruta": "path"}
+- mover_archivo: mueve un archivo. Params: {"origen": "path", "destino": "path"}
+- leer_correos: lee correos no leídos. Params: {"limite": 5}
+- enviar_correo: envía un correo. Params: {"para": "email", "asunto": "txt", "cuerpo": "txt"}
+- abrir_aplicacion: abre una app. Params: {"nombre": "nombre_app"}
+- tomar_captura: captura la pantalla. Params: {}
+- esperar: espera N segundos. Params: {"segundos": 3}
+
+REGLAS IMPORTANTES:
+1. Piensa paso a paso antes de actuar (muestra tu razonamiento)
+2. Una herramienta a la vez, observa el resultado antes de continuar
+3. Siempre explica al usuario lo que vas a hacer ANTES de hacerlo
+4. Si una tarea puede causar pérdida de datos, pide confirmación
+5. Cuando termines una tarea, di explícitamente "TAREA COMPLETADA"
+
+Modo actual: {modo}
+"""</span>
+
+<span class="kw">class</span> <span class="cls">AgenteIA</span>:
+    <span class="str">"""
+    Agente IA que implementa el bucle ReAct:
+    
+    1. PERCIBIR: recibe la tarea del usuario
+    2. RAZONAR:  el LLM decide qué herramienta usar y por qué
+    3. ACTUAR:   ejecuta la herramienta
+    4. OBSERVAR: registra el resultado
+    5. REPETIR:  hasta completar la tarea o necesitar intervención humana
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.historial = []
+        <span class="kw">self</span>.herramientas = {}  <span class="cm"># Se poblan en Fase 2</span>
+        <span class="kw">self</span>.memoria = <span class="cls">MemoriaEpisodica</span>()
+        <span class="kw">self</span>.modo_seguro = MODO_SEGURO
+        <span class="kw">self</span>.tareas_completadas = <span class="num">0</span>
+        console.print(<span class="cls">Panel</span>(<span class="str">"[bold green]🤖 ARIA — Agente IA Personal iniciado[/bold green]\n"</span>
+                            <span class="str">f"Modelo: {LLM_MODEL} | Modo seguro: {MODO_SEGURO}"</span>,
+                            title=<span class="str">"Sistema"</span>))
+    
+    <span class="kw">def</span> <span class="fn">registrar_herramienta</span>(<span class="kw">self</span>, nombre: <span class="fn">str</span>, funcion, descripcion: <span class="fn">str</span>):
+        <span class="str">"""Añade una herramienta al repertorio del agente."""</span>
+        <span class="kw">self</span>.herramientas[nombre] = {<span class="str">"fn"</span>: funcion, <span class="str">"desc"</span>: descripcion}
+        console.print(<span class="str">f"  [dim]+ Herramienta registrada: [cyan]{nombre}[/cyan][/dim]"</span>)
+    
+    <span class="kw">def</span> <span class="fn">_llamar_llm</span>(<span class="kw">self</span>, mensaje: <span class="fn">str</span>) -> <span class="fn">str</span>:
+        <span class="str">"""Llama al LLM y devuelve su respuesta en texto."""</span>
+        modo_txt = <span class="str">"SEGURO (describe pero no ejecuta)"</span> <span class="kw">if</span> <span class="kw">self</span>.modo_seguro <span class="kw">else</span> <span class="str">"ACTIVO (ejecuta acciones reales)"</span>
+        sistema = SYSTEM_PROMPT.format(modo=modo_txt)
+        
+        <span class="kw">self</span>.historial.append({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: mensaje})
+        
+        response = ollama.chat(
+            model=LLM_MODEL,
+            messages=[{<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: sistema}] + <span class="kw">self</span>.historial,
+            options={<span class="str">"temperature"</span>: LLM_TEMP}
+        )
+        
+        respuesta = response[<span class="str">'message'</span>][<span class="str">'content'</span>]
+        <span class="kw">self</span>.historial.append({<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: respuesta})
+        <span class="kw">return</span> respuesta
+    
+    <span class="kw">def</span> <span class="fn">_parsear_herramienta</span>(<span class="kw">self</span>, texto: <span class="fn">str</span>) -> <span class="fn">dict</span> | <span class="kw">None</span>:
+        <span class="str">"""Extrae el nombre y parámetros de la herramienta del texto del LLM."""</span>
+        h_match = re.search(<span class="str">r'HERRAMIENTA:\s*(\w+)'</span>, texto)
+        p_match = re.search(<span class="str">r'PARAMETROS:\s*(\{.*?\})'</span>, texto, re.DOTALL)
+        
+        <span class="kw">if not</span> h_match:
+            <span class="kw">return None</span>
+        
+        nombre = h_match.group(<span class="num">1</span>).strip()
+        params = {}
+        <span class="kw">if</span> p_match:
+            <span class="kw">try</span>: params = json.loads(p_match.group(<span class="num">1</span>))
+            <span class="kw">except</span>: <span class="kw">pass</span>
+        
+        <span class="kw">return</span> {<span class="str">"herramienta"</span>: nombre, <span class="str">"params"</span>: params}
+    
+    <span class="kw">def</span> <span class="fn">ejecutar_tarea</span>(<span class="kw">self</span>, tarea: <span class="fn">str</span>, max_pasos: <span class="fn">int</span> = <span class="num">8</span>) -> <span class="fn">str</span>:
+        <span class="str">"""
+        Bucle principal ReAct:
+        Razona → Actúa → Observa → Repite hasta completar la tarea.
+        """</span>
+        console.print(<span class="cls">Panel</span>(<span class="str">f"[bold yellow]📋 Nueva tarea:[/bold yellow] {tarea}"</span>))
+        <span class="kw">self</span>.memoria.registrar_tarea(tarea)
+        
+        contexto = tarea
+        
+        <span class="kw">for</span> paso <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, max_pasos + <span class="num">1</span>):
+            console.print(<span class="str">f"\n[dim]Paso {paso}/{max_pasos}...[/dim]"</span>)
+            
+            <span class="cm"># RAZONAR: el LLM decide qué hacer</span>
+            respuesta_llm = <span class="kw">self</span>.<span class="fn">_llamar_llm</span>(contexto)
+            console.print(<span class="cls">Panel</span>(respuesta_llm, title=<span class="str">f"[cyan]🧠 Razonamiento (paso {paso})[/cyan]"</span>, border_style=<span class="str">"dim"</span>))
+            
+            <span class="cm"># ¿Tarea completada?</span>
+            <span class="kw">if</span> <span class="str">"TAREA COMPLETADA"</span> <span class="kw">in</span> respuesta_llm.upper():
+                <span class="kw">self</span>.tareas_completadas += <span class="num">1</span>
+                <span class="kw">self</span>.memoria.marcar_completada(tarea)
+                <span class="kw">self</span>.<span class="fn">_notificar</span>(<span class="str">f"✅ Tarea completada: {tarea[:60]}"</span>)
+                <span class="kw">return</span> respuesta_llm
+            
+            <span class="cm"># ACTUAR: extraer y ejecutar herramienta</span>
+            llamada = <span class="kw">self</span>.<span class="fn">_parsear_herramienta</span>(respuesta_llm)
+            <span class="kw">if not</span> llamada:
+                <span class="cm"># No hay herramienta — es solo una respuesta conversacional</span>
+                <span class="kw">break</span>
+            
+            nombre_h = llamada[<span class="str">"herramienta"</span>]
+            params   = llamada[<span class="str">"params"</span>]
+            
+            <span class="cm"># OBSERVAR: ejecutar y capturar resultado</span>
+            <span class="kw">if</span> nombre_h <span class="kw">in</span> <span class="kw">self</span>.herramientas:
+                <span class="kw">if</span> <span class="kw">self</span>.modo_seguro:
+                    resultado = <span class="str">f"[MODO SEGURO] Simularía: {nombre_h}({params})"</span>
+                    console.print(<span class="str">f"  [yellow]🔒 Modo seguro: {resultado}[/yellow]"</span>)
+                <span class="kw">else</span>:
+                    <span class="kw">try</span>:
+                        resultado = <span class="kw">self</span>.herramientas[nombre_h][<span class="str">"fn"</span>](**params)
+                        console.print(<span class="str">f"  [green]✓ {nombre_h}: {str(resultado)[:120]}[/green]"</span>)
+                    <span class="kw">except Exception as</span> e:
+                        resultado = <span class="str">f"Error: {e}"</span>
+                        console.print(<span class="str">f"  [red]✗ {nombre_h}: {resultado}[/red]"</span>)
+            <span class="kw">else</span>:
+                resultado = <span class="str">f"Herramienta '{nombre_h}' no disponible."</span>
+            
+            <span class="cm"># Pasar resultado como contexto para el siguiente paso</span>
+            contexto = <span class="str">f"Resultado de {nombre_h}: {resultado}\nContinúa con la tarea."</span>
+        
+        <span class="kw">return</span> <span class="str">"Tarea procesada."</span>
+    
+    <span class="kw">def</span> <span class="fn">_notificar</span>(<span class="kw">self</span>, mensaje: <span class="fn">str</span>):
+        <span class="str">"""Muestra notificación en terminal. En Fase 4 se agrega notificación del SO."""</span>
+        console.print(<span class="cls">Panel</span>(<span class="str">f"[bold green]{mensaje}[/bold green]"</span>, border_style=<span class="str">"green"</span>))
+    
+    <span class="kw">def</span> <span class="fn">chat</span>(<span class="kw">self</span>):
+        <span class="str">"""Modo interactivo: el usuario escribe tareas en la terminal."""</span>
+        console.print(<span class="str">"\n[bold cyan]ARIA lista. Escribe una tarea o 'salir' para terminar.[/bold cyan]\n"</span>)
+        <span class="kw">while True</span>:
+            <span class="kw">try</span>:
+                entrada = console.input(<span class="str">"[bold yellow]▶ Tarea:[/bold yellow] "</span>).strip()
+            <span class="kw">except</span> (<span class="cls">KeyboardInterrupt</span>, <span class="cls">EOFError</span>):
+                <span class="kw">break</span>
+            <span class="kw">if</span> entrada.lower() <span class="kw">in</span> [<span class="str">'salir'</span>, <span class="str">'exit'</span>, <span class="str">'quit'</span>]:
+                <span class="kw">break</span>
+            <span class="kw">if</span> entrada.lower() == <span class="str">'modo real'</span>:
+                <span class="kw">self</span>.modo_seguro = <span class="kw">False</span>
+                console.print(<span class="str">"[red bold]⚠️ Modo REAL activado — el agente ejecutará acciones reales[/red bold]"</span>)
+                <span class="kw">continue</span>
+            <span class="kw">if</span> entrada:
+                <span class="kw">self</span>.ejecutar_tarea(entrada)
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    agente = <span class="cls">AgenteIA</span>()
+    agente.chat()</pre></div>
+      <div class="an">▶ Ejecuta: <strong>python agent.py</strong> — prueba con "Hola, ¿qué puedes hacer?" para verificar que el LLM responde.</div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 2.A — El bucle ReAct</div>
+        <ol>
+          <li>El agente itera hasta 8 pasos por defecto. ¿Qué pasa si una tarea necesita más pasos? ¿Y si el LLM entra en un bucle infinito?</li>
+          <li>¿Por qué el historial de mensajes crece con cada turno? ¿Qué limitación técnica impone esto con el tiempo?</li>
+          <li>Compara el bucle ReAct con el ciclo de aprendizaje por refuerzo (percepción → acción → recompensa). ¿Qué tienen en común?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="step" id="f1s3">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n1">03</div>
+      <div class="si"><h3>Memoria episódica persistente</h3><p>SQLite para que el agente recuerde lo que hizo y aprenda patrones</p></div>
+      <div class="sdur">~35 min</div>
+    </div>
+    <div class="sbd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> memory/episodic.py</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> sqlite3
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> config <span class="kw">import</span> MEMORY_DB
+
+
+<span class="kw">class</span> <span class="cls">MemoriaEpisodica</span>:
+    <span class="str">"""
+    Almacena cada tarea ejecutada como un "episodio":
+    qué se pidió, qué herramientas se usaron, si tuvo éxito,
+    cuánto tardó. Permite al agente aprender de su historial.
+    
+    Tablas:
+        episodios  — cada tarea ejecutada
+        herramientas_uso — frecuencia de uso de cada tool
+        preferencias — patrones aprendidos del usuario
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.db = <span class="fn">str</span>(MEMORY_DB)
+        <span class="kw">self</span>.<span class="fn">_init_db</span>()
+    
+    <span class="kw">def</span> <span class="fn">_init_db</span>(<span class="kw">self</span>):
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.executescript(<span class="str">"""
+            CREATE TABLE IF NOT EXISTS episodios (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp   TEXT NOT NULL,
+                tarea       TEXT NOT NULL,
+                completada  INTEGER DEFAULT 0,
+                n_pasos     INTEGER DEFAULT 0,
+                duracion_s  REAL DEFAULT 0,
+                herramientas_usadas TEXT DEFAULT '[]'
+            );
+            CREATE TABLE IF NOT EXISTS herramientas_uso (
+                herramienta TEXT PRIMARY KEY,
+                usos        INTEGER DEFAULT 0,
+                exitosas    INTEGER DEFAULT 0,
+                ultima_vez  TEXT
+            );
+            CREATE TABLE IF NOT EXISTS preferencias (
+                clave       TEXT PRIMARY KEY,
+                valor       TEXT,
+                actualizado TEXT
+            );
+        """</span>)
+        conn.commit()
+        conn.close()
+    
+    <span class="kw">def</span> <span class="fn">registrar_tarea</span>(<span class="kw">self</span>, tarea: <span class="fn">str</span>) -> <span class="fn">int</span>:
+        <span class="str">"""Inicia un episodio y devuelve su ID."""</span>
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"INSERT INTO episodios (timestamp, tarea) VALUES (?, ?)"</span>,
+                  (datetime.now().isoformat(), tarea))
+        eid = c.lastrowid
+        conn.commit(); conn.close()
+        <span class="kw">return</span> eid
+    
+    <span class="kw">def</span> <span class="fn">marcar_completada</span>(<span class="kw">self</span>, tarea: <span class="fn">str</span>, herramientas: <span class="fn">list</span> = <span class="kw">None</span>):
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""UPDATE episodios SET completada=1, herramientas_usadas=?
+                       WHERE tarea=? AND completada=0"""</span>,
+                     (json.dumps(herramientas <span class="kw">or</span> []), tarea))
+        conn.commit(); conn.close()
+    
+    <span class="kw">def</span> <span class="fn">registrar_uso_herramienta</span>(<span class="kw">self</span>, herramienta: <span class="fn">str</span>, exito: <span class="fn">bool</span>):
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""INSERT INTO herramientas_uso (herramienta, usos, exitosas, ultima_vez)
+                       VALUES (?, 1, ?, ?)
+                       ON CONFLICT(herramienta) DO UPDATE SET
+                           usos = usos + 1,
+                           exitosas = exitosas + ?,
+                           ultima_vez = ?"""</span>,
+                     (herramienta, <span class="num">1</span> <span class="kw">if</span> exito <span class="kw">else</span> <span class="num">0</span>, datetime.now().isoformat(),
+                      <span class="num">1</span> <span class="kw">if</span> exito <span class="kw">else</span> <span class="num">0</span>, datetime.now().isoformat()))
+        conn.commit(); conn.close()
+    
+    <span class="kw">def</span> <span class="fn">tareas_similares</span>(<span class="kw">self</span>, tarea: <span class="fn">str</span>, limite: <span class="fn">int</span> = <span class="num">3</span>) -> <span class="fn">list</span>:
+        <span class="str">"""Busca episodios anteriores similares a la tarea actual."""</span>
+        palabras = [p <span class="kw">for</span> p <span class="kw">in</span> tarea.lower().split() <span class="kw">if</span> <span class="fn">len</span>(p) > <span class="num">3</span>]
+        <span class="kw">if not</span> palabras: <span class="kw">return</span> []
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        like = <span class="str">f"%{palabras[0]}%"</span>
+        c.execute(<span class="str">"""SELECT tarea, completada, herramientas_usadas
+                    FROM episodios WHERE tarea LIKE ? AND completada=1
+                    ORDER BY timestamp DESC LIMIT ?"""</span>, (like, limite))
+        resultados = c.fetchall()
+        conn.close()
+        <span class="kw">return</span> resultados
+    
+    <span class="kw">def</span> <span class="fn">resumen</span>(<span class="kw">self</span>) -> <span class="fn">dict</span>:
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"SELECT COUNT(*), SUM(completada) FROM episodios"</span>)
+        total, completadas = c.fetchone()
+        c.execute(<span class="str">"SELECT herramienta, usos FROM herramientas_uso ORDER BY usos DESC LIMIT 5"</span>)
+        top_tools = c.fetchall()
+        conn.close()
+        <span class="kw">return</span> {<span class="str">"total_tareas"</span>: total <span class="kw">or</span> <span class="num">0</span>,
+                <span class="str">"completadas"</span>: completadas <span class="kw">or</span> <span class="num">0</span>,
+                <span class="str">"top_herramientas"</span>: top_tools}</pre></div>
+      <div class="an">Este módulo ya está importado en agent.py. La memoria se crea automáticamente en data/memoria.db al ejecutar el agente.</div>
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 3.A</div>
+        <ol>
+          <li>¿Qué diferencia hay entre la "memoria episódica" de tu agente y el simple historial de conversación? ¿Por qué es importante tener ambas?</li>
+          <li>El método <code>tareas_similares</code> usa búsqueda por palabras. ¿Qué mejoría aportaría usar embeddings semánticos aquí (como aprendiste en el chatbot)?</li>
+          <li>¿Cuándo la memoria del agente podría convertirse en un problema de privacidad? ¿Qué información NO debería guardarse?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ═══════════════════════════════
+     FASE 2: HERRAMIENTAS DEL SO
+═══════════════════════════════ -->
+<section id="f2">
+<div class="wrap">
+  <div class="pdiv"><div class="plbl pl2">🟣 FASE 2 · Control del Sistema Operativo · 2.5 horas</div></div>
+  <div class="stag t2">Fase 2 · Pasos 4–6</div>
+  <h2 class="sh">El agente controla tu computadora</h2>
+  <p class="sd">Implementa las herramientas que permiten al agente interactuar con el sistema de archivos, controlar el escritorio y gestionar una cola de tareas programadas.</p>
+
+  <!-- PASO 4 -->
+  <div class="step" id="f2s1">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n2">04</div>
+      <div class="si"><h3>Herramientas de sistema de archivos</h3><p>Listar, mover, organizar y buscar archivos de forma segura</p></div>
+      <div class="sdur">~50 min</div>
+    </div>
+    <div class="sbd">
+      <div class="lg">
+        <a href="https://docs.python.org/3/library/pathlib.html" target="_blank" class="el"><div class="eico" style="background:rgba(16,185,129,.1)">📂</div><div class="etx"><strong>pathlib — Python docs</strong><span>Manejo moderno de rutas</span></div></a>
+        <a href="https://docs.python.org/3/library/shutil.html" target="_blank" class="el"><div class="eico" style="background:rgba(59,130,246,.1)">🔧</div><div class="etx"><strong>shutil — Python docs</strong><span>Operaciones de archivos</span></div></a>
+        <a href="https://pypi.org/project/watchdog/" target="_blank" class="el"><div class="eico" style="background:rgba(245,158,11,.1)">👁️</div><div class="etx"><strong>watchdog</strong><span>Vigilar carpetas en tiempo real</span></div></a>
+      </div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> tools/file_tools.py — Herramientas de archivos</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> shutil
+<span class="kw">import</span> os
+<span class="kw">from</span> pathlib <span class="kw">import</span> <span class="cls">Path</span>
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> config <span class="kw">import</span> CARPETAS_GESTIONADAS, MAX_ARCHIVOS_POR_OP, CONFIRMAR_BORRADO
+
+<span class="cm"># ── Clasificación de archivos por extensión ───────────────</span>
+TIPOS_ARCHIVO = {
+    <span class="str">"Imágenes"</span>:    [<span class="str">'.jpg'</span>, <span class="str">'.jpeg'</span>, <span class="str">'.png'</span>, <span class="str">'.gif'</span>, <span class="str">'.webp'</span>, <span class="str">'.svg'</span>, <span class="str">'.bmp'</span>],
+    <span class="str">"Documentos"</span>:  [<span class="str">'.pdf'</span>, <span class="str">'.docx'</span>, <span class="str">'.doc'</span>, <span class="str">'.txt'</span>, <span class="str">'.odt'</span>, <span class="str">'.rtf'</span>],
+    <span class="str">"Hojas"</span>:       [<span class="str">'.xlsx'</span>, <span class="str">'.xls'</span>, <span class="str">'.csv'</span>, <span class="str">'.ods'</span>],
+    <span class="str">"Presentaciones"</span>: [<span class="str">'.pptx'</span>, <span class="str">'.ppt'</span>, <span class="str">'.key'</span>],
+    <span class="str">"Código"</span>:      [<span class="str">'.py'</span>, <span class="str">'.js'</span>, <span class="str">'.ts'</span>, <span class="str">'.html'</span>, <span class="str">'.css'</span>, <span class="str">'.java'</span>, <span class="str">'.cpp'</span>, <span class="str">'.c'</span>],
+    <span class="str">"Videos"</span>:      [<span class="str">'.mp4'</span>, <span class="str">'.avi'</span>, <span class="str">'.mov'</span>, <span class="str">'.mkv'</span>, <span class="str">'.webm'</span>],
+    <span class="str">"Audio"</span>:       [<span class="str">'.mp3'</span>, <span class="str">'.wav'</span>, <span class="str">'.flac'</span>, <span class="str">'.ogg'</span>, <span class="str">'.m4a'</span>],
+    <span class="str">"Comprimidos"</span>: [<span class="str">'.zip'</span>, <span class="str">'.rar'</span>, <span class="str">'.7z'</span>, <span class="str">'.tar'</span>, <span class="str">'.gz'</span>],
+    <span class="str">"Ejecutables"</span>: [<span class="str">'.exe'</span>, <span class="str">'.msi'</span>, <span class="str">'.dmg'</span>, <span class="str">'.pkg'</span>, <span class="str">'.deb'</span>],
+}
+
+<span class="kw">def</span> <span class="fn">_tipo_archivo</span>(extension: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    ext = extension.lower()
+    <span class="kw">for</span> tipo, exts <span class="kw">in</span> TIPOS_ARCHIVO.items():
+        <span class="kw">if</span> ext <span class="kw">in</span> exts: <span class="kw">return</span> tipo
+    <span class="kw">return</span> <span class="str">"Otros"</span>
+
+<span class="kw">def</span> <span class="fn">_ruta_segura</span>(ruta: <span class="fn">str</span>) -> <span class="cls">Path</span>:
+    <span class="str">"""Verifica que la ruta esté dentro de las carpetas permitidas."""</span>
+    p = <span class="cls">Path</span>(ruta).resolve()
+    <span class="kw">if not</span> <span class="fn">any</span>(p == c <span class="kw">or</span> c <span class="kw">in</span> p.parents <span class="kw">for</span> c <span class="kw">in</span> CARPETAS_GESTIONADAS):
+        <span class="kw">raise</span> <span class="cls">PermissionError</span>(<span class="str">f"Ruta no permitida: {ruta}. Solo puedo acceder a carpetas configuradas."</span>)
+    <span class="kw">return</span> p
+
+
+<span class="kw">def</span> <span class="fn">listar_archivos</span>(ruta: <span class="fn">str</span> = <span class="str">"."</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Lista archivos de una carpeta con información de tamaño y fecha."""</span>
+    p = <span class="cls">Path</span>(ruta).expanduser()
+    <span class="kw">if not</span> p.exists(): <span class="kw">return</span> <span class="str">f"La ruta '{ruta}' no existe."</span>
+    
+    archivos = [f <span class="kw">for</span> f <span class="kw">in</span> p.iterdir() <span class="kw">if</span> f.is_file()][:MAX_ARCHIVOS_POR_OP]
+    carpetas = [d <span class="kw">for</span> d <span class="kw">in</span> p.iterdir() <span class="kw">if</span> d.is_dir()]
+    
+    resultado = [<span class="str">f"📁 {p} ({len(archivos)} archivos, {len(carpetas)} subcarpetas)\n"</span>]
+    <span class="kw">for</span> f <span class="kw">in</span> archivos:
+        stat = f.stat()
+        kb = stat.st_size / <span class="num">1024</span>
+        fecha = datetime.fromtimestamp(stat.st_mtime).strftime(<span class="str">"%d/%m/%Y"</span>)
+        tipo = <span class="fn">_tipo_archivo</span>(f.suffix)
+        resultado.append(<span class="str">f"  [{tipo:12}] {f.name:<40} {kb:>8.1f} KB  {fecha}"</span>)
+    
+    <span class="kw">return</span> <span class="str">"\n"</span>.join(resultado)
+
+
+<span class="kw">def</span> <span class="fn">organizar_carpeta</span>(ruta: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Organiza todos los archivos de una carpeta en subcarpetas por tipo.
+    Ejemplo: Downloads/ → Downloads/Imágenes/, Downloads/Documentos/, etc.
+    """</span>
+    p = <span class="fn">_ruta_segura</span>(ruta)
+    <span class="kw">if not</span> p.exists(): <span class="kw">return</span> <span class="str">f"Ruta no encontrada: {ruta}"</span>
+    
+    movidos = []
+    errores = []
+    
+    <span class="kw">for</span> archivo <span class="kw">in</span> p.iterdir():
+        <span class="kw">if not</span> archivo.is_file(): <span class="kw">continue</span>
+        <span class="kw">if</span> archivo.name.startswith(<span class="str">'.'</span>): <span class="kw">continue</span>  <span class="cm"># Ignorar archivos ocultos</span>
+        
+        tipo = <span class="fn">_tipo_archivo</span>(archivo.suffix)
+        destino_dir = p / tipo
+        destino_dir.mkdir(exist_ok=<span class="kw">True</span>)
+        destino = destino_dir / archivo.name
+        
+        <span class="cm"># Si ya existe, añadir timestamp al nombre</span>
+        <span class="kw">if</span> destino.exists():
+            ts = datetime.now().strftime(<span class="str">"%H%M%S"</span>)
+            destino = destino_dir / <span class="str">f"{archivo.stem}_{ts}{archivo.suffix}"</span>
+        
+        <span class="kw">try</span>:
+            shutil.move(<span class="fn">str</span>(archivo), <span class="fn">str</span>(destino))
+            movidos.append(<span class="str">f"{archivo.name} → {tipo}/"</span>)
+        <span class="kw">except Exception as</span> e:
+            errores.append(<span class="str">f"{archivo.name}: {e}"</span>)
+    
+    resumen = <span class="str">f"✅ Organizados: {len(movidos)} archivos\n"</span>
+    resumen += <span class="str">"\n"</span>.join(movidos[:<span class="num">10</span>])
+    <span class="kw">if</span> errores: resumen += <span class="str">f"\n⚠️ Errores: {len(errores)}"</span>
+    <span class="kw">return</span> resumen
+
+
+<span class="kw">def</span> <span class="fn">mover_archivo</span>(origen: <span class="fn">str</span>, destino: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Mueve un archivo de origen a destino, ambos deben estar en rutas permitidas."""</span>
+    o = <span class="fn">_ruta_segura</span>(origen)
+    d = <span class="cls">Path</span>(destino).expanduser()
+    <span class="kw">if not</span> o.exists(): <span class="kw">return</span> <span class="str">f"Archivo no encontrado: {origen}"</span>
+    d.parent.mkdir(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+    shutil.move(<span class="fn">str</span>(o), <span class="fn">str</span>(d))
+    <span class="kw">return</span> <span class="str">f"✅ Movido: {o.name} → {d}"</span>
+
+
+<span class="kw">def</span> <span class="fn">buscar_archivos</span>(patron: <span class="fn">str</span>, ruta: <span class="fn">str</span> = <span class="kw">None</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Busca archivos que coincidan con un patrón glob en las carpetas permitidas."""</span>
+    bases = [<span class="cls">Path</span>(ruta)] <span class="kw">if</span> ruta <span class="kw">else</span> CARPETAS_GESTIONADAS
+    encontrados = []
+    <span class="kw">for</span> base <span class="kw">in</span> bases:
+        encontrados.extend(<span class="fn">list</span>(base.rglob(patron))[:MAX_ARCHIVOS_POR_OP])
+    
+    <span class="kw">if not</span> encontrados: <span class="kw">return</span> <span class="str">f"No se encontraron archivos con patrón '{patron}'"</span>
+    resultado = [<span class="str">f"🔍 {len(encontrados)} archivos encontrados con '{patron}':"</span>]
+    resultado += [<span class="str">f"  {f}"</span> <span class="kw">for</span> f <span class="kw">in</span> encontrados[:<span class="num">20</span>]]
+    <span class="kw">return</span> <span class="str">"\n"</span>.join(resultado)
+
+
+<span class="kw">def</span> <span class="fn">registrar_en_agente</span>(agente):
+    <span class="str">"""Registra todas las herramientas de archivo en el agente."""</span>
+    agente.registrar_herramienta(<span class="str">"listar_archivos"</span>, listar_archivos, <span class="str">"Lista archivos de una carpeta"</span>)
+    agente.registrar_herramienta(<span class="str">"organizar_carpeta"</span>, organizar_carpeta, <span class="str">"Organiza archivos por tipo"</span>)
+    agente.registrar_herramienta(<span class="str">"mover_archivo"</span>, mover_archivo, <span class="str">"Mueve un archivo a otra ubicación"</span>)
+    agente.registrar_herramienta(<span class="str">"buscar_archivos"</span>, buscar_archivos, <span class="str">"Busca archivos por patrón"</span>)</pre></div>
+      <div class="an">▶ Prueba: Agrega <code>from tools.file_tools import registrar_en_agente</code> en agent.py y llámala después de crear el agente. Luego pide: "Lista los archivos de mi carpeta de Descargas".</div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 4.A</div>
+        <ol>
+          <li>¿Por qué tiene la función <code>_ruta_segura()</code>? ¿Qué podría pasar si el agente pudiera acceder a cualquier ruta del sistema?</li>
+          <li>Ejecuta el agente con <code>MODO_SEGURO=True</code> y pídele que organice una carpeta. Luego cambia a modo real y observa la diferencia. ¿Cuál fue el resultado?</li>
+          <li>¿Qué pasa si dos archivos tienen el mismo nombre en carpetas destino diferentes? ¿El código actual lo maneja correctamente?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 5 -->
+  <div class="step" id="f2s2">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n2">05</div>
+      <div class="si"><h3>Control de escritorio — mouse y ventanas</h3><p>pyautogui para mover el cursor, hacer clics y cambiar entre aplicaciones</p></div>
+      <div class="sdur">~50 min</div>
+    </div>
+    <div class="sbd">
+      <div class="lg">
+        <a href="https://pyautogui.readthedocs.io/en/latest/" target="_blank" class="el"><div class="eico" style="background:rgba(168,85,247,.1)">🖱️</div><div class="etx"><strong>PyAutoGUI Docs</strong><span>Control del escritorio</span></div></a>
+        <a href="https://psutil.readthedocs.io/en/latest/" target="_blank" class="el"><div class="eico" style="background:rgba(59,130,246,.1)">⚙️</div><div class="etx"><strong>psutil Docs</strong><span>Gestión de procesos del SO</span></div></a>
+      </div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> tools/desktop_tools.py — Control del escritorio</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> pyautogui
+<span class="kw">import</span> psutil
+<span class="kw">import</span> subprocess
+<span class="kw">import</span> platform
+<span class="kw">import</span> time
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="cm"># Pausa de seguridad entre acciones de pyautogui (en segundos)</span>
+<span class="cm"># Aumenta este valor si las acciones ocurren demasiado rápido</span>
+pyautogui.PAUSE = <span class="num">0.5</span>
+pyautogui.FAILSAFE = <span class="kw">True</span>  <span class="cm"># Mover el ratón a esquina superior izq. = parar</span>
+
+SISTEMA = platform.system()  <span class="cm"># "Windows", "Darwin" (macOS), "Linux"</span>
+
+
+<span class="kw">def</span> <span class="fn">tomar_captura</span>(nombre: <span class="fn">str</span> = <span class="kw">None</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Toma una captura de pantalla y la guarda en data/."""</span>
+    <span class="kw">from</span> config <span class="kw">import</span> DATA_DIR
+    nombre = nombre <span class="kw">or</span> <span class="str">f"captura_{int(time.time())}.png"</span>
+    ruta = DATA_DIR / nombre
+    img = pyautogui.screenshot()
+    img.save(<span class="fn">str</span>(ruta))
+    <span class="kw">return</span> <span class="str">f"✅ Captura guardada: {ruta}"</span>
+
+
+<span class="kw">def</span> <span class="fn">mover_mouse</span>(x: <span class="fn">int</span>, y: <span class="fn">int</span>, duracion: <span class="fn">float</span> = <span class="num">0.5</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Mueve el cursor del mouse a las coordenadas (x, y)."""</span>
+    ancho, alto = pyautogui.size()
+    <span class="cm"># Validar que las coordenadas estén dentro de la pantalla</span>
+    x = <span class="fn">max</span>(<span class="num">0</span>, <span class="fn">min</span>(x, ancho - <span class="num">1</span>))
+    y = <span class="fn">max</span>(<span class="num">0</span>, <span class="fn">min</span>(y, alto - <span class="num">1</span>))
+    pyautogui.moveTo(x, y, duration=duracion)
+    <span class="kw">return</span> <span class="str">f"✅ Mouse movido a ({x}, {y})"</span>
+
+
+<span class="kw">def</span> <span class="fn">hacer_clic</span>(x: <span class="fn">int</span> = <span class="kw">None</span>, y: <span class="fn">int</span> = <span class="kw">None</span>, boton: <span class="fn">str</span> = <span class="str">"left"</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Hace un clic del mouse. Si no se dan coordenadas, hace clic en la posición actual."""</span>
+    <span class="kw">if</span> x <span class="kw">is not None and</span> y <span class="kw">is not None</span>:
+        pyautogui.click(x, y, button=boton)
+        <span class="kw">return</span> <span class="str">f"✅ Clic {boton} en ({x}, {y})"</span>
+    <span class="kw">else</span>:
+        pyautogui.click(button=boton)
+        pos = pyautogui.position()
+        <span class="kw">return</span> <span class="str">f"✅ Clic {boton} en posición actual {pos}"</span>
+
+
+<span class="kw">def</span> <span class="fn">escribir_texto</span>(texto: <span class="fn">str</span>, intervalo: <span class="fn">float</span> = <span class="num">0.05</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Escribe texto como si fuera desde el teclado (en el campo activo)."""</span>
+    <span class="kw">if</span> <span class="fn">len</span>(texto) > <span class="num">500</span>:
+        <span class="kw">return</span> <span class="str">"Error: texto demasiado largo (máx 500 caracteres por seguridad)"</span>
+    pyautogui.typewrite(texto, interval=intervalo)
+    <span class="kw">return</span> <span class="str">f"✅ Texto escrito: '{texto[:50]}{'...' if len(texto)>50 else ''}'"</span>
+
+
+<span class="kw">def</span> <span class="fn">abrir_aplicacion</span>(nombre: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Abre una aplicación según el sistema operativo.
+    Nombres permitidos para evitar ejecución de código malicioso.
+    """</span>
+    APPS_PERMITIDAS = {
+        <span class="str">"notepad"</span>: (<span class="str">"notepad.exe"</span>, <span class="str">"open -a TextEdit"</span>, <span class="str">"gedit"</span>),
+        <span class="str">"calculadora"</span>: (<span class="str">"calc.exe"</span>, <span class="str">"open -a Calculator"</span>, <span class="str">"gnome-calculator"</span>),
+        <span class="str">"explorador"</span>: (<span class="str">"explorer.exe"</span>, <span class="str">"open ."</span>, <span class="str">"nautilus"</span>),
+        <span class="str">"chrome"</span>: (<span class="str">"start chrome"</span>, <span class="str">"open -a 'Google Chrome'"</span>, <span class="str">"google-chrome"</span>),
+        <span class="str">"vscode"</span>: (<span class="str">"code"</span>, <span class="str">"code"</span>, <span class="str">"code"</span>),
+    }
+    
+    n = nombre.lower()
+    <span class="kw">if</span> n <span class="kw">not in</span> APPS_PERMITIDAS:
+        <span class="kw">return</span> <span class="str">f"App '{nombre}' no está en la lista permitida: {list(APPS_PERMITIDAS.keys())}"</span>
+    
+    idx = <span class="num">0</span> <span class="kw">if</span> SISTEMA == <span class="str">"Windows"</span> <span class="kw">else</span> (<span class="num">1</span> <span class="kw">if</span> SISTEMA == <span class="str">"Darwin"</span> <span class="kw">else</span> <span class="num">2</span>)
+    cmd = APPS_PERMITIDAS[n][idx]
+    <span class="kw">try</span>:
+        subprocess.Popen(cmd, shell=<span class="kw">True</span>)
+        <span class="kw">return</span> <span class="str">f"✅ Abriendo: {nombre}"</span>
+    <span class="kw">except Exception as</span> e:
+        <span class="kw">return</span> <span class="str">f"Error abriendo {nombre}: {e}"</span>
+
+
+<span class="kw">def</span> <span class="fn">listar_procesos</span>(filtro: <span class="fn">str</span> = <span class="str">""</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Lista los procesos activos, opcionalmente filtrando por nombre."""</span>
+    procs = []
+    <span class="kw">for</span> p <span class="kw">in</span> psutil.process_iter([<span class="str">'pid'</span>, <span class="str">'name'</span>, <span class="str">'cpu_percent'</span>, <span class="str">'memory_percent'</span>]):
+        <span class="kw">try</span>:
+            info = p.info
+            <span class="kw">if</span> filtro.lower() <span class="kw">in</span> info[<span class="str">'name'</span>].lower():
+                procs.append(<span class="str">f"  PID {info['pid']:6} | CPU {info['cpu_percent']:5.1f}% | "
+                              f"RAM {info['memory_percent']:4.1f}% | {info['name']}"</span>)
+        <span class="kw">except</span>: <span class="kw">pass</span>
+    
+    <span class="kw">return</span> <span class="str">f"Procesos activos ({len(procs)}):\n"</span> + <span class="str">"\n"</span>.join(procs[:<span class="num">20</span>])
+
+
+<span class="kw">def</span> <span class="fn">info_sistema</span>() -> <span class="fn">str</span>:
+    <span class="str">"""Devuelve información básica del estado del sistema."""</span>
+    cpu = psutil.cpu_percent(interval=<span class="num">1</span>)
+    ram = psutil.virtual_memory()
+    disco = psutil.disk_usage(<span class="str">'/'</span>)
+    <span class="kw">return</span> (<span class="str">f"💻 Sistema: {SISTEMA}\n"</span>
+            <span class="str">f"   CPU: {cpu:.1f}%\n"</span>
+            <span class="str">f"   RAM: {ram.used/1e9:.1f} GB / {ram.total/1e9:.1f} GB ({ram.percent}%)\n"</span>
+            <span class="str">f"   Disco: {disco.used/1e9:.1f} GB / {disco.total/1e9:.1f} GB ({disco.percent}%)"</span>)
+
+
+<span class="kw">def</span> <span class="fn">esperar</span>(segundos: <span class="fn">int</span> = <span class="num">2</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Pausa la ejecución N segundos (máx 30)."""</span>
+    seg = <span class="fn">min</span>(<span class="fn">int</span>(segundos), <span class="num">30</span>)
+    time.sleep(seg)
+    <span class="kw">return</span> <span class="str">f"✅ Esperé {seg} segundos."</span>
+
+
+<span class="kw">def</span> <span class="fn">registrar_en_agente</span>(agente):
+    agente.registrar_herramienta(<span class="str">"tomar_captura"</span>, tomar_captura, <span class="str">"Captura la pantalla"</span>)
+    agente.registrar_herramienta(<span class="str">"mover_mouse"</span>, mover_mouse, <span class="str">"Mueve el cursor del mouse"</span>)
+    agente.registrar_herramienta(<span class="str">"hacer_clic"</span>, hacer_clic, <span class="str">"Hace un clic del mouse"</span>)
+    agente.registrar_herramienta(<span class="str">"escribir_texto"</span>, escribir_texto, <span class="str">"Escribe texto como teclado"</span>)
+    agente.registrar_herramienta(<span class="str">"abrir_aplicacion"</span>, abrir_aplicacion, <span class="str">"Abre una aplicación"</span>)
+    agente.registrar_herramienta(<span class="str">"listar_procesos"</span>, listar_procesos, <span class="str">"Lista procesos activos"</span>)
+    agente.registrar_herramienta(<span class="str">"info_sistema"</span>, info_sistema, <span class="str">"Estado del sistema"</span>)
+    agente.registrar_herramienta(<span class="str">"esperar"</span>, esperar, <span class="str">"Pausa N segundos"</span>)</pre></div>
+
+      <div class="note dng"><div class="ni">🔴</div><div class="nb"><strong>Seguridad de pyautogui</strong><p>Mueve el mouse a la esquina superior izquierda de la pantalla en cualquier momento para abortar todas las acciones (FAILSAFE). Siempre prueba primero en MODO_SEGURO. Nunca ejecutes el agente en modo real sin supervisión.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 5.A</div>
+        <ol>
+          <li>¿Por qué existe la lista <code>APPS_PERMITIDAS</code>? ¿Qué podría hacer un atacante si el agente pudiera ejecutar cualquier comando?</li>
+          <li>Prueba pedirle al agente "abre el explorador de archivos". ¿Cómo decide el LLM qué parámetros usar? ¿Qué pasa si le pides una app que no está en la lista?</li>
+          <li>¿Qué diferencia hay entre controlar el escritorio con pyautogui y usar APIs nativas del SO (como Win32 en Windows)? ¿Cuándo usar cada uno?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 6 -->
+  <div class="step" id="f2s3">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n2">06</div>
+      <div class="si"><h3>Cola de tareas programadas</h3><p>schedule para ejecutar tareas automáticamente en segundo plano</p></div>
+      <div class="sdur">~40 min</div>
+    </div>
+    <div class="sbd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> memory/task_queue.py — Cola de tareas</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> schedule
+<span class="kw">import</span> threading
+<span class="kw">import</span> time
+<span class="kw">import</span> sqlite3
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> rich.console <span class="kw">import</span> <span class="cls">Console</span>
+<span class="kw">from</span> config <span class="kw">import</span> MEMORY_DB
+
+console = <span class="cls">Console</span>()
+
+
+<span class="kw">class</span> <span class="cls">ColaTareas</span>:
+    <span class="str">"""
+    Gestiona tareas programadas para el agente.
+    
+    Tipos de tarea:
+    - inmediata: se ejecuta ahora
+    - diaria: todos los días a una hora
+    - intervalo: cada N minutos
+    - unica: una sola vez en una fecha/hora específica
+    
+    Las tareas se guardan en SQLite para sobrevivir reinicios.
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, agente):
+        <span class="kw">self</span>.agente = agente
+        <span class="kw">self</span>.db = <span class="fn">str</span>(MEMORY_DB)
+        <span class="kw">self</span>.<span class="fn">_init_tabla</span>()
+        <span class="kw">self</span>.hilo_programador = <span class="kw">None</span>
+    
+    <span class="kw">def</span> <span class="fn">_init_tabla</span>(<span class="kw">self</span>):
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""
+            CREATE TABLE IF NOT EXISTS tareas_programadas (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre   TEXT NOT NULL,
+                descripcion TEXT,
+                tipo     TEXT NOT NULL,
+                config   TEXT,
+                activa   INTEGER DEFAULT 1,
+                ultima_ejecucion TEXT,
+                proxima  TEXT
+            )
+        """</span>)
+        conn.commit(); conn.close()
+    
+    <span class="kw">def</span> <span class="fn">agregar_tarea</span>(<span class="kw">self</span>, nombre: <span class="fn">str</span>, descripcion: <span class="fn">str</span>,
+                       tipo: <span class="fn">str</span>, config: <span class="fn">dict</span> = <span class="kw">None</span>) -> <span class="fn">str</span>:
+        <span class="str">"""
+        Agrega una nueva tarea programada.
+        
+        tipo='diaria', config={'hora': '09:00', 'tarea': 'revisar correo'}
+        tipo='intervalo', config={'minutos': 30, 'tarea': 'verificar descargas'}
+        """</span>
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""INSERT INTO tareas_programadas (nombre, descripcion, tipo, config)
+                       VALUES (?, ?, ?, ?)"""</span>,
+                     (nombre, descripcion, tipo, json.dumps(config <span class="kw">or</span> {})))
+        conn.commit(); conn.close()
+        
+        <span class="kw">self</span>.<span class="fn">_programar</span>(nombre, tipo, config)
+        console.print(<span class="str">f"[green]📅 Tarea programada: [bold]{nombre}[/bold] ({tipo})[/green]"</span>)
+        <span class="kw">return</span> <span class="str">f"Tarea '{nombre}' programada exitosamente."</span>
+    
+    <span class="kw">def</span> <span class="fn">_programar</span>(<span class="kw">self</span>, nombre: <span class="fn">str</span>, tipo: <span class="fn">str</span>, config: <span class="fn">dict</span>):
+        <span class="kw">def</span> <span class="fn">ejecutar</span>():
+            console.print(<span class="str">f"\n[bold yellow]⏰ Ejecutando tarea programada: {nombre}[/bold yellow]"</span>)
+            tarea_texto = config.get(<span class="str">'tarea'</span>, nombre)
+            resultado = <span class="kw">self</span>.agente.ejecutar_tarea(tarea_texto)
+            <span class="cm"># Actualizar última ejecución</span>
+            conn = sqlite3.connect(<span class="kw">self</span>.db)
+            conn.execute(<span class="str">"UPDATE tareas_programadas SET ultima_ejecucion=? WHERE nombre=?"</span>,
+                        (datetime.now().isoformat(), nombre))
+            conn.commit(); conn.close()
+            <span class="kw">return</span> resultado
+        
+        <span class="kw">if</span> tipo == <span class="str">'diaria'</span>:
+            hora = config.get(<span class="str">'hora'</span>, <span class="str">'09:00'</span>)
+            schedule.every().day.at(hora).do(ejecutar).tag(nombre)
+        <span class="kw">elif</span> tipo == <span class="str">'intervalo'</span>:
+            mins = config.get(<span class="str">'minutos'</span>, <span class="num">30</span>)
+            schedule.every(mins).minutes.do(ejecutar).tag(nombre)
+    
+    <span class="kw">def</span> <span class="fn">iniciar_hilo</span>(<span class="kw">self</span>):
+        <span class="str">"""Inicia el programador en un hilo separado para no bloquear el agente."""</span>
+        <span class="kw">def</span> <span class="fn">loop</span>():
+            <span class="kw">while True</span>:
+                schedule.run_pending()
+                time.sleep(<span class="num">30</span>)
+        
+        <span class="kw">self</span>.hilo_programador = threading.<span class="cls">Thread</span>(target=loop, daemon=<span class="kw">True</span>)
+        <span class="kw">self</span>.hilo_programador.start()
+        console.print(<span class="str">"[dim]🕐 Programador de tareas iniciado en segundo plano[/dim]"</span>)
+    
+    <span class="kw">def</span> <span class="fn">listar_tareas</span>(<span class="kw">self</span>) -> <span class="fn">str</span>:
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"SELECT nombre, tipo, ultima_ejecucion, activa FROM tareas_programadas"</span>)
+        tareas = c.fetchall(); conn.close()
+        <span class="kw">if not</span> tareas: <span class="kw">return</span> <span class="str">"No hay tareas programadas."</span>
+        resultado = <span class="str">"📅 Tareas programadas:\n"</span>
+        <span class="kw">for</span> t <span class="kw">in</span> tareas:
+            estado = <span class="str">"✅"</span> <span class="kw">if</span> t[<span class="num">3</span>] <span class="kw">else</span> <span class="str">"⏸️"</span>
+            ultima = t[<span class="num">2</span>][:<span class="num">16</span>] <span class="kw">if</span> t[<span class="num">2</span>] <span class="kw">else</span> <span class="str">"nunca"</span>
+            resultado += <span class="str">f"  {estado} {t[0]:<20} [{t[1]}] última: {ultima}\n"</span>
+        <span class="kw">return</span> resultado</pre></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 6.A</div>
+        <ol>
+          <li>¿Por qué el programador de tareas corre en un <em>hilo separado</em> (<code>daemon=True</code>)? ¿Qué significa que sea daemon?</li>
+          <li>Diseña 3 tareas programadas útiles para tu vida real como estudiante. Define el tipo y la configuración de cada una.</li>
+          <li>¿Qué pasaría si el agente tarda más en ejecutar una tarea que el intervalo programado? ¿Cómo lo resolverías?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════
+     FASE 3: CORREO
+═══════════════════════════════ -->
+<section id="f3">
+<div class="wrap">
+  <div class="pdiv"><div class="plbl pl3">🟢 FASE 3 · Correo y Comunicación · 2.5 horas</div></div>
+  <div class="stag t3">Fase 3 · Pasos 7–8</div>
+  <h2 class="sh">El agente gestiona tu correo</h2>
+  <p class="sd">Implementa acceso IMAP para leer correos, clasificarlos por prioridad con el LLM y generar respuestas automáticas para agilizar tu bandeja de entrada.</p>
+
+  <!-- PASO 7 -->
+  <div class="step" id="f3s1">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n3">07</div>
+      <div class="si"><h3>Leer y clasificar correos con IMAP</h3><p>Conexión segura, lectura de bandeja de entrada y clasificación automática</p></div>
+      <div class="sdur">~70 min</div>
+    </div>
+    <div class="sbd">
+      <div class="note war"><div class="ni">📧</div><div class="nb"><strong>Usa una cuenta de prueba</strong><p>Para Gmail: activa "Contraseñas de aplicación" en tu cuenta Google (<a href="https://myaccount.google.com/security" target="_blank">myaccount.google.com/security</a>). Crea una contraseña de app específica. NO uses tu contraseña normal.</p></div></div>
+
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> tools/email_tools.py — Acceso a correo</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> imaplib
+<span class="kw">import</span> smtplib
+<span class="kw">import</span> email
+<span class="kw">from</span> email.mime.text <span class="kw">import</span> <span class="cls">MIMEText</span>
+<span class="kw">from</span> email.mime.multipart <span class="kw">import</span> <span class="cls">MIMEMultipart</span>
+<span class="kw">from</span> email.header <span class="kw">import</span> decode_header
+<span class="kw">from</span> config <span class="kw">import</span> EMAIL_ADDRESS, EMAIL_PASSWORD, IMAP_SERVER, SMTP_SERVER
+<span class="kw">import</span> ollama
+<span class="kw">from</span> config <span class="kw">import</span> LLM_MODEL
+
+
+<span class="kw">def</span> <span class="fn">_decodificar_header</span>(valor: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""Decodifica cabeceras de correo que pueden venir en distintos encodings."""</span>
+    partes = decode_header(valor)
+    resultado = []
+    <span class="kw">for</span> parte, enc <span class="kw">in</span> partes:
+        <span class="kw">if isinstance</span>(parte, <span class="fn">bytes</span>):
+            resultado.append(parte.decode(enc <span class="kw">or</span> <span class="str">'utf-8'</span>, errors=<span class="str">'replace'</span>))
+        <span class="kw">else</span>:
+            resultado.append(parte)
+    <span class="kw">return</span> <span class="str">" "</span>.join(resultado)
+
+
+<span class="kw">def</span> <span class="fn">leer_correos</span>(limite: <span class="fn">int</span> = <span class="num">5</span>, carpeta: <span class="fn">str</span> = <span class="str">"INBOX"</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Lee los últimos N correos no leídos de la bandeja especificada.
+    Devuelve un resumen legible para el agente.
+    """</span>
+    <span class="kw">if not</span> EMAIL_ADDRESS:
+        <span class="kw">return</span> <span class="str">"Error: No hay cuenta de correo configurada en .env"</span>
+    
+    <span class="kw">try</span>:
+        mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+        mail.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        mail.select(carpeta)
+        
+        <span class="cm"># Buscar correos no leídos</span>
+        _, ids = mail.search(<span class="kw">None</span>, <span class="str">'UNSEEN'</span>)
+        id_list = ids[<span class="num">0</span>].split()
+        
+        <span class="kw">if not</span> id_list:
+            mail.logout()
+            <span class="kw">return</span> <span class="str">"📭 No hay correos no leídos."</span>
+        
+        correos = []
+        <span class="cm"># Leer los más recientes (últimos N)</span>
+        <span class="kw">for</span> cid <span class="kw">in</span> id_list[-limite:]:
+            _, data = mail.fetch(cid, <span class="str">'(RFC822)'</span>)
+            msg = email.message_from_bytes(data[<span class="num">0</span>][<span class="num">1</span>])
+            
+            de     = <span class="fn">_decodificar_header</span>(msg.get(<span class="str">'From'</span>, <span class="str">''</span>))
+            asunto = <span class="fn">_decodificar_header</span>(msg.get(<span class="str">'Subject'</span>, <span class="str">'Sin asunto'</span>))
+            fecha  = msg.get(<span class="str">'Date'</span>, <span class="str">''</span>)[:<span class="num">25</span>]
+            
+            <span class="cm"># Extraer cuerpo del mensaje</span>
+            cuerpo = <span class="str">""</span>
+            <span class="kw">if</span> msg.is_multipart():
+                <span class="kw">for</span> parte <span class="kw">in</span> msg.walk():
+                    <span class="kw">if</span> parte.get_content_type() == <span class="str">'text/plain'</span>:
+                        <span class="kw">try</span>: cuerpo = parte.get_payload(decode=<span class="kw">True</span>).decode(<span class="str">'utf-8'</span>, errors=<span class="str">'replace'</span>)[:<span class="num">300</span>]
+                        <span class="kw">except</span>: <span class="kw">pass</span>
+                        <span class="kw">break</span>
+            <span class="kw">else</span>:
+                <span class="kw">try</span>: cuerpo = msg.get_payload(decode=<span class="kw">True</span>).decode(<span class="str">'utf-8'</span>, errors=<span class="str">'replace'</span>)[:<span class="num">300</span>]
+                <span class="kw">except</span>: <span class="kw">pass</span>
+            
+            correos.append(<span class="str">f"--- CORREO ---\nDe: {de}\nAsunto: {asunto}\nFecha: {fecha}\nCuerpo:\n{cuerpo}\n"</span>)
+        
+        mail.logout()
+        <span class="kw">return</span> <span class="str">f"📬 {len(correos)} correos no leídos:\n\n"</span> + <span class="str">"\n"</span>.join(correos)
+    
+    <span class="kw">except Exception as</span> e:
+        <span class="kw">return</span> <span class="str">f"Error de correo: {e}"</span>
+
+
+<span class="kw">def</span> <span class="fn">clasificar_correo</span>(asunto: <span class="fn">str</span>, cuerpo: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Usa el LLM para clasificar un correo por:
+    - Prioridad: Alta / Media / Baja
+    - Categoría: Trabajo / Personal / Spam / Notificación / Urgente
+    - Acción sugerida: Responder / Archivar / Ignorar / Reenviar
+    """</span>
+    prompt = <span class="str">f"""Clasifica este correo electrónico:
+
+Asunto: {asunto}
+Cuerpo: {cuerpo[:500]}
+
+Responde SOLO con este JSON (sin texto adicional):
+{{
+  "prioridad": "Alta|Media|Baja",
+  "categoria": "Trabajo|Personal|Spam|Notificación|Urgente",
+  "accion": "Responder|Archivar|Ignorar|Reenviar",
+  "razon": "breve explicación en máximo 20 palabras"
+}}"""</span>
+    
+    <span class="kw">try</span>:
+        resp = ollama.chat(model=LLM_MODEL, messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}])
+        <span class="kw">return</span> resp[<span class="str">'message'</span>][<span class="str">'content'</span>]
+    <span class="kw">except Exception as</span> e:
+        <span class="kw">return</span> <span class="str">f"Error clasificando: {e}"</span>
+
+
+<span class="kw">def</span> <span class="fn">enviar_correo</span>(para: <span class="fn">str</span>, asunto: <span class="fn">str</span>, cuerpo: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Envía un correo electrónico.
+    REQUIERE confirmación del usuario antes de ejecutarse.
+    """</span>
+    <span class="kw">if not</span> EMAIL_ADDRESS:
+        <span class="kw">return</span> <span class="str">"Error: No hay cuenta de correo configurada."</span>
+    
+    <span class="kw">try</span>:
+        msg = <span class="cls">MIMEMultipart</span>()
+        msg[<span class="str">'From'</span>]    = EMAIL_ADDRESS
+        msg[<span class="str">'To'</span>]      = para
+        msg[<span class="str">'Subject'</span>] = asunto
+        msg.attach(<span class="cls">MIMEText</span>(cuerpo, <span class="str">'plain'</span>, <span class="str">'utf-8'</span>))
+        
+        <span class="kw">with</span> smtplib.<span class="cls">SMTP_SSL</span>(SMTP_SERVER, <span class="num">465</span>) <span class="kw">as</span> smtp:
+            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+            smtp.sendmail(EMAIL_ADDRESS, para, msg.as_string())
+        
+        <span class="kw">return</span> <span class="str">f"✅ Correo enviado a {para}: '{asunto}'"</span>
+    <span class="kw">except Exception as</span> e:
+        <span class="kw">return</span> <span class="str">f"Error enviando correo: {e}"</span>
+
+
+<span class="kw">def</span> <span class="fn">registrar_en_agente</span>(agente):
+    agente.registrar_herramienta(<span class="str">"leer_correos"</span>, leer_correos, <span class="str">"Lee correos no leídos"</span>)
+    agente.registrar_herramienta(<span class="str">"clasificar_correo"</span>, clasificar_correo, <span class="str">"Clasifica un correo por prioridad"</span>)
+    agente.registrar_herramienta(<span class="str">"enviar_correo"</span>, enviar_correo, <span class="str">"Envía un correo electrónico"</span>)</pre></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 7.A — Correo y privacidad</div>
+        <ol>
+          <li>¿Qué es IMAP vs SMTP? ¿Para qué sirve cada protocolo? ¿Por qué usamos SSL?</li>
+          <li>¿Por qué guardamos las credenciales en variables de entorno y no directamente en el código? ¿Qué riesgo mitiga esto?</li>
+          <li>El agente podría enviar correos automáticamente. ¿Qué mecanismo de control adicional implementarías para que nunca envíe un correo sin tu aprobación explícita?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 8 -->
+  <div class="step" id="f3s2">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n3">08</div>
+      <div class="si"><h3>Redacción automática con el LLM</h3><p>El agente genera borradores de respuesta adaptados al tono y contexto</p></div>
+      <div class="sdur">~40 min</div>
+    </div>
+    <div class="sbd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> Agregar a tools/email_tools.py</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">def</span> <span class="fn">redactar_respuesta</span>(correo_original: <span class="fn">str</span>, instruccion: <span class="fn">str</span> = <span class="str">""</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Genera un borrador de respuesta al correo usando el LLM.
+    
+    El borrador siempre se muestra al usuario para REVISIÓN y APROBACIÓN.
+    El agente NUNCA envía sin que el usuario confirme explícitamente.
+    
+    instruccion: indicación adicional, ej: "responde en tono formal"
+                 "declina la invitación amablemente"
+                 "pide más información sobre la fecha"
+    """</span>
+    perfil = <span class="str">"""
+    Eres un asistente de redacción de correos en español.
+    Escribe respuestas profesionales, concisas y corteses.
+    Máximo 150 palabras. Incluye saludo y despedida apropiados.
+    NO inventes información que no está en el correo original.
+    """</span>
+    
+    prompt = <span class="str">f"""Correo recibido:
+{correo_original[:600]}
+
+Instrucción para la respuesta: {instruccion or "responde de forma apropiada al contexto"}
+
+Genera SOLO el texto de la respuesta, listo para enviar."""</span>
+    
+    <span class="kw">try</span>:
+        resp = ollama.chat(
+            model=LLM_MODEL,
+            messages=[
+                {<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: perfil},
+                {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}
+            ]
+        )
+        borrador = resp[<span class="str">'message'</span>][<span class="str">'content'</span>]
+        <span class="kw">return</span> <span class="str">f"📝 BORRADOR (requiere tu aprobación antes de enviar):\n\n{borrador}"</span>
+    <span class="kw">except Exception as</span> e:
+        <span class="kw">return</span> <span class="str">f"Error generando borrador: {e}"</span>
+
+
+<span class="kw">def</span> <span class="fn">resumir_bandeja</span>(limite: <span class="fn">int</span> = <span class="num">10</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Lee los últimos N correos y genera un resumen ejecutivo del día.
+    Útil como primera tarea del día para el agente.
+    """</span>
+    correos_raw = leer_correos(limite=limite)
+    
+    <span class="kw">if</span> <span class="str">"Error"</span> <span class="kw">in</span> correos_raw <span class="kw">or</span> <span class="str">"No hay"</span> <span class="kw">in</span> correos_raw:
+        <span class="kw">return</span> correos_raw
+    
+    prompt = <span class="str">f"""Aquí están los correos no leídos:
+
+{correos_raw[:2000]}
+
+Genera un resumen ejecutivo con:
+1. Total de correos urgentes/importantes
+2. Lista de acciones pendientes (máx 5)
+3. Correos que pueden ignorarse o archivarse
+
+Responde en español, máximo 200 palabras."""</span>
+    
+    resp = ollama.chat(model=LLM_MODEL, messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}])
+    <span class="kw">return</span> <span class="str">"📊 Resumen de bandeja de entrada:\n\n"</span> + resp[<span class="str">'message'</span>][<span class="str">'content'</span>]</pre></div>
+      <div class="an">Registra también en agente: <code>agente.registrar_herramienta("redactar_respuesta", ...)</code> y <code>"resumir_bandeja"</code></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 8.A</div>
+        <ol>
+          <li>Prueba pedirle al agente "resume mi bandeja de entrada". Evalúa la calidad del resumen generado. ¿Qué mejorarías en el prompt?</li>
+          <li>¿Por qué es importante que el borrador siempre pase por revisión humana antes de enviarse? Menciona un caso donde un envío automático podría causar problemas.</li>
+          <li>¿Qué información del perfil del usuario (historial, tono preferido) podría usar el agente para mejorar los borradores con el tiempo?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════
+     FASE 4: APRENDIZAJE
+═══════════════════════════════ -->
+<section id="f4">
+<div class="wrap">
+  <div class="pdiv"><div class="plbl pl4">🟡 FASE 4 · Aprendizaje y Autonomía · 2.5 horas</div></div>
+  <div class="stag t4">Fase 4 · Pasos 9–10</div>
+  <h2 class="sh">El agente aprende y actúa solo</h2>
+  <p class="sd">Implementa el sistema de aprendizaje de patrones, notificaciones del SO y el main.py final que integra todos los módulos en un agente completo y ejecutable.</p>
+
+  <!-- PASO 9 -->
+  <div class="step" id="f4s1">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n4">09</div>
+      <div class="si"><h3>Perfil de usuario y aprendizaje de patrones</h3><p>El agente aprende tus preferencias y adapta su comportamiento</p></div>
+      <div class="sdur">~55 min</div>
+    </div>
+    <div class="sbd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> memory/profile.py — Perfil del usuario</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> sqlite3
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, time <span class="kw">as</span> dtime
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+<span class="kw">from</span> config <span class="kw">import</span> MEMORY_DB
+
+
+<span class="kw">class</span> <span class="cls">PerfilUsuario</span>:
+    <span class="str">"""
+    Mantiene un perfil del usuario basado en su historial de uso.
+    
+    Aprende:
+    - Horarios habituales de uso (mañana/tarde/noche)
+    - Herramientas más usadas por hora del día
+    - Tipos de archivos que más gestiona
+    - Tono preferido en correos
+    - Tareas que se repiten (candidatas a automatización)
+    
+    Esto permite al agente:
+    - Sugerir acciones proactivamente
+    - Adaptar la verbosidad de sus respuestas
+    - Pre-cargar herramientas frecuentes
+    """</span>
+    
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>):
+        <span class="kw">self</span>.db = <span class="fn">str</span>(MEMORY_DB)
+        <span class="kw">self</span>.<span class="fn">_init_tabla</span>()
+        <span class="kw">self</span>.cache = {}  <span class="cm"># Cache en memoria para acceso rápido</span>
+    
+    <span class="kw">def</span> <span class="fn">_init_tabla</span>(<span class="kw">self</span>):
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.executescript(<span class="str">"""
+            CREATE TABLE IF NOT EXISTS perfil (
+                clave TEXT PRIMARY KEY,
+                valor TEXT,
+                tipo  TEXT DEFAULT 'string',
+                actualizado TEXT
+            );
+            CREATE TABLE IF NOT EXISTS uso_horario (
+                hora     INTEGER,
+                herramienta TEXT,
+                usos     INTEGER DEFAULT 1,
+                PRIMARY KEY (hora, herramienta)
+            );
+        """</span>)
+        conn.commit(); conn.close()
+    
+    <span class="kw">def</span> <span class="fn">registrar_uso</span>(<span class="kw">self</span>, herramienta: <span class="fn">str</span>):
+        <span class="str">"""Registra el uso de una herramienta con la hora actual."""</span>
+        hora = datetime.now().hour
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""INSERT INTO uso_horario (hora, herramienta, usos)
+                       VALUES (?, ?, 1)
+                       ON CONFLICT(hora, herramienta)
+                       DO UPDATE SET usos = usos + 1"""</span>, (hora, herramienta))
+        conn.commit(); conn.close()
+    
+    <span class="kw">def</span> <span class="fn">herramientas_recomendadas</span>(<span class="kw">self</span>) -> <span class="fn">list</span>:
+        <span class="str">"""Devuelve las herramientas más usadas en la hora actual."""</span>
+        hora = datetime.now().hour
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"""SELECT herramienta, usos FROM uso_horario
+                    WHERE hora = ? ORDER BY usos DESC LIMIT 3"""</span>, (hora,))
+        result = c.fetchall(); conn.close()
+        <span class="kw">return</span> [r[<span class="num">0</span>] <span class="kw">for</span> r <span class="kw">in</span> result]
+    
+    <span class="kw">def</span> <span class="fn">guardar_preferencia</span>(<span class="kw">self</span>, clave: <span class="fn">str</span>, valor, tipo: <span class="fn">str</span> = <span class="str">'string'</span>):
+        <span class="str">"""Guarda una preferencia aprendida del usuario."""</span>
+        val_str = json.dumps(valor) <span class="kw">if</span> tipo == <span class="str">'json'</span> <span class="kw">else</span> <span class="fn">str</span>(valor)
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        conn.execute(<span class="str">"""INSERT INTO perfil (clave, valor, tipo, actualizado)
+                       VALUES (?, ?, ?, ?)
+                       ON CONFLICT(clave) DO UPDATE SET
+                           valor=?, actualizado=?"""</span>,
+                     (clave, val_str, tipo, datetime.now().isoformat(),
+                      val_str, datetime.now().isoformat()))
+        conn.commit(); conn.close()
+        <span class="kw">self</span>.cache[clave] = valor
+    
+    <span class="kw">def</span> <span class="fn">obtener</span>(<span class="kw">self</span>, clave: <span class="fn">str</span>, defecto=<span class="kw">None</span>):
+        <span class="kw">if</span> clave <span class="kw">in</span> <span class="kw">self</span>.cache: <span class="kw">return</span> <span class="kw">self</span>.cache[clave]
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"SELECT valor, tipo FROM perfil WHERE clave=?"</span>, (clave,))
+        row = c.fetchone(); conn.close()
+        <span class="kw">if not</span> row: <span class="kw">return</span> defecto
+        val = json.loads(row[<span class="num">0</span>]) <span class="kw">if</span> row[<span class="num">1</span>] == <span class="str">'json'</span> <span class="kw">else</span> row[<span class="num">0</span>]
+        <span class="kw">self</span>.cache[clave] = val
+        <span class="kw">return</span> val
+    
+    <span class="kw">def</span> <span class="fn">detectar_patrones</span>(<span class="kw">self</span>) -> <span class="fn">str</span>:
+        <span class="str">"""
+        Analiza el historial y detecta tareas que se repiten.
+        Candidatos a automatización.
+        """</span>
+        conn = sqlite3.connect(<span class="kw">self</span>.db)
+        c = conn.cursor()
+        c.execute(<span class="str">"""SELECT tarea FROM episodios
+                    WHERE completada=1
+                    ORDER BY timestamp DESC LIMIT 50"""</span>)
+        tareas = [r[<span class="num">0</span>] <span class="kw">for</span> r <span class="kw">in</span> c.fetchall()]; conn.close()
+        
+        <span class="kw">if not</span> tareas: <span class="kw">return</span> <span class="str">"No hay suficiente historial para detectar patrones."</span>
+        
+        <span class="cm"># Agrupar por primeras palabras (simplificación)</span>
+        prefijos = Counter()
+        <span class="kw">for</span> t <span class="kw">in</span> tareas:
+            palabras = t.lower().split()[:<span class="num">3</span>]
+            <span class="kw">if</span> palabras: prefijos[<span class="str">" "</span>.join(palabras)] += <span class="num">1</span>
+        
+        repetidas = [(p, n) <span class="kw">for</span> p, n <span class="kw">in</span> prefijos.most_common(<span class="num">5</span>) <span class="kw">if</span> n >= <span class="num">2</span>]
+        <span class="kw">if not</span> repetidas: <span class="kw">return</span> <span class="str">"No se detectaron patrones repetitivos aún."</span>
+        
+        resultado = <span class="str">"🔍 Patrones detectados (candidatos a automatizar):\n"</span>
+        <span class="kw">for</span> patron, veces <span class="kw">in</span> repetidas:
+            resultado += <span class="str">f"  → '{patron}...' — {veces} veces\n"</span>
+        <span class="kw">return</span> resultado</pre></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 9.A</div>
+        <ol>
+          <li>¿Qué limitación tiene el método <code>detectar_patrones</code> usando solo las primeras 3 palabras? ¿Cómo usarías embeddings para mejorarlo?</li>
+          <li>¿Cuándo el "aprendizaje" del agente podría volverse problemático? Por ejemplo, si aprendes un patrón incorrecto, ¿cómo lo corriges?</li>
+          <li>Diseña 3 preferencias personales que quisieras que tu agente aprenda. Define la clave, el tipo de valor y cómo se aprenderían.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 10 -->
+  <div class="step" id="f4s2">
+    <div class="shd" onclick="tog(this)">
+      <div class="sno n4">10</div>
+      <div class="si"><h3>main.py — Integración final del agente completo</h3><p>Ensambla todos los módulos, agrega notificaciones del SO y ejecuta</p></div>
+      <div class="sdur">~55 min</div>
+    </div>
+    <div class="sbd">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> main.py — Punto de entrada del Agente IA Personal</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">#!/usr/bin/env python3</span>
+<span class="str">"""
+ARIA — Autonomous Reasoning Intelligence Agent
+Proyecto Global Final · Aprendizaje Máquina
+
+Ejecutar: python main.py
+"""</span>
+<span class="kw">import</span> platform
+<span class="kw">import</span> subprocess
+<span class="kw">from</span> rich.console <span class="kw">import</span> <span class="cls">Console</span>
+<span class="kw">from</span> rich.panel <span class="kw">import</span> <span class="cls">Panel</span>
+<span class="kw">from</span> rich.table <span class="kw">import</span> <span class="cls">Table</span>
+
+<span class="cm"># Importar el agente base</span>
+<span class="kw">from</span> agent <span class="kw">import</span> <span class="cls">AgenteIA</span>
+
+<span class="cm"># Importar todas las herramientas</span>
+<span class="kw">from</span> tools <span class="kw">import</span> file_tools, desktop_tools, email_tools
+<span class="kw">from</span> memory.task_queue <span class="kw">import</span> <span class="cls">ColaTareas</span>
+<span class="kw">from</span> memory.profile <span class="kw">import</span> <span class="cls">PerfilUsuario</span>
+
+console = <span class="cls">Console</span>()
+SISTEMA = platform.system()
+
+
+<span class="kw">def</span> <span class="fn">notificar_so</span>(titulo: <span class="fn">str</span>, mensaje: <span class="fn">str</span>):
+    <span class="str">"""Envía una notificación nativa del sistema operativo."""</span>
+    <span class="kw">try</span>:
+        <span class="kw">if</span> SISTEMA == <span class="str">"Windows"</span>:
+            <span class="kw">from</span> win10toast <span class="kw">import</span> <span class="cls">ToastNotifier</span>
+            toaster = <span class="cls">ToastNotifier</span>()
+            toaster.show_toast(titulo, mensaje, duration=<span class="num">5</span>)
+        <span class="kw">elif</span> SISTEMA == <span class="str">"Darwin"</span>:  <span class="cm"># macOS</span>
+            subprocess.run([<span class="str">'osascript'</span>, <span class="str">'-e'</span>,
+                f'display notification "{mensaje}" with title "{titulo}"'])
+        <span class="kw">elif</span> SISTEMA == <span class="str">"Linux"</span>:
+            subprocess.run([<span class="str">'notify-send'</span>, titulo, mensaje])
+    <span class="kw">except</span>:
+        console.print(<span class="str">f"[yellow]🔔 {titulo}: {mensaje}[/yellow]"</span>)
+
+
+<span class="kw">def</span> <span class="fn">mostrar_estado</span>(agente, perfil, cola):
+    <span class="str">"""Muestra el estado actual del sistema en la terminal."""</span>
+    tabla = <span class="cls">Table</span>(title=<span class="str">"🤖 Estado del Agente ARIA"</span>, show_header=<span class="kw">True</span>)
+    tabla.add_column(<span class="str">"Módulo"</span>, style=<span class="str">"cyan"</span>)
+    tabla.add_column(<span class="str">"Estado"</span>, style=<span class="str">"green"</span>)
+    tabla.add_column(<span class="str">"Info"</span>, style=<span class="str">"dim"</span>)
+    
+    mem = agente.memoria.resumen()
+    tabla.add_row(<span class="str">"LLM"</span>, <span class="str">"✅ Activo"</span>, <span class="kw">f"Modelo: llama3 | Modo: {'SEGURO' if agente.modo_seguro else 'REAL'}"</span>)
+    tabla.add_row(<span class="str">"Herramientas"</span>, <span class="str">"✅ Cargadas"</span>, <span class="str">f"{len(agente.herramientas)} disponibles"</span>)
+    tabla.add_row(<span class="str">"Memoria"</span>, <span class="str">"✅ SQLite"</span>, <span class="str">f"{mem['total_tareas']} tareas · {mem['completadas']} completadas"</span>)
+    tabla.add_row(<span class="str">"Programador"</span>, <span class="str">"✅ En hilo"</span>, cola.listar_tareas().split(<span class="str">'\n'</span>)[<span class="num">0</span>])
+    
+    <span class="kw">top</span> = perfil.herramientas_recomendadas()
+    tabla.add_row(<span class="str">"Perfil"</span>, <span class="str">"✅ Aprendiendo"</span>, <span class="str">f"Tools frecuentes ahora: {', '.join(top) or 'ninguna aún'}"</span>)
+    
+    console.print(tabla)
+
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    console.print(<span class="cls">Panel</span>(
+        <span class="str">"[bold yellow]⚡ ARIA — Agente IA Personal[/bold yellow]\n"</span>
+        <span class="str">"[dim]Proyecto Global Final · Aprendizaje Máquina[/dim]"</span>,
+        border_style=<span class="str">"yellow"</span>
+    ))
+    
+    <span class="cm"># ── 1. Crear el agente base ────────────────────────────────</span>
+    agente = <span class="cls">AgenteIA</span>()
+    
+    <span class="cm"># ── 2. Registrar todas las herramientas ─────────────────────</span>
+    console.print(<span class="str">"\n[bold]Cargando herramientas...[/bold]"</span>)
+    file_tools.registrar_en_agente(agente)
+    desktop_tools.registrar_en_agente(agente)
+    email_tools.registrar_en_agente(agente)
+    
+    <span class="cm"># ── 3. Cargar perfil y memoria ──────────────────────────────</span>
+    perfil = <span class="cls">PerfilUsuario</span>()
+    
+    <span class="cm"># ── 4. Configurar cola de tareas ─────────────────────────────</span>
+    cola = <span class="cls">ColaTareas</span>(agente)
+    
+    <span class="cm"># ── 5. Tareas programadas por defecto ────────────────────────</span>
+    <span class="cm"># PERSONALIZA: agrega tus propias tareas programadas aquí</span>
+    cola.agregar_tarea(
+        <span class="str">"Resumen matutino"</span>,
+        <span class="str">"Resume la bandeja de entrada al inicio del día"</span>,
+        <span class="str">"diaria"</span>,
+        {<span class="str">"hora"</span>: <span class="str">"08:00"</span>, <span class="str">"tarea"</span>: <span class="str">"resume mi bandeja de entrada y avísame"</span>}
+    )
+    cola.iniciar_hilo()
+    
+    <span class="cm"># ── 6. Parchear _notificar para usar notificaciones del SO ───</span>
+    <span class="kw">def</span> <span class="fn">notificar_mejorado</span>(msg): notificar_so(<span class="str">"ARIA"</span>, msg)
+    agente._notificar = notificar_mejorado
+    
+    <span class="cm"># ── 7. Mostrar estado y comenzar sesión ─────────────────────</span>
+    mostrar_estado(agente, perfil, cola)
+    
+    <span class="cm"># ── 8. Detectar patrones y hacer sugerencia proactiva ────────</span>
+    patrones = perfil.detectar_patrones()
+    <span class="kw">if</span> <span class="str">"→"</span> <span class="kw">in</span> patrones:
+        console.print(<span class="cls">Panel</span>(patrones, title=<span class="str">"[yellow]💡 Sugerencias de automatización[/yellow]"</span>))
+    
+    <span class="cm"># ── 9. Modo interactivo principal ─────────────────────────────</span>
+    console.print(<span class="str">"\n[bold cyan]Comandos especiales:[/bold cyan]"</span>)
+    console.print(<span class="str">"  [yellow]modo real[/yellow]      → activa ejecución real (cuidado)"</span>)
+    console.print(<span class="str">"  [yellow]modo seguro[/yellow]    → vuelve a modo simulación"</span>)
+    console.print(<span class="str">"  [yellow]estado[/yellow]         → muestra estado del sistema"</span>)
+    console.print(<span class="str">"  [yellow]patrones[/yellow]       → detecta tareas repetitivas"</span>)
+    console.print(<span class="str">"  [yellow]tareas[/yellow]         → lista tareas programadas"</span>)
+    console.print(<span class="str">"  [yellow]salir[/yellow]          → cierra el agente\n"</span>)
+    
+    agente.chat()
+    
+    notificar_so(<span class="str">"ARIA"</span>, <span class="str">"Sesión del agente terminada"</span>)
+    console.print(<span class="str">"[dim]Sesión terminada. ¡Hasta pronto![/dim]"</span>)
+
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    main()</pre></div>
+      <div class="an">▶ Ejecuta el agente completo: <strong>python main.py</strong> — prueba al menos 5 tareas distintas incluyendo archivos y correo.</div>
+
+      <div class="note tip"><div class="ni">✅</div><div class="nb"><strong>Checklist final de la actividad</strong><p>Verifica que tu agente pueda: ① Listar archivos de una carpeta, ② Organizar una carpeta de prueba, ③ Tomar una captura de pantalla, ④ Leer correos (cuenta de prueba), ⑤ Generar borrador de respuesta, ⑥ Recordar tareas en la memoria SQLite, ⑦ Mostrar métricas de uso.</p></div></div>
+
+      <div class="rbox">
+        <div class="rbox-t">🧠 Reflexión 10.A — Integración y evaluación final</div>
+        <ol>
+          <li>Después de usar el agente durante 30 minutos, revisa la memoria SQLite. ¿Qué patrones observas? ¿Qué tareas se completaron y cuáles fallaron?</li>
+          <li>¿En qué se diferencia tu agente de un asistente comercial como Copilot de Microsoft? ¿Qué ventajas tiene correr localmente?</li>
+          <li>Si tuvieras que mejorar una sola cosa del agente para hacerlo más útil en tu vida real, ¿qué sería? Descríbela técnicamente.</li>
+          <li>¿Qué implica desde el punto de vista de seguridad que el agente tenga acceso a archivos y correo simultáneamente? ¿Cómo lo mitigarías?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════ RETO EXTRA ═══════ -->
+<section id="reto">
+<div class="wrap">
+  <div class="pdiv"><div class="plbl plr">⚡ RETO EXTRA — Proyecto Global Final Avanzado</div></div>
+  <div class="reto-h">
+    <div class="rb">⚡ PUNTOS EXTRA — PROYECTO GLOBAL FINAL</div>
+    <h2>Lleva tu agente al siguiente nivel</h2>
+    <p>Elige al menos uno. Cada reto requiere diseño propio — el código de arranque es solo orientación.</p>
+  </div>
+
+  <div class="step"><div class="shd" onclick="tog(this)"><div class="sno nr">R1</div><div class="si"><h3>Interfaz gráfica con Tkinter o PyQt</h3><p>El agente ya no es solo terminal — tiene ventana propia</p></div><div class="sdur">+15 pts</div></div>
+  <div class="sbd">
+    <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> gui/agent_gui.py — Arranque básico</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="kw">import</span> tkinter <span class="kw">as</span> tk
+<span class="kw">from</span> tkinter <span class="kw">import</span> ttk, scrolledtext
+<span class="kw">import</span> threading
+<span class="kw">from</span> agent <span class="kw">import</span> <span class="cls">AgenteIA</span>
+
+<span class="kw">class</span> <span class="cls">AgentGUI</span>:
+    <span class="str">"""
+    GUI para ARIA. Tu desafío:
+    1. Chat widget donde se muestran razonamientos del agente
+    2. Panel lateral con herramientas disponibles y su estado
+    3. Log de tareas completadas con timestamp
+    4. Botón de STOP de emergencia que detiene cualquier acción
+    5. Indicador de estado (pensando / ejecutando / listo)
+    """</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, root):
+        <span class="kw">self</span>.root = root
+        <span class="kw">self</span>.root.title(<span class="str">"ARIA — Agente IA Personal"</span>)
+        <span class="kw">self</span>.root.geometry(<span class="str">"900x600"</span>)
+        <span class="kw">self</span>.agente = <span class="cls">AgenteIA</span>()
+        <span class="kw">self</span>.<span class="fn">_construir_ui</span>()
+    
+    <span class="kw">def</span> <span class="fn">_construir_ui</span>(<span class="kw">self</span>):
+        <span class="cm"># TODO: implementar la interfaz completa</span>
+        lbl = tk.<span class="cls">Label</span>(<span class="kw">self</span>.root, text=<span class="str">"Implementa la GUI del agente aquí"</span>, font=(<span class="str">"Arial"</span>, <span class="num">14</span>))
+        lbl.pack(pady=<span class="num">20</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    root = tk.<span class="cls">Tk</span>()
+    app = <span class="cls">AgentGUI</span>(root)
+    root.mainloop()</pre></div>
+    <div class="note inf"><div class="ni">🎯</div><div class="nb"><strong>Tu desafío</strong><p>Implementa la GUI completa con: panel de chat, lista de herramientas, log de acciones, botón de pausa/stop, indicador de estado animado y selector para cambiar entre modo seguro y real.</p></div></div>
+  </div></div>
+
+  <div class="step"><div class="shd" onclick="tog(this)"><div class="sno nr">R2</div><div class="si"><h3>Control por voz con Whisper</h3><p>Dale órdenes de voz a tu agente en lugar de escribir</p></div><div class="sdur">+15 pts</div></div>
+  <div class="sbd">
+    <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> tools/voice_tools.py — Arranque</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="cm"># pip install openai-whisper sounddevice numpy scipy</span>
+<span class="kw">import</span> whisper
+<span class="kw">import</span> sounddevice <span class="kw">as</span> sd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.io.wavfile <span class="kw">import</span> write <span class="kw">as</span> write_wav
+
+modelo_whisper = whisper.load_model(<span class="str">"small"</span>)  <span class="cm"># "base", "small", "medium"</span>
+
+<span class="kw">def</span> <span class="fn">grabar_y_transcribir</span>(segundos: <span class="fn">int</span> = <span class="num">5</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Graba N segundos de audio y los transcribe con Whisper.
+    
+    Tu desafío:
+    1. Implementar activación por palabra clave ("Hey ARIA")
+    2. Mostrar indicador visual mientras graba
+    3. Integrar con el bucle principal del agente
+    4. Manejar ruido de fondo y errores de transcripción
+    """</span>
+    <span class="fn">print</span>(<span class="str">f"🎙️ Grabando {segundos}s... habla ahora"</span>)
+    audio = sd.rec(<span class="fn">int</span>(segundos * <span class="num">16000</span>), samplerate=<span class="num">16000</span>, channels=<span class="num">1</span>)
+    sd.wait()
+    write_wav(<span class="str">"temp_audio.wav"</span>, <span class="num">16000</span>, audio)
+    resultado = modelo_whisper.transcribe(<span class="str">"temp_audio.wav"</span>, language=<span class="str">"es"</span>)
+    texto = resultado[<span class="str">"text"</span>].strip()
+    <span class="fn">print</span>(<span class="str">f"🗣️ Transcrito: {texto}"</span>)
+    <span class="kw">return</span> texto</pre></div>
+  </div></div>
+
+  <div class="step"><div class="shd" onclick="tog(this)"><div class="sno nr">R3</div><div class="si"><h3>Agente navegador web</h3><p>El agente puede buscar información en la web y resumirla</p></div><div class="sdur">+15 pts</div></div>
+  <div class="sbd">
+    <div class="cw"><div class="ch"><div class="cl"><span class="ext">py</span> tools/web_tools.py — Arranque</div><button class="cpb" onclick="cp(this)">Copiar</button></div>
+<pre><span class="cm"># pip install playwright beautifulsoup4 requests</span>
+<span class="cm"># playwright install chromium</span>
+<span class="kw">from</span> playwright.sync_api <span class="kw">import</span> sync_playwright
+<span class="kw">from</span> bs4 <span class="kw">import</span> <span class="cls">BeautifulSoup</span>
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">buscar_web</span>(consulta: <span class="fn">str</span>) -> <span class="fn">str</span>:
+    <span class="str">"""
+    Busca en DuckDuckGo y devuelve los primeros resultados.
+    
+    Tu desafío:
+    1. Extraer el texto relevante de las páginas resultado
+    2. Usar el LLM para sintetizar la información encontrada
+    3. Citar las fuentes en la respuesta
+    4. Manejar páginas con JavaScript (usar Playwright)
+    5. No guardar cookies ni historial del navegador
+    """</span>
+    url = <span class="str">f"https://html.duckduckgo.com/html/?q={consulta.replace(' ', '+')}"</span>
+    headers = {<span class="str">'User-Agent'</span>: <span class="str">'Mozilla/5.0'</span>}
+    resp = requests.get(url, headers=headers, timeout=<span class="num">10</span>)
+    soup = <span class="cls">BeautifulSoup</span>(resp.text, <span class="str">'html.parser'</span>)
+    resultados = soup.find_all(<span class="str">'a'</span>, class_=<span class="str">'result__a'</span>, limit=<span class="num">5</span>)
+    <span class="kw">return</span> <span class="str">"\n"</span>.join([r.get_text() <span class="kw">for</span> r <span class="kw">in</span> resultados]) <span class="kw">or</span> <span class="str">"Sin resultados"</span></pre></div>
+  </div></div>
+
+  <div class="step"><div class="shd" onclick="tog(this)"><div class="sno nr">R4</div><div class="si"><h3>Sistema multiagente</h3><p>Varios agentes especializados que se delegan tareas entre sí</p></div><div class="sdur">+20 pts</div></div>
+  <div class="sbd">
+    <p>Diseña un sistema donde ARIA (agente orquestador) delega tareas a agentes especializados:</p>
+    <ul>
+      <li><strong>FileAgent</strong> — solo gestiona archivos</li>
+      <li><strong>EmailAgent</strong> — solo gestiona correo</li>
+      <li><strong>ResearchAgent</strong> — solo busca información en la web</li>
+    </ul>
+    <p>El orquestador recibe la tarea del usuario, la analiza y la envía al agente especializado correcto. Los agentes se comunican a través de una cola de mensajes en SQLite.</p>
+    <div class="rbox">
+      <div class="rbox-t">🧠 Reflexión R4</div>
+      <ol>
+        <li>¿Qué ventajas tiene la especialización de agentes? ¿Qué desafíos de coordinación surgen?</li>
+        <li>¿Cómo decides qué agente es el responsable cuando una tarea involucra varios dominios?</li>
+      </ol>
+    </div>
+  </div></div>
+</div>
+</section>
+
+<!-- ═══════ RÚBRICA ═══════ -->
+<section id="rubrica">
+<div class="wrap">
+  <div class="stag t0">Evaluación</div>
+  <h2 class="sh">Rúbrica del Proyecto Global Final</h2>
+  <p class="sd">Este proyecto integra las competencias de toda la materia. La evaluación considera tanto el funcionamiento técnico como la comprensión conceptual demostrada en las reflexiones.</p>
+
+  <table class="rtbl">
+    <thead><tr><th>Criterio</th><th>Descripción</th><th>Pts</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Arquitectura</strong></td><td>Diagrama propio documentado, capas y flujo de datos claros</td><td class="pts">10</td></tr>
+      <tr><td><strong>F1 · LLM + ReAct</strong></td><td>Agente funciona con Ollama, bucle ReAct completo, memoria SQLite</td><td class="pts">15</td></tr>
+      <tr><td><strong>F2 · Archivos</strong></td><td>Listar, organizar, mover y buscar archivos de forma segura</td><td class="pts">15</td></tr>
+      <tr><td><strong>F2 · Escritorio</strong></td><td>Capturas, mouse/teclado, cola de tareas programadas funcional</td><td class="pts">10</td></tr>
+      <tr><td><strong>F3 · Correo</strong></td><td>Leer IMAP, clasificar con LLM, generar borradores</td><td class="pts">15</td></tr>
+      <tr><td><strong>F4 · Aprendizaje</strong></td><td>Perfil de usuario, detección de patrones, notificaciones del SO</td><td class="pts">10</td></tr>
+      <tr><td><strong>F4 · main.py</strong></td><td>Integración completa, modo seguro/real, comandos especiales</td><td class="pts">10</td></tr>
+      <tr><td><strong>Reflexiones</strong></td><td>Todas las preguntas respondidas con profundidad y evidencia</td><td class="pts">10</td></tr>
+      <tr><td><strong>Demostración</strong></td><td>Presentación en vivo: 5 tareas distintas en tiempo real</td><td class="pts">5</td></tr>
+      <tr class="extra"><td><strong>★ R1 — GUI</strong></td><td>Interfaz gráfica funcional con Tkinter/PyQt</td><td class="pts">+15</td></tr>
+      <tr class="extra"><td><strong>★ R2 — Voz</strong></td><td>Control por voz con Whisper integrado</td><td class="pts">+15</td></tr>
+      <tr class="extra"><td><strong>★ R3 — Web</strong></td><td>Agente navegador con síntesis de información</td><td class="pts">+15</td></tr>
+      <tr class="extra"><td><strong>★ R4 — Multiagente</strong></td><td>Sistema de agentes especializados coordinados</td><td class="pts">+20</td></tr>
+    </tbody>
+  </table>
+  <div class="tot"><span>Puntaje base</span><span>100 pts</span></div>
+  <div class="tot" style="margin-top:8px"><span>Máximo con todos los retos</span><span style="color:var(--accent)">165 pts</span></div>
+
+  <div class="entrega">
+    <h3>Entregables y niveles</h3>
+    <div class="levels">
+      <div class="lc l1"><div class="lt">Nivel 1 · Funcional</div><h5>Agente básico completo</h5><p>Fases 1–4 funcionando. Archivos + escritorio básico. Sin correo. Hasta 60 pts.</p></div>
+      <div class="lc l2"><div class="lt">Nivel 2 · Integrado</div><h5>Sistema completo</h5><p>Todas las fases incluyendo correo y aprendizaje. main.py integrado. Hasta 100 pts.</p></div>
+      <div class="lc l3"><div class="lt">Nivel 3 · Avanzado</div><h5>Con capacidades extra</h5><p>Nivel 2 + al menos 1 reto + README profesional + demo grabada.</p></div>
+      <div class="lc l4"><div class="lt">Nivel 4 · Sobresaliente</div><h5>Producto desplegable</h5><p>Nivel 3 + 2 retos + presentación técnica + análisis comparativo.</p></div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="cw"><div class="ch"><div class="cl"><span class="ext">bash</span> Estructura de entrega</div></div>
+<pre>equipo_XX_agente_ia/
+├── main.py
+├── agent.py
+├── config.py
+├── .env.example       ← plantilla sin credenciales reales
+├── requirements.txt
+├── tools/
+│   ├── file_tools.py
+│   ├── desktop_tools.py
+│   ├── email_tools.py
+│   └── web_tools.py   ← si aplica
+├── memory/
+│   ├── episodic.py
+│   ├── profile.py
+│   └── task_queue.py
+├── data/              ← vacío (se llena al ejecutar)
+├── logs/              ← vacío
+├── docs/
+│   ├── arquitectura.png
+│   ├── reflexiones.pdf
+│   └── demo.mp4       ← grabación del agente en acción (2-5 min)
+└── README.md          ← instrucciones de instalación y uso</pre></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>AG-ML601 · Agente IA Personal · Proyecto Global Final · Aprendizaje Máquina · Ingeniería en Computación 6°</p>
+  <p style="margin-top:6px;opacity:.5">
+    <a href="https://ollama.com">Ollama</a> ·
+    <a href="https://pyautogui.readthedocs.io">PyAutoGUI</a> ·
+    <a href="https://rich.readthedocs.io">Rich</a> ·
+    <a href="https://react-lm.github.io">ReAct Paper</a>
+  </p>
+</footer>
+
+<script>
+// Barra de progreso
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+});
+
+// Partículas flotantes en el hero
+const cont = document.getElementById('pts');
+for (let i = 0; i < 25; i++) {
+  const p = document.createElement('div');
+  p.className = 'p';
+  p.style.cssText = `left:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-duration:${6+Math.random()*12}s;animation-delay:${Math.random()*8}s;opacity:${0.2+Math.random()*0.5}`;
+  cont.appendChild(p);
+}
+
+// Toggle steps
+function tog(hd) { hd.nextElementSibling.classList.toggle('open'); }
+
+// Copiar código
+function cp(btn) {
+  const txt = btn.closest('.cw').querySelector('pre').innerText;
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = '✓'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
